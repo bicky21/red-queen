@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M2.1
 
-**Version:** 0.4.0 · **Date:** 2026-10-24 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.4.0 · **Date:** 2026-10-24 · **Status:** build-environment passed; **accepted on Linux (user's laptop), 2026-10-24**
 
 ## 1. Review of M2
 
@@ -95,21 +95,14 @@ Data: `results/m2_1_memory_experiment.json`.
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Accepted, 2026-10-24.** After `git pull` to commit `4d93c4a`, the user ran:
 
 ```
-git pull
 python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
 ```
 
-M2.1 is accepted when the output shows `Ran 94 tests ... OK` and
-`50/50 validation checks passed`.
-
-Optional:
-
-```
-python3 -m red_queen.memory_experiment
-```
+User-reported output: `Ran 94 tests ... OK` and `50/50 validation checks passed`.
+The CLI test no longer prints into the test log.
 
 ## 9. Next milestone
 

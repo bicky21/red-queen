@@ -99,7 +99,7 @@ tests/             94 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
-docs/ENGINEERING_RECORD_M2_1.md
+docs/ENGINEERING_RECORD_M2_1.md   (accepted on Linux)
 results/                          build-environment reports
 ```
 
@@ -110,4 +110,4 @@ results/                          build-environment reports
 | M1 | 38 tests OK, 20/20 checks | **Accepted** 2026-10-24 |
 | M1.1 | 57 tests OK, 31/31 checks | **Accepted** 2026-10-24 |
 | M2 | 77 tests OK, 42/42 checks | **Accepted** 2026-10-24 |
-| M2.1 | 94 tests OK, 50/50 checks | Pending — run step 2 |
+| M2.1 | 94 tests OK, 50/50 checks | **Accepted** 2026-10-24 |
