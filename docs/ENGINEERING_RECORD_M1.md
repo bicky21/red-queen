@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M1
 
-**Version:** 0.1.0 · **Date:** 2026-10-24 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.1.0 · **Date:** 2026-10-24 · **Status:** build-environment passed; **accepted on Linux (user's laptop), 2026-10-24**
 
 ## 1. Starting point
 
@@ -101,15 +101,18 @@ frustration signal never activates.
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** The target machine runs Linux (Ubuntu), so acceptance is
-confirmed there instead of Windows. Run in the repository folder:
+**Accepted, 2026-10-24.** The target machine runs Linux (Ubuntu), so
+acceptance is confirmed there instead of Windows.
+
+Command run by the user in a fresh clone of `bicky21/red-queen` at commit `6f4bef5`:
 
 ```
-git pull
 python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
 ```
 
-M1 counts as accepted only when this output shows 38 tests OK and 20/20 checks passed.
+User-reported output: `Ran 38 tests ... OK`, and validation lines V01–V20
+all `[PASS]`. (The final summary line was cut off in the pasted output;
+all 20 individual PASS lines were present.)
 
 ## 9. Next milestone
 
