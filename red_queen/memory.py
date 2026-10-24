@@ -128,13 +128,16 @@ class EpisodeMemory:
         self.max_events_per_episode = max_events_per_episode
         if self.path != ":memory:":
             Path(self.path).parent.mkdir(parents=True, exist_ok=True)
+        self._conn = sqlite3.connect(self.path)
         try:
-            self._conn = sqlite3.connect(self.path)
             self._conn.execute("PRAGMA foreign_keys = ON")
             self._conn.executescript(_SCHEMA)
             self._check_schema_version()
         except sqlite3.DatabaseError as exc:
+            self._conn.close()  # never leak a connection to a refused file
             raise MemoryStoreError(f"Cannot open memory store {self.path!r}: {exc}") from exc
+        except MemoryStoreError:
+            raise  # schema mismatch: _check_schema_version already closed it
 
     # -- lifecycle ---------------------------------------------------------
 

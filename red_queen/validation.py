@@ -11,7 +11,7 @@ from typing import Callable, List, Tuple
 
 from .actions import UnknownActionError
 from .affect import AffectConfig
-from .agent import STOP_MAX_STEPS, RecoveryAgent
+from .agent import STOP_MAX_STEPS, STOP_POLICY, RecoveryAgent
 from .environment import SimulatedEnvironment
 from .experiments import run_affect_comparison, run_scenario
 from .goal import RecoveryGoal
@@ -453,6 +453,199 @@ def check_memory_experiment() -> CheckResult:
     return ok, f"rows={len(a['rows'])}/{expected} deterministic={a == b} all_succeeded={all_ok}"
 
 
+# ---- M3 checks ---------------------------------------------------------
+
+
+def check_reactive_default_policy_unchanged() -> CheckResult:
+    from .policy import DEFAULT_POLICY
+
+    frozen = {**M1_FROZEN_SEQUENCES, **M1_1_FROZEN_SEQUENCES}
+    for name, expected in frozen.items():
+        for enabled in (False, True):
+            r = run_scenario(get_scenario(name), enabled, policy=DEFAULT_POLICY)
+            if r.actions != expected or r.stats["policy_denials"] or r.stats["policy_filtered"]:
+                return False, f"{name} affect={enabled}: {r.actions} stats={r.stats}"
+    return True, f"{len(frozen) * 2} reactive episodes match frozen sequences; 0 denials, 0 filtered"
+
+
+def check_planner_recovers_default() -> CheckResult:
+    from .planning_experiment import run_planner
+
+    results = {s.name: run_planner(s) for s in SCENARIOS}
+    failed = [n for n, r in results.items() if not r.success]
+    return not failed, f"recovered {len(results) - len(failed)}/{len(results)} failed={failed}"
+
+
+def _brute_force_shortest(state, goal, max_len=7):
+    import itertools
+
+    from .actions import ACTION_NAMES, apply_action
+
+    if goal.is_satisfied(state):
+        return 0
+    for n in range(1, max_len + 1):
+        for seq in itertools.product(ACTION_NAMES, repeat=n):
+            s = state
+            for a in seq:
+                s = apply_action(s, a)
+            if goal.is_satisfied(s):
+                return n
+    return None
+
+
+def check_planner_shortest() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+
+    goal = RecoveryGoal()
+    planner = BoundedPlanner(goal)
+    names = ("low_battery", "overheating", "service_down", "overheated_service_down", "compound_failure")
+    for name in names:
+        start = get_scenario(name).initial
+        plan = planner.plan(start, ACTIONS_ALL())
+        oracle = _brute_force_shortest(start, goal)
+        if not plan.reaches_goal or len(plan.actions) != oracle:
+            return False, f"{name}: planner={len(plan.actions)} oracle={oracle}"
+    return True, f"{len(names)} plans match exhaustive-search optimum"
+
+
+def ACTIONS_ALL():
+    from .actions import ACTION_NAMES
+
+    return ACTION_NAMES
+
+
+def check_planner_replans() -> CheckResult:
+    from .planning_experiment import run_planner
+
+    fr = run_planner(get_scenario("flaky_restart"))
+    dm = run_planner(get_scenario("disturbance_mid_recovery"))
+    ok = (fr.success and fr.stats["replans"] == 3 and fr.stats["prediction_mismatches"] == 3
+          and dm.success and dm.stats["replans"] == 2 and dm.stats["prediction_mismatches"] == 2)
+    return ok, (f"flaky_restart replans={fr.stats['replans']} mismatches={fr.stats['prediction_mismatches']}; "
+                f"disturbance replans={dm.stats['replans']} mismatches={dm.stats['prediction_mismatches']}")
+
+
+def check_planner_deterministic() -> CheckResult:
+    from .planning_experiment import run_planner
+    from .policy import POLICIES
+
+    for policy in POLICIES.values():
+        for s in SCENARIOS:
+            if run_planner(s, policy).to_dict() != run_planner(s, policy).to_dict():
+                return False, f"{s.name} policy={policy.name} not reproducible"
+    return True, f"{len(SCENARIOS) * len(POLICIES)} planner episodes reproduced identically"
+
+
+def check_planner_bounds() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+    from .planning_agent import STOP_NO_PLAN
+    from .planning_experiment import run_planner
+
+    goal = RecoveryGoal()
+    start = get_scenario("compound_failure").initial
+    by_nodes = BoundedPlanner(goal, max_nodes=10).plan(start, ACTIONS_ALL())
+    by_depth = BoundedPlanner(goal, max_depth=2).plan(start, ACTIONS_ALL())
+    r = run_planner(get_scenario("compound_failure"), planner=BoundedPlanner(goal, max_nodes=10))
+    ok = (not by_nodes.reaches_goal and by_nodes.hit_node_limit and by_nodes.nodes_expanded <= 10
+          and not by_depth.reaches_goal and r.action_count == 0 and r.stop_reason == STOP_NO_PLAN
+          and not r.success)
+    return ok, (f"node_limit: nodes={by_nodes.nodes_expanded} hit={by_nodes.hit_node_limit}; "
+                f"depth_limit found={by_depth.reaches_goal}; agent actions={r.action_count} stop={r.stop_reason}")
+
+
+class _RoguePlanner:
+    """Test double: always proposes a plan that uses a denied action."""
+
+    def plan(self, start, allowed):
+        from .actions import apply_action
+        from .planner import Plan
+
+        nxt = apply_action(start, "restart_service")
+        return Plan(("restart_service",), (nxt,), True, 1, False)
+
+
+def check_rogue_plan_rejected() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planning_agent import PlanningAgent
+    from .policy import POLICIES
+
+    agent = PlanningAgent(RecoveryGoal(), planner=_RoguePlanner(), policy=POLICIES["no_restart"])
+    r = agent.run(get_scenario("service_down").make_env(), "service_down")
+    ok = (r.action_count == 0 and r.event_count == 0 and r.stop_reason == STOP_POLICY
+          and r.stats["plan_rejections"] == 3)
+    return ok, f"actions={r.action_count} env_events={r.event_count} stop={r.stop_reason} rejections={r.stats['plan_rejections']}"
+
+
+def check_executor_boundary() -> CheckResult:
+    from .policy import POLICIES, PolicyDenied, PolicyExecutor
+
+    env = SimulatedEnvironment(SystemState(50, 50, False))
+    ex = PolicyExecutor(env, POLICIES["no_restart"], max_actions=1)
+    before = env.observe()
+    outcomes = []
+    for action in ("restart_service", "shell", "charge", "charge"):
+        try:
+            ex.execute(action)
+            outcomes.append("ran")
+        except PolicyDenied:
+            outcomes.append("denied")
+    ok = (outcomes == ["denied", "denied", "ran", "denied"] and env.step == 1
+          and env.observe() == before.with_changes(battery=70, temperature=55)
+          and [d["reason"] for d in ex.denials][-1] == "action budget exhausted")
+    return ok, f"outcomes={outcomes} env_steps={env.step} denials={len(ex.denials)}"
+
+
+def check_policy_config_validated() -> CheckResult:
+    from .policy import Policy, PolicyConfigError
+
+    rejected = 0
+    for bad in (frozenset({"charge", "shell"}), {"charge"}, ["cool"]):
+        try:
+            Policy("bad", bad)
+        except PolicyConfigError:
+            rejected += 1
+    return rejected == 3, f"rejected {rejected}/3 invalid policy configs"
+
+
+def check_denied_never_executed() -> CheckResult:
+    from .planning_experiment import run_planning_experiment
+
+    report = run_planning_experiment()
+    leaked = sum(r["denied_actions_executed"] for r in report["rows"])
+    return leaked == 0, f"denied actions reaching environment across {len(report['rows'])} runs: {leaked}"
+
+
+def check_impossible_goal_detected() -> CheckResult:
+    from .planning_agent import STOP_NO_PLAN
+    from .planning_experiment import run_agent
+    from .policy import POLICIES
+
+    s, pol = get_scenario("service_down"), POLICIES["no_restart"]
+    p, r = run_agent("planner", s, pol), run_agent("reactive", s, pol)
+    ok = (not p.success and p.action_count == 0 and p.stop_reason == STOP_NO_PLAN
+          and not r.success and r.action_count == 20)
+    return ok, f"planner actions={p.action_count} stop={p.stop_reason}; reactive actions={r.action_count} stop={r.stop_reason}"
+
+
+def check_planning_experiment() -> CheckResult:
+    from .planning_experiment import AGENTS, run_planning_experiment
+    from .policy import POLICIES
+
+    a, b = run_planning_experiment(), run_planning_experiment()
+    expected = len(SCENARIOS) * len(POLICIES) * len(AGENTS)
+    return a == b and len(a["rows"]) == expected, f"rows={len(a['rows'])}/{expected} deterministic={a == b}"
+
+
+def check_m2_1_results_unchanged() -> CheckResult:
+    from .memory_experiment import run_memory_experiment
+
+    s = run_memory_experiment()["summary"]
+    got = (s["empty"]["total_actions"], s["irrelevant"]["total_actions"], s["relevant"]["total_actions"])
+    return got == (70, 70, 68), f"memory experiment total actions empty/irrelevant/relevant={got} (expected 70/70/68)"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -514,6 +707,24 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("memory_discount_capped_and_sanitised", check_discount_capped),
         ("observation_overrides_memory", check_observation_overrides_memory),
         ("memory_experiment_complete_deterministic", check_memory_experiment),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M3 (V51 onward)
+    for name, fn in (
+        ("reactive_default_policy_unchanged", check_reactive_default_policy_unchanged),
+        ("planner_recovers_all_default", check_planner_recovers_default),
+        ("planner_plans_are_shortest", check_planner_shortest),
+        ("planner_replans_on_mismatch", check_planner_replans),
+        ("planner_deterministic", check_planner_deterministic),
+        ("planner_search_bounded", check_planner_bounds),
+        ("rogue_plan_rejected_before_execution", check_rogue_plan_rejected),
+        ("executor_enforces_policy_and_budget", check_executor_boundary),
+        ("policy_config_validated", check_policy_config_validated),
+        ("denied_actions_never_executed", check_denied_never_executed),
+        ("impossible_goal_detected_by_planner", check_impossible_goal_detected),
+        ("planning_experiment_complete_deterministic", check_planning_experiment),
+        ("m2_1_memory_results_unchanged", check_m2_1_results_unchanged),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

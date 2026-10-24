@@ -1,9 +1,9 @@
-# RED QUEEN AI — Milestone M2.1
+# RED QUEEN AI — Milestone M3
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
-an affect parameter sweep, persistent SQLite episodic memory, and bounded
-advisory memory.
+an affect parameter sweep, persistent SQLite episodic memory, bounded
+advisory memory, and a bounded planner with policy enforcement.
 
 Pure Python standard library. No dependencies, no network, no shell
 execution, no real-world actions.
@@ -25,6 +25,11 @@ execution, no real-world actions.
 8. Optionally, an **advisor** reads past episodes of the same scenario and
    lowers the expected gain of actions that were blocked at that step
    (at most by 90%). What the agent currently observes always wins.
+9. A **policy** lists which actions are permitted. Every action passes a
+   policy check right before it runs, so a denied action can never execute.
+10. The **planning agent** searches ahead for the shortest permitted plan,
+    checks the plan against the policy, follows it, and replans when what
+    it observes differs from what it predicted. If no plan exists, it stops.
 
 Allowed actions (the only ones that can ever run):
 
@@ -56,7 +61,7 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 94 tests ... OK` and `50/50 validation checks passed`.
+   Expected: `Ran 121 tests ... OK` and `63/63 validation checks passed`.
 3. Optional reports:
    ```
    python3 -m red_queen.experiments --output results/m1_affect_comparison.json
@@ -72,6 +77,10 @@ git --version
    ```
    python3 -m red_queen.memory_experiment
    ```
+6. Optional planning experiment (reactive vs planner under 3 policies):
+   ```
+   python3 -m red_queen.planning_experiment
+   ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 
@@ -85,7 +94,7 @@ red_queen/
   goal.py          recovery goal, deficits, distance
   affect.py        experimental affect signals (urgency, concern, frustration)
   scoring.py       one-step action scoring
-  agent.py         bounded observe-score-act loop
+  agent.py         reactive agent: bounded observe-score-act loop
   verification.py  independent goal verifier
   scenarios.py     7 M1 + 3 fault scenarios
   experiments.py   affect on/off comparison
@@ -94,12 +103,18 @@ red_queen/
   memory_cli.py    record-all / search / stats (M2)
   memory_advice.py bounded advisory memory (M2.1)
   memory_experiment.py  empty/irrelevant/relevant memory comparison (M2.1)
-  validation.py    50 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2, V43-V50 M2.1)
-tests/             94 unittest tests
+  policy.py        policy allowlists + execution-boundary executor (M3)
+  planner.py       bounded breadth-first planner (M3)
+  planning_agent.py plan / validate / act / replan agent (M3)
+  planning_experiment.py reactive vs planner x 3 policies (M3)
+  validation.py    63 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+                   V43-V50 M2.1, V51-V63 M3)
+tests/             121 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M2_1.md   (accepted on Linux)
+docs/ENGINEERING_RECORD_M3.md
 results/                          build-environment reports
 ```
 
@@ -111,3 +126,4 @@ results/                          build-environment reports
 | M1.1 | 57 tests OK, 31/31 checks | **Accepted** 2026-10-24 |
 | M2 | 77 tests OK, 42/42 checks | **Accepted** 2026-10-24 |
 | M2.1 | 94 tests OK, 50/50 checks | **Accepted** 2026-10-24 |
+| M3 | 121 tests OK, 63/63 checks | Pending — run step 2 |
