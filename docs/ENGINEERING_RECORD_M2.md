@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M2
 
-**Version:** 0.3.0 · **Date:** 2026-10-24 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.3.0 · **Date:** 2026-10-24 · **Status:** build-environment passed; **accepted on Linux (user's laptop), 2026-10-24**
 
 ## 1. Review of M1.1
 
@@ -69,23 +69,20 @@ No performance claim is made: memory is not yet used for decisions.
 
 ## 9. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Accepted, 2026-10-24.** After `git pull` to commit `d38586f`, the user ran:
 
 ```
-git pull
 python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
 ```
 
-M2 is accepted when the output shows `Ran 77 tests ... OK` and
-`42/42 validation checks passed`.
+User-reported output: `Ran 77 tests ... OK` and `42/42 validation checks passed`.
+The user also ran the memory demo: `record-all` stored 20 episodes,
+`search "restart blocked"` ranked the four `flaky_restart*` episodes first
+(score 2), and `stats` reported 20 episodes, 74 events, `integrity_ok=True`.
 
-Optional: try the memory yourself.
-
-```
-python3 -m red_queen.memory_cli record-all
-python3 -m red_queen.memory_cli search "restart blocked"
-python3 -m red_queen.memory_cli stats
-```
+Note: `test_cli_record_search_stats` printed CLI output (including an
+expected `error:` line for a rejected limit) into the test log. Harmless;
+silenced in M2.1.
 
 ## 10. Next milestone
 
