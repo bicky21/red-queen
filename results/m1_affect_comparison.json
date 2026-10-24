@@ -1,6 +1,6 @@
 {
-  "milestone": "M1",
-  "version": "0.1.0",
+  "milestone": "M1.1",
+  "version": "0.2.0",
   "rows": [
     {
       "scenario": "nominal",
@@ -251,6 +251,124 @@
         "temperature": 35,
         "service_up": true
       }
+    },
+    {
+      "scenario": "flaky_restart",
+      "affect_enabled": false,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 4,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service"
+      ],
+      "event_count": 4,
+      "final_state": {
+        "battery": 60,
+        "temperature": 30,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "flaky_restart",
+      "affect_enabled": true,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 4,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service"
+      ],
+      "event_count": 4,
+      "final_state": {
+        "battery": 60,
+        "temperature": 30,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "flaky_restart_low_battery",
+      "affect_enabled": false,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 6,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "charge",
+        "charge"
+      ],
+      "event_count": 6,
+      "final_state": {
+        "battery": 70,
+        "temperature": 40,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "flaky_restart_low_battery",
+      "affect_enabled": true,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 6,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "charge",
+        "charge"
+      ],
+      "event_count": 6,
+      "final_state": {
+        "battery": 70,
+        "temperature": 40,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "charger_outage",
+      "affect_enabled": false,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 4,
+      "actions": [
+        "charge",
+        "charge",
+        "charge",
+        "charge"
+      ],
+      "event_count": 4,
+      "final_state": {
+        "battery": 60,
+        "temperature": 40,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "charger_outage",
+      "affect_enabled": true,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 4,
+      "actions": [
+        "charge",
+        "charge",
+        "charge",
+        "charge"
+      ],
+      "event_count": 4,
+      "final_state": {
+        "battery": 60,
+        "temperature": 40,
+        "service_up": true
+      }
     }
   ],
   "per_scenario": [
@@ -295,22 +413,40 @@
       "same_action_sequence": true,
       "action_count_difference": "same",
       "both_succeeded": true
+    },
+    {
+      "scenario": "flaky_restart",
+      "same_action_sequence": true,
+      "action_count_difference": "same",
+      "both_succeeded": true
+    },
+    {
+      "scenario": "flaky_restart_low_battery",
+      "same_action_sequence": true,
+      "action_count_difference": "same",
+      "both_succeeded": true
+    },
+    {
+      "scenario": "charger_outage",
+      "same_action_sequence": true,
+      "action_count_difference": "same",
+      "both_succeeded": true
     }
   ],
   "summary": {
     "affect_disabled": {
-      "episodes": 7,
-      "successes": 7,
-      "total_actions": 21,
-      "mean_actions_successful": 3.0,
-      "total_events": 23
+      "episodes": 10,
+      "successes": 10,
+      "total_actions": 35,
+      "mean_actions_successful": 3.5,
+      "total_events": 37
     },
     "affect_enabled": {
-      "episodes": 7,
-      "successes": 7,
-      "total_actions": 21,
-      "mean_actions_successful": 3.0,
-      "total_events": 23
+      "episodes": 10,
+      "successes": 10,
+      "total_actions": 35,
+      "mean_actions_successful": 3.5,
+      "total_events": 37
     }
   },
   "note": "Fixed deterministic scenarios only; not evidence of general performance."

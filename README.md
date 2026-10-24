@@ -1,7 +1,8 @@
-# RED QUEEN AI — Milestone M1
+# RED QUEEN AI — Milestone M1.1
 
-Deterministic simulated recovery, explicit action scoring, and an
-affect-enabled vs affect-disabled comparison.
+Deterministic simulated recovery, explicit action scoring, an
+affect-enabled vs affect-disabled comparison, scheduled action faults,
+and an affect parameter sweep.
 
 Pure Python standard library. No dependencies, no network, no shell
 execution, no real-world actions.
@@ -14,7 +15,8 @@ execution, no real-world actions.
 3. The **agent** looks at the state, scores every allowed action, and
    picks the best one.
 4. The **environment** runs the action. Some scenarios add scheduled
-   **disturbances** (heat spike, service crash).
+   **disturbances** (heat spike, service crash) or **action faults**
+   (an action silently does nothing for a few steps; the agent is not told).
 5. The agent repeats until the goal is met or it hits `max_steps`.
 6. An **independent verifier** reads the true state and decides success.
 
@@ -48,10 +50,11 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 38 tests ... OK` and `20/20 validation checks passed`.
-3. Optional affect comparison report:
+   Expected: `Ran 57 tests ... OK` and `31/31 validation checks passed`.
+3. Optional reports:
    ```
    python3 -m red_queen.experiments --output results/m1_affect_comparison.json
+   python3 -m red_queen.sweeps --output results/m1_1_sweep.json
    ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
@@ -62,21 +65,25 @@ Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 red_queen/
   state.py         immutable SystemState
   actions.py       action allowlist + deterministic transition model
-  environment.py   simulated world, disturbances, event log
+  environment.py   simulated world, disturbances, action faults, event log
   goal.py          recovery goal, deficits, distance
   affect.py        experimental affect signals (urgency, concern, frustration)
   scoring.py       one-step action scoring
   agent.py         bounded observe-score-act loop
   verification.py  independent goal verifier
-  scenarios.py     7 fixed validation scenarios
+  scenarios.py     7 M1 + 3 fault scenarios
   experiments.py   affect on/off comparison
-  validation.py    20 validation checks
-tests/             38 unittest tests
-docs/ENGINEERING_RECORD_M1.md
-results/m1_affect_comparison.json   (build-environment run)
+  sweeps.py        affect parameter sweep (M1.1)
+  validation.py    31 validation checks (V01-V20 from M1)
+tests/             57 unittest tests
+docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
+docs/ENGINEERING_RECORD_M1_1.md
+results/                          build-environment reports
 ```
 
 ## Status
 
-- Build environment (Linux, Python 3.13): 38/38 tests passed, 20/20 validation checks passed.
-- **Linux acceptance (user's laptop): pending** — run step 2 and report the output.
+| Milestone | Build environment | Your laptop (Linux) |
+|---|---|---|
+| M1 | 38 tests OK, 20/20 checks | **Accepted** 2026-10-24 |
+| M1.1 | 57 tests OK, 31/31 checks | Pending — run step 2 |

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "red-queen"
-version = "0.1.0"
-description = "RED QUEEN AI - M1: deterministic simulated recovery, action scoring and affect comparison"
+version = "0.2.0"
+description = "RED QUEEN AI - M1.1: simulated recovery, action scoring, affect comparison under scheduled action faults"
 requires-python = ">=3.10"
 dependencies = []
 

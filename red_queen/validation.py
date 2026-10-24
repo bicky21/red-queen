@@ -15,12 +15,26 @@ from .agent import STOP_MAX_STEPS, RecoveryAgent
 from .environment import SimulatedEnvironment
 from .experiments import run_affect_comparison, run_scenario
 from .goal import RecoveryGoal
-from .scenarios import SCENARIOS, get_scenario
+from .scenarios import FAULT_SCENARIOS, M1_SCENARIO_NAMES, SCENARIOS, get_scenario
 from .state import SystemState
+from .sweeps import run_sweep, sweep_configs
 from .verification import GoalVerifier
 
 CheckResult = Tuple[bool, str]
-RECOVERY_SCENARIOS = [s for s in SCENARIOS if s.name != "nominal"]
+# V02-V13 stay tied to the M1 scenarios so their numbering never shifts.
+RECOVERY_SCENARIOS = [get_scenario(n) for n in M1_SCENARIO_NAMES if n != "nominal"]
+
+# Frozen M1 behaviour (default affect config), recorded at commit 6f4bef5.
+# Any change here is a behaviour regression and must be explained.
+M1_FROZEN_SEQUENCES = {
+    "nominal": (),
+    "low_battery": ("charge", "charge"),
+    "overheating": ("cool", "cool"),
+    "service_down": ("restart_service",),
+    "overheated_service_down": ("cool", "restart_service", "cool"),
+    "compound_failure": ("cool", "restart_service", "charge", "cool", "charge", "charge", "cool"),
+    "disturbance_mid_recovery": ("charge", "cool", "cool", "restart_service", "charge", "cool"),
+}
 
 
 def check_nominal_no_action() -> CheckResult:
@@ -96,6 +110,60 @@ def check_comparison_report_complete() -> CheckResult:
     return ok, f"rows={len(report['rows'])}/{expected}"
 
 
+# ---- M1.1 checks -------------------------------------------------------
+
+
+def check_blocked_action_no_effect() -> CheckResult:
+    env = SimulatedEnvironment(SystemState(40, 30, False), blocked=(("restart_service", 1, 2),))
+    before = env.observe()
+    env.execute("restart_service")
+    unchanged = env.observe() == before
+    env.execute("charge")  # other actions are not affected
+    charged = env.observe().battery == 60
+    env.execute("restart_service")  # step 3: window over, works again
+    works_again = env.observe().service_up
+    kinds = [e.kind for e in env.events]
+    ok = unchanged and charged and works_again and kinds == ["blocked", "action", "action"]
+    return ok, f"unchanged={unchanged} other_ok={charged} after_window={works_again} kinds={kinds}"
+
+
+def make_fault_recovery_check(name: str, affect_enabled: bool) -> Callable[[], CheckResult]:
+    def check() -> CheckResult:
+        scenario = get_scenario(name)
+        r = run_scenario(scenario, affect_enabled)
+        blocked = sum(1 for e in r.events if e["kind"] == "blocked")
+        ok = r.success and r.action_count <= scenario.max_steps and blocked > 0
+        return ok, f"success={r.success} actions={r.action_count} blocked_events={blocked}"
+
+    return check
+
+
+def check_frustration_activates() -> CheckResult:
+    r = run_scenario(get_scenario("flaky_restart"), affect_enabled=True)
+    peak = max((s.affect["frustration"] for s in r.steps), default=0)
+    return peak > 0, f"peak frustration={peak}"
+
+
+def check_sweep_complete() -> CheckResult:
+    report = run_sweep()
+    expected = len(sweep_configs()) * len(SCENARIOS)
+    return len(report["rows"]) == expected, f"rows={len(report['rows'])}/{expected}"
+
+
+def check_sweep_deterministic() -> CheckResult:
+    same = run_sweep() == run_sweep()
+    return same, f"two sweeps identical={same}"
+
+
+def check_m1_regression() -> CheckResult:
+    for name, expected in M1_FROZEN_SEQUENCES.items():
+        for enabled in (False, True):
+            got = run_scenario(get_scenario(name), enabled).actions
+            if got != expected:
+                return False, f"{name} affect={enabled}: {got} != {expected}"
+    return True, f"{len(M1_FROZEN_SEQUENCES) * 2} M1 episodes match frozen sequences"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -112,6 +180,22 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("verifier_independent_boundary", check_verifier_independent),
         ("disturbances_applied_and_logged", check_disturbances_logged),
         ("comparison_report_complete", check_comparison_report_complete),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M1.1 (V21 onward)
+    checks.append((f"V{n:02d} blocked_action_has_no_effect", check_blocked_action_no_effect))
+    n += 1
+    for s in FAULT_SCENARIOS:
+        for enabled in (False, True):
+            label = f"V{n:02d} recover_{s.name}_affect_{'on' if enabled else 'off'}"
+            checks.append((label, make_fault_recovery_check(s.name, enabled)))
+            n += 1
+    for name, fn in (
+        ("frustration_activates_under_faults", check_frustration_activates),
+        ("sweep_report_complete", check_sweep_complete),
+        ("sweep_deterministic", check_sweep_deterministic),
+        ("m1_behaviour_unchanged", check_m1_regression),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

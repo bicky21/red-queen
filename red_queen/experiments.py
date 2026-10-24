@@ -21,8 +21,19 @@ from .goal import RecoveryGoal
 from .scenarios import SCENARIOS, Scenario
 
 
-def run_scenario(scenario: Scenario, affect_enabled: bool, goal: RecoveryGoal = RecoveryGoal()) -> EpisodeResult:
-    agent = RecoveryAgent(goal, AffectConfig(enabled=affect_enabled), max_steps=scenario.max_steps)
+def run_scenario(
+    scenario: Scenario,
+    affect_enabled: bool,
+    goal: RecoveryGoal = RecoveryGoal(),
+    affect: Optional[AffectConfig] = None,
+) -> EpisodeResult:
+    """Run one episode. `affect` (M1.1) overrides the default config; its
+    `enabled` flag must agree with `affect_enabled`."""
+    if affect is None:
+        affect = AffectConfig(enabled=affect_enabled)
+    elif affect.enabled != affect_enabled:
+        raise ValueError("affect.enabled does not match affect_enabled")
+    agent = RecoveryAgent(goal, affect, max_steps=scenario.max_steps)
     return agent.run(scenario.make_env(), scenario=scenario.name)
 
 

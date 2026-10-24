@@ -7,9 +7,12 @@ The environment owns the true state. Actions arrive only through
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Mapping, Optional
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple
 
 from .actions import ACTIONS, UnknownActionError, apply_action
+
+# (action name, first step, last step) - inclusive, 1-based action steps.
+BlockedWindow = Tuple[str, int, int]
 from .state import SystemState
 
 DISTURBANCES: Dict[str, Callable[[SystemState], SystemState]] = {
@@ -26,7 +29,7 @@ class UnknownDisturbanceError(ValueError):
 @dataclass(frozen=True)
 class Event:
     step: int
-    kind: str  # "action", "disturbance" or "rejected"
+    kind: str  # "action", "blocked", "disturbance" or "rejected"
     name: str
     before: Dict[str, Any]
     after: Dict[str, Any]
@@ -46,6 +49,7 @@ class SimulatedEnvironment:
         self,
         initial_state: SystemState,
         disturbances: Optional[Mapping[int, str]] = None,
+        blocked: Iterable[BlockedWindow] = (),
     ) -> None:
         schedule = dict(disturbances or {})
         for step, name in schedule.items():
@@ -53,10 +57,28 @@ class SimulatedEnvironment:
                 raise UnknownDisturbanceError(f"Unknown disturbance: {name!r}")
             if not isinstance(step, int) or step < 1:
                 raise ValueError(f"Disturbance step must be an int >= 1, got {step!r}")
+        windows = tuple(tuple(w) for w in blocked)
+        for window in windows:
+            if len(window) != 3:
+                raise ValueError(f"Blocked window must be (action, first, last), got {window!r}")
+            action, first, last = window
+            if action not in ACTIONS:
+                raise UnknownActionError(f"Cannot block unknown action: {action!r}")
+            if not (isinstance(first, int) and isinstance(last, int) and 1 <= first <= last):
+                raise ValueError(f"Blocked window steps must satisfy 1 <= first <= last, got {window!r}")
         self._state = initial_state
         self._step = 0
         self._schedule = schedule
+        self._blocked = windows
         self.events: List[Event] = []
+
+    def is_blocked(self, action_name: str, step: int) -> bool:
+        """True if this action has no effect when executed at this step.
+
+        The agent is not told about blocked windows; it can only notice
+        that an action produced no change.
+        """
+        return any(a == action_name and first <= step <= last for a, first, last in self._blocked)
 
     @property
     def step(self) -> int:
@@ -75,8 +97,12 @@ class SimulatedEnvironment:
 
         self._step += 1
         before = self._state
-        self._state = apply_action(before, action_name)
-        self.events.append(Event(self._step, "action", action_name, before.to_dict(), self._state.to_dict()))
+        if self.is_blocked(action_name, self._step):
+            kind = "blocked"  # scheduled fault: the action has no effect
+        else:
+            kind = "action"
+            self._state = apply_action(before, action_name)
+        self.events.append(Event(self._step, kind, action_name, before.to_dict(), self._state.to_dict()))
 
         disturbance = self._schedule.get(self._step)
         if disturbance is not None:
