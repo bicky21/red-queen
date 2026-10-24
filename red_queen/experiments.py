@@ -26,14 +26,16 @@ def run_scenario(
     affect_enabled: bool,
     goal: RecoveryGoal = RecoveryGoal(),
     affect: Optional[AffectConfig] = None,
+    advisor=None,
 ) -> EpisodeResult:
     """Run one episode. `affect` (M1.1) overrides the default config; its
-    `enabled` flag must agree with `affect_enabled`."""
+    `enabled` flag must agree with `affect_enabled`. `advisor` (M2.1) is an
+    optional advisory-memory object; None gives the original behaviour."""
     if affect is None:
         affect = AffectConfig(enabled=affect_enabled)
     elif affect.enabled != affect_enabled:
         raise ValueError("affect.enabled does not match affect_enabled")
-    agent = RecoveryAgent(goal, affect, max_steps=scenario.max_steps)
+    agent = RecoveryAgent(goal, affect, max_steps=scenario.max_steps, advisor=advisor)
     return agent.run(scenario.make_env(), scenario=scenario.name)
 
 

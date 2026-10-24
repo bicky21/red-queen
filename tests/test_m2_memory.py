@@ -1,3 +1,5 @@
+import contextlib
+import io
 import sqlite3
 import tempfile
 import unittest
@@ -155,10 +157,15 @@ class TestFiles(unittest.TestCase):
     def test_cli_record_search_stats(self):
         with tempfile.TemporaryDirectory() as tmp:
             db = str(Path(tmp) / "m.sqlite")
-            self.assertEqual(cli_main(["--db", db, "record-all"]), 0)
-            self.assertEqual(cli_main(["--db", db, "search", "charge blocked"]), 0)
-            self.assertEqual(cli_main(["--db", db, "stats"]), 0)
-            self.assertEqual(cli_main(["--db", db, "search", "x", "--limit", "0"]), 2)
+            out, err = io.StringIO(), io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                self.assertEqual(cli_main(["--db", db, "record-all"]), 0)
+                self.assertEqual(cli_main(["--db", db, "search", "charge blocked"]), 0)
+                self.assertEqual(cli_main(["--db", db, "stats"]), 0)
+                self.assertEqual(cli_main(["--db", db, "search", "x", "--limit", "0"]), 2)
+            self.assertIn("Recorded 20 episodes", out.getvalue())
+            self.assertIn("integrity_ok=True", out.getvalue())
+            self.assertIn("limit must be between", err.getvalue())
 
 
 class TestBehaviourUnchanged(unittest.TestCase):

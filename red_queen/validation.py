@@ -330,6 +330,129 @@ def check_m1_1_regression() -> CheckResult:
     return True, f"{len(M1_1_FROZEN_SEQUENCES) * 2} M1.1 episodes match frozen sequences"
 
 
+# ---- M2.1 checks -------------------------------------------------------
+
+
+def check_empty_advisor_identical() -> CheckResult:
+    from .memory import EpisodeMemory
+    from .memory_advice import MemoryAdvisor
+
+    for s in SCENARIOS:
+        for enabled in (False, True):
+            with EpisodeMemory(":memory:") as memory:
+                with_advisor = run_scenario(s, enabled, advisor=MemoryAdvisor(memory, s.name))
+            plain = run_scenario(s, enabled)
+            if with_advisor.actions != plain.actions or with_advisor.events != plain.events:
+                return False, f"{s.name} affect={enabled} differs with empty memory"
+    return True, f"{len(SCENARIOS) * 2} episodes identical with empty memory and no advisor"
+
+
+def check_relevant_memory_outcome() -> CheckResult:
+    from .memory_experiment import run_condition
+
+    s = get_scenario("flaky_restart_low_battery")
+    empty, _ = run_condition(s, "empty", False)
+    relevant, advice = run_condition(s, "relevant", False)
+    ok = (relevant.success and empty.action_count == 6 and relevant.action_count == 5
+          and relevant.actions[0] == "charge" and advice["records_used"] == 1)
+    return ok, f"empty={empty.action_count} relevant={relevant.action_count} first={relevant.actions[0]} advice={advice}"
+
+
+def check_irrelevant_memory_no_effect() -> CheckResult:
+    from .memory_experiment import run_condition
+
+    for s in SCENARIOS:
+        empty, _ = run_condition(s, "empty", True)
+        irrelevant, advice = run_condition(s, "irrelevant", True)
+        if irrelevant.actions != empty.actions or advice["records_used"] != 0:
+            return False, f"{s.name}: irrelevant memory changed behaviour or was used ({advice})"
+    return True, f"{len(SCENARIOS)} scenarios unchanged; 0 irrelevant records used"
+
+
+def _memory_for(name: str):
+    from .memory import EpisodeMemory
+
+    memory = EpisodeMemory(":memory:")
+    config = AffectConfig(enabled=False)
+    memory.record(run_scenario(get_scenario(name), False, affect=config), config)
+    return memory
+
+
+def check_invalid_records_ignored() -> CheckResult:
+    from .memory_advice import MemoryAdvisor
+
+    memory = _memory_for("flaky_restart_low_battery")
+    memory._conn.execute("UPDATE episodes SET actions_json = '[\"shell\"]'")
+    advisor = MemoryAdvisor(memory, "flaky_restart_low_battery")
+    result = run_scenario(get_scenario("flaky_restart_low_battery"), False, advisor=advisor)
+    memory.close()
+    s = advisor.summary()
+    ok = s["records_used"] == 0 and s["records_ignored_invalid"] == 1 and result.action_count == 6
+    return ok, f"advisor={s} actions={result.action_count} (same as empty memory)"
+
+
+def check_poisoned_memory_bounded() -> CheckResult:
+    """Valid-looking records whose events all claim 'blocked' must not stop recovery."""
+    from .memory import EpisodeMemory
+    from .memory_advice import MemoryAdvisor
+
+    for s in SCENARIOS:
+        with EpisodeMemory(":memory:") as memory:
+            config = AffectConfig(enabled=False)
+            for _ in range(3):
+                memory.record(run_scenario(s, False, affect=config), config)
+            memory._conn.execute("UPDATE events SET kind = 'blocked' WHERE kind = 'action'")
+            for enabled in (False, True):
+                r = run_scenario(s, enabled, advisor=MemoryAdvisor(memory, s.name))
+                if not r.success:
+                    return False, f"{s.name} affect={enabled} failed under poisoned memory"
+    return True, f"{len(SCENARIOS) * 2} poisoned-memory episodes all recovered"
+
+
+def check_discount_capped() -> CheckResult:
+    from .affect import compute_signals
+    from .goal import RecoveryGoal
+    from .scoring import MAX_MEMORY_DISCOUNT, ActionScorer
+
+    goal = RecoveryGoal()
+    scorer = ActionScorer(goal, AffectConfig(enabled=False))
+    s = SystemState(40, 30, False)
+    sig = compute_signals(goal, s, 0)
+    base = {r.name: r for r in scorer.score_all(s, sig)}
+    hit = {r.name: r for r in scorer.score_all(
+        s, sig, discounts={"restart_service": 5.0, "wait": 1.0, "shell": 1.0, "charge": float("nan")})}
+    capped = abs(hit["restart_service"].gain - base["restart_service"].gain * (1 - MAX_MEMORY_DISCOUNT)) < 1e-9
+    negative_untouched = hit["wait"].score == base["wait"].score
+    nan_ignored = hit["charge"].score == base["charge"].score
+    no_new_actions = set(hit) == set(base)
+    ok = capped and negative_untouched and nan_ignored and no_new_actions
+    return ok, (f"capped={capped} non_positive_gain_untouched={negative_untouched} "
+                f"nan_ignored={nan_ignored} no_new_actions={no_new_actions}")
+
+
+def check_observation_overrides_memory() -> CheckResult:
+    from .memory_advice import MemoryAdvisor
+
+    memory = _memory_for("low_battery")  # charge worked at steps 1-2
+    memory._conn.execute("UPDATE events SET kind = 'blocked'")  # claim charge always fails
+    r = run_scenario(get_scenario("low_battery"), False, advisor=MemoryAdvisor(memory, "low_battery"))
+    memory.close()
+    first, second = r.steps[0].memory_discounts, r.steps[1].memory_discounts
+    ok = r.success and "charge" in first and "charge" not in second
+    return ok, f"step1 discounts={first} step2 discounts={second} success={r.success}"
+
+
+def check_memory_experiment() -> CheckResult:
+    from .memory_experiment import CONDITIONS, run_memory_experiment
+
+    a = run_memory_experiment()
+    b = run_memory_experiment()
+    expected = len(SCENARIOS) * 2 * len(CONDITIONS)
+    all_ok = all(r["success"] for r in a["rows"])
+    ok = a == b and len(a["rows"]) == expected and all_ok
+    return ok, f"rows={len(a['rows'])}/{expected} deterministic={a == b} all_succeeded={all_ok}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -378,6 +501,19 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("tampered_record_flagged_invalid", check_tampered_record_flagged),
         ("memory_does_not_change_behaviour", check_memory_does_not_change_behaviour),
         ("m1_1_behaviour_unchanged", check_m1_1_regression),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M2.1 (V43 onward)
+    for name, fn in (
+        ("empty_memory_identical_to_no_advisor", check_empty_advisor_identical),
+        ("relevant_memory_expected_outcome", check_relevant_memory_outcome),
+        ("irrelevant_memory_no_effect", check_irrelevant_memory_no_effect),
+        ("invalid_records_ignored_by_advisor", check_invalid_records_ignored),
+        ("poisoned_memory_cannot_block_recovery", check_poisoned_memory_bounded),
+        ("memory_discount_capped_and_sanitised", check_discount_capped),
+        ("observation_overrides_memory", check_observation_overrides_memory),
+        ("memory_experiment_complete_deterministic", check_memory_experiment),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

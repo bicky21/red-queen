@@ -10,7 +10,7 @@ independent verifier, never by the agent's own belief.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Protocol, Set, Tuple
 
 from .affect import AffectConfig, compute_signals, update_frustration
 from .environment import SimulatedEnvironment
@@ -18,6 +18,12 @@ from .goal import RecoveryGoal
 from .scoring import ActionScorer
 from .state import SystemState
 from .verification import GoalVerifier, VerificationResult
+
+class Advisor(Protocol):
+    """M2.1 advisory interface: per-action discount in [0, 1] for a step."""
+
+    def discounts(self, step: int) -> Mapping[str, float]: ...
+
 
 STOP_GOAL = "goal_believed_satisfied"
 STOP_MAX_STEPS = "max_steps_reached"
@@ -31,9 +37,10 @@ class StepRecord:
     score: float
     ranking: Tuple[Tuple[str, float], ...]
     affect: Dict[str, Any]
+    memory_discounts: Optional[Dict[str, float]] = None  # M2.1; None = no advisor
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        out = {
             "step": self.step,
             "observed": dict(self.observed),
             "chosen": self.chosen,
@@ -41,6 +48,9 @@ class StepRecord:
             "ranking": [list(item) for item in self.ranking],
             "affect": self.affect,
         }
+        if self.memory_discounts is not None:
+            out["memory_discounts"] = dict(self.memory_discounts)
+        return out
 
 
 @dataclass(frozen=True)
@@ -82,12 +92,14 @@ class RecoveryAgent:
         goal: RecoveryGoal,
         affect: AffectConfig = AffectConfig(),
         max_steps: int = 20,
+        advisor: Optional["Advisor"] = None,
     ) -> None:
         if max_steps < 0:
             raise ValueError("max_steps must be >= 0")
         self.goal = goal
         self.affect = affect
         self.max_steps = max_steps
+        self.advisor = advisor
         self.scorer = ActionScorer(goal, affect)
         self.verifier = GoalVerifier(goal)
 
@@ -96,13 +108,20 @@ class RecoveryAgent:
         records: List[StepRecord] = []
         frustration = 0
         last_action = None
+        worked: Set[str] = set()  # actions observed to behave as modelled this episode
 
         while len(actions) < self.max_steps:
             observed = env.observe()
             if self.goal.is_satisfied(observed):
                 break
             signals = compute_signals(self.goal, observed, frustration)
-            ranking = self.scorer.score_all(observed, signals, last_action)
+            discounts = None
+            if self.advisor is not None:
+                # Current observation wins: an action that already worked in
+                # this episode gets no memory discount.
+                raw = self.advisor.discounts(len(actions) + 1)
+                discounts = {a: d for a, d in raw.items() if a not in worked}
+            ranking = self.scorer.score_all(observed, signals, last_action, discounts)
             best = ranking[0]
 
             records.append(
@@ -113,11 +132,17 @@ class RecoveryAgent:
                     score=best.score,
                     ranking=tuple((r.name, r.score) for r in ranking),
                     affect=signals.to_dict(),
+                    memory_discounts=(
+                        None if discounts is None
+                        else {r.name: r.memory_discount for r in ranking if r.memory_discount > 0}
+                    ),
                 )
             )
             distance_before = self.goal.distance(observed)
             env.execute(best.name)
             actions.append(best.name)
+            if env.observe() == best.predicted:
+                worked.add(best.name)
             frustration = update_frustration(frustration, distance_before, self.goal.distance(env.observe()))
             last_action = best.name
 

@@ -1,0 +1,1232 @@
+{
+  "milestone": "M2.1",
+  "version": "0.4.0",
+  "rows": [
+    {
+      "scenario": "nominal",
+      "affect_enabled": false,
+      "memory": "empty",
+      "success": true,
+      "action_count": 0,
+      "actions": [],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "nominal",
+      "affect_enabled": false,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 0,
+      "actions": [],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "nominal",
+      "affect_enabled": false,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 0,
+      "actions": [],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "nominal",
+      "affect_enabled": true,
+      "memory": "empty",
+      "success": true,
+      "action_count": 0,
+      "actions": [],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "nominal",
+      "affect_enabled": true,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 0,
+      "actions": [],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "nominal",
+      "affect_enabled": true,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 0,
+      "actions": [],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "low_battery",
+      "affect_enabled": false,
+      "memory": "empty",
+      "success": true,
+      "action_count": 2,
+      "actions": [
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "low_battery",
+      "affect_enabled": false,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 2,
+      "actions": [
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "low_battery",
+      "affect_enabled": false,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 2,
+      "actions": [
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "low_battery",
+      "affect_enabled": true,
+      "memory": "empty",
+      "success": true,
+      "action_count": 2,
+      "actions": [
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "low_battery",
+      "affect_enabled": true,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 2,
+      "actions": [
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "low_battery",
+      "affect_enabled": true,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 2,
+      "actions": [
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "overheating",
+      "affect_enabled": false,
+      "memory": "empty",
+      "success": true,
+      "action_count": 2,
+      "actions": [
+        "cool",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "overheating",
+      "affect_enabled": false,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 2,
+      "actions": [
+        "cool",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "overheating",
+      "affect_enabled": false,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 2,
+      "actions": [
+        "cool",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "overheating",
+      "affect_enabled": true,
+      "memory": "empty",
+      "success": true,
+      "action_count": 2,
+      "actions": [
+        "cool",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "overheating",
+      "affect_enabled": true,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 2,
+      "actions": [
+        "cool",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "overheating",
+      "affect_enabled": true,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 2,
+      "actions": [
+        "cool",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "service_down",
+      "affect_enabled": false,
+      "memory": "empty",
+      "success": true,
+      "action_count": 1,
+      "actions": [
+        "restart_service"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "service_down",
+      "affect_enabled": false,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 1,
+      "actions": [
+        "restart_service"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "service_down",
+      "affect_enabled": false,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 1,
+      "actions": [
+        "restart_service"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "service_down",
+      "affect_enabled": true,
+      "memory": "empty",
+      "success": true,
+      "action_count": 1,
+      "actions": [
+        "restart_service"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "service_down",
+      "affect_enabled": true,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 1,
+      "actions": [
+        "restart_service"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "service_down",
+      "affect_enabled": true,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 1,
+      "actions": [
+        "restart_service"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "overheated_service_down",
+      "affect_enabled": false,
+      "memory": "empty",
+      "success": true,
+      "action_count": 3,
+      "actions": [
+        "cool",
+        "restart_service",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "overheated_service_down",
+      "affect_enabled": false,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 3,
+      "actions": [
+        "cool",
+        "restart_service",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "overheated_service_down",
+      "affect_enabled": false,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 3,
+      "actions": [
+        "cool",
+        "restart_service",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "overheated_service_down",
+      "affect_enabled": true,
+      "memory": "empty",
+      "success": true,
+      "action_count": 3,
+      "actions": [
+        "cool",
+        "restart_service",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "overheated_service_down",
+      "affect_enabled": true,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 3,
+      "actions": [
+        "cool",
+        "restart_service",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "overheated_service_down",
+      "affect_enabled": true,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 3,
+      "actions": [
+        "cool",
+        "restart_service",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "compound_failure",
+      "affect_enabled": false,
+      "memory": "empty",
+      "success": true,
+      "action_count": 7,
+      "actions": [
+        "cool",
+        "restart_service",
+        "charge",
+        "cool",
+        "charge",
+        "charge",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "compound_failure",
+      "affect_enabled": false,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 7,
+      "actions": [
+        "cool",
+        "restart_service",
+        "charge",
+        "cool",
+        "charge",
+        "charge",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "compound_failure",
+      "affect_enabled": false,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 7,
+      "actions": [
+        "cool",
+        "restart_service",
+        "charge",
+        "cool",
+        "charge",
+        "charge",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "compound_failure",
+      "affect_enabled": true,
+      "memory": "empty",
+      "success": true,
+      "action_count": 7,
+      "actions": [
+        "cool",
+        "restart_service",
+        "charge",
+        "cool",
+        "charge",
+        "charge",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "compound_failure",
+      "affect_enabled": true,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 7,
+      "actions": [
+        "cool",
+        "restart_service",
+        "charge",
+        "cool",
+        "charge",
+        "charge",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "compound_failure",
+      "affect_enabled": true,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 7,
+      "actions": [
+        "cool",
+        "restart_service",
+        "charge",
+        "cool",
+        "charge",
+        "charge",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "disturbance_mid_recovery",
+      "affect_enabled": false,
+      "memory": "empty",
+      "success": true,
+      "action_count": 6,
+      "actions": [
+        "charge",
+        "cool",
+        "cool",
+        "restart_service",
+        "charge",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "disturbance_mid_recovery",
+      "affect_enabled": false,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 6,
+      "actions": [
+        "charge",
+        "cool",
+        "cool",
+        "restart_service",
+        "charge",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "disturbance_mid_recovery",
+      "affect_enabled": false,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 6,
+      "actions": [
+        "charge",
+        "cool",
+        "cool",
+        "restart_service",
+        "charge",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "disturbance_mid_recovery",
+      "affect_enabled": true,
+      "memory": "empty",
+      "success": true,
+      "action_count": 6,
+      "actions": [
+        "charge",
+        "cool",
+        "cool",
+        "restart_service",
+        "charge",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "disturbance_mid_recovery",
+      "affect_enabled": true,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 6,
+      "actions": [
+        "charge",
+        "cool",
+        "cool",
+        "restart_service",
+        "charge",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "disturbance_mid_recovery",
+      "affect_enabled": true,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 6,
+      "actions": [
+        "charge",
+        "cool",
+        "cool",
+        "restart_service",
+        "charge",
+        "cool"
+      ],
+      "blocked_events": 0,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "flaky_restart",
+      "affect_enabled": false,
+      "memory": "empty",
+      "success": true,
+      "action_count": 4,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service"
+      ],
+      "blocked_events": 3,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "flaky_restart",
+      "affect_enabled": false,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 4,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service"
+      ],
+      "blocked_events": 3,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "flaky_restart",
+      "affect_enabled": false,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 4,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service"
+      ],
+      "blocked_events": 3,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 3
+      }
+    },
+    {
+      "scenario": "flaky_restart",
+      "affect_enabled": true,
+      "memory": "empty",
+      "success": true,
+      "action_count": 4,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service"
+      ],
+      "blocked_events": 3,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "flaky_restart",
+      "affect_enabled": true,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 4,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service"
+      ],
+      "blocked_events": 3,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "flaky_restart",
+      "affect_enabled": true,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 4,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service"
+      ],
+      "blocked_events": 3,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 3
+      }
+    },
+    {
+      "scenario": "flaky_restart_low_battery",
+      "affect_enabled": false,
+      "memory": "empty",
+      "success": true,
+      "action_count": 6,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 3,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "flaky_restart_low_battery",
+      "affect_enabled": false,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 6,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 3,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "flaky_restart_low_battery",
+      "affect_enabled": false,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 5,
+      "actions": [
+        "charge",
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "charge"
+      ],
+      "blocked_events": 2,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 3
+      }
+    },
+    {
+      "scenario": "flaky_restart_low_battery",
+      "affect_enabled": true,
+      "memory": "empty",
+      "success": true,
+      "action_count": 6,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 3,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "flaky_restart_low_battery",
+      "affect_enabled": true,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 6,
+      "actions": [
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 3,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "flaky_restart_low_battery",
+      "affect_enabled": true,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 5,
+      "actions": [
+        "charge",
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "charge"
+      ],
+      "blocked_events": 2,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 3
+      }
+    },
+    {
+      "scenario": "charger_outage",
+      "affect_enabled": false,
+      "memory": "empty",
+      "success": true,
+      "action_count": 4,
+      "actions": [
+        "charge",
+        "charge",
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 2,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "charger_outage",
+      "affect_enabled": false,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 4,
+      "actions": [
+        "charge",
+        "charge",
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 2,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "charger_outage",
+      "affect_enabled": false,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 4,
+      "actions": [
+        "charge",
+        "charge",
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 2,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 2
+      }
+    },
+    {
+      "scenario": "charger_outage",
+      "affect_enabled": true,
+      "memory": "empty",
+      "success": true,
+      "action_count": 4,
+      "actions": [
+        "charge",
+        "charge",
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 2,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "charger_outage",
+      "affect_enabled": true,
+      "memory": "irrelevant",
+      "success": true,
+      "action_count": 4,
+      "actions": [
+        "charge",
+        "charge",
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 2,
+      "advisor": {
+        "records_used": 0,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 0
+      }
+    },
+    {
+      "scenario": "charger_outage",
+      "affect_enabled": true,
+      "memory": "relevant",
+      "success": true,
+      "action_count": 4,
+      "actions": [
+        "charge",
+        "cool",
+        "charge",
+        "charge"
+      ],
+      "blocked_events": 1,
+      "advisor": {
+        "records_used": 1,
+        "records_ignored_invalid": 0,
+        "events_ignored": 0,
+        "nonzero_entries": 2
+      }
+    }
+  ],
+  "summary": {
+    "empty": {
+      "episodes": 20,
+      "successes": 20,
+      "total_actions": 70,
+      "total_blocked_events": 16
+    },
+    "irrelevant": {
+      "episodes": 20,
+      "successes": 20,
+      "total_actions": 70,
+      "total_blocked_events": 16
+    },
+    "relevant": {
+      "episodes": 20,
+      "successes": 20,
+      "total_actions": 68,
+      "total_blocked_events": 13
+    }
+  },
+  "changes_vs_empty": [
+    {
+      "scenario": "flaky_restart_low_battery",
+      "affect_enabled": false,
+      "memory": "relevant",
+      "empty_actions": 6,
+      "actions": 5,
+      "sequence": [
+        "charge",
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "charge"
+      ]
+    },
+    {
+      "scenario": "flaky_restart_low_battery",
+      "affect_enabled": true,
+      "memory": "relevant",
+      "empty_actions": 6,
+      "actions": 5,
+      "sequence": [
+        "charge",
+        "restart_service",
+        "restart_service",
+        "restart_service",
+        "charge"
+      ]
+    },
+    {
+      "scenario": "charger_outage",
+      "affect_enabled": true,
+      "memory": "relevant",
+      "empty_actions": 4,
+      "actions": 4,
+      "sequence": [
+        "charge",
+        "cool",
+        "charge",
+        "charge"
+      ]
+    }
+  ],
+  "note": "Fixed deterministic scenarios only; not evidence of general performance."
+}

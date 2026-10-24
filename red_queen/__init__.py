@@ -1,10 +1,10 @@
-"""RED QUEEN AI - Milestone M2.
+"""RED QUEEN AI - Milestone M2.1.
 
 Deterministic simulated recovery with explicit action scoring, an
 experimental affect-signal comparison, scheduled action faults (M1.1),
-an affect parameter sweep (M1.1) and persistent SQLite episodic
-memory (M2). Standard library only.
+an affect parameter sweep (M1.1), persistent SQLite episodic memory (M2)
+and bounded advisory memory (M2.1). Standard library only.
 """
 
-__version__ = "0.3.0"
-MILESTONE = "M2"
+__version__ = "0.4.0"
+MILESTONE = "M2.1"
