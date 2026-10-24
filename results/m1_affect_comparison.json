@@ -1,0 +1,317 @@
+{
+  "milestone": "M1",
+  "version": "0.1.0",
+  "rows": [
+    {
+      "scenario": "nominal",
+      "affect_enabled": false,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 0,
+      "actions": [],
+      "event_count": 0,
+      "final_state": {
+        "battery": 80,
+        "temperature": 30,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "nominal",
+      "affect_enabled": true,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 0,
+      "actions": [],
+      "event_count": 0,
+      "final_state": {
+        "battery": 80,
+        "temperature": 30,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "low_battery",
+      "affect_enabled": false,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 2,
+      "actions": [
+        "charge",
+        "charge"
+      ],
+      "event_count": 2,
+      "final_state": {
+        "battery": 60,
+        "temperature": 40,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "low_battery",
+      "affect_enabled": true,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 2,
+      "actions": [
+        "charge",
+        "charge"
+      ],
+      "event_count": 2,
+      "final_state": {
+        "battery": 60,
+        "temperature": 40,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "overheating",
+      "affect_enabled": false,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 2,
+      "actions": [
+        "cool",
+        "cool"
+      ],
+      "event_count": 2,
+      "final_state": {
+        "battery": 70,
+        "temperature": 50,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "overheating",
+      "affect_enabled": true,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 2,
+      "actions": [
+        "cool",
+        "cool"
+      ],
+      "event_count": 2,
+      "final_state": {
+        "battery": 70,
+        "temperature": 50,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "service_down",
+      "affect_enabled": false,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 1,
+      "actions": [
+        "restart_service"
+      ],
+      "event_count": 1,
+      "final_state": {
+        "battery": 60,
+        "temperature": 30,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "service_down",
+      "affect_enabled": true,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 1,
+      "actions": [
+        "restart_service"
+      ],
+      "event_count": 1,
+      "final_state": {
+        "battery": 60,
+        "temperature": 30,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "overheated_service_down",
+      "affect_enabled": false,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 3,
+      "actions": [
+        "cool",
+        "restart_service",
+        "cool"
+      ],
+      "event_count": 3,
+      "final_state": {
+        "battery": 60,
+        "temperature": 50,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "overheated_service_down",
+      "affect_enabled": true,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 3,
+      "actions": [
+        "cool",
+        "restart_service",
+        "cool"
+      ],
+      "event_count": 3,
+      "final_state": {
+        "battery": 60,
+        "temperature": 50,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "compound_failure",
+      "affect_enabled": false,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 7,
+      "actions": [
+        "cool",
+        "restart_service",
+        "charge",
+        "cool",
+        "charge",
+        "charge",
+        "cool"
+      ],
+      "event_count": 7,
+      "final_state": {
+        "battery": 65,
+        "temperature": 40,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "compound_failure",
+      "affect_enabled": true,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 7,
+      "actions": [
+        "cool",
+        "restart_service",
+        "charge",
+        "cool",
+        "charge",
+        "charge",
+        "cool"
+      ],
+      "event_count": 7,
+      "final_state": {
+        "battery": 65,
+        "temperature": 40,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "disturbance_mid_recovery",
+      "affect_enabled": false,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 6,
+      "actions": [
+        "charge",
+        "cool",
+        "cool",
+        "restart_service",
+        "charge",
+        "cool"
+      ],
+      "event_count": 8,
+      "final_state": {
+        "battery": 60,
+        "temperature": 35,
+        "service_up": true
+      }
+    },
+    {
+      "scenario": "disturbance_mid_recovery",
+      "affect_enabled": true,
+      "success": true,
+      "stop_reason": "goal_believed_satisfied",
+      "action_count": 6,
+      "actions": [
+        "charge",
+        "cool",
+        "cool",
+        "restart_service",
+        "charge",
+        "cool"
+      ],
+      "event_count": 8,
+      "final_state": {
+        "battery": 60,
+        "temperature": 35,
+        "service_up": true
+      }
+    }
+  ],
+  "per_scenario": [
+    {
+      "scenario": "nominal",
+      "same_action_sequence": true,
+      "action_count_difference": "same",
+      "both_succeeded": true
+    },
+    {
+      "scenario": "low_battery",
+      "same_action_sequence": true,
+      "action_count_difference": "same",
+      "both_succeeded": true
+    },
+    {
+      "scenario": "overheating",
+      "same_action_sequence": true,
+      "action_count_difference": "same",
+      "both_succeeded": true
+    },
+    {
+      "scenario": "service_down",
+      "same_action_sequence": true,
+      "action_count_difference": "same",
+      "both_succeeded": true
+    },
+    {
+      "scenario": "overheated_service_down",
+      "same_action_sequence": true,
+      "action_count_difference": "same",
+      "both_succeeded": true
+    },
+    {
+      "scenario": "compound_failure",
+      "same_action_sequence": true,
+      "action_count_difference": "same",
+      "both_succeeded": true
+    },
+    {
+      "scenario": "disturbance_mid_recovery",
+      "same_action_sequence": true,
+      "action_count_difference": "same",
+      "both_succeeded": true
+    }
+  ],
+  "summary": {
+    "affect_disabled": {
+      "episodes": 7,
+      "successes": 7,
+      "total_actions": 21,
+      "mean_actions_successful": 3.0,
+      "total_events": 23
+    },
+    "affect_enabled": {
+      "episodes": 7,
+      "successes": 7,
+      "total_actions": 21,
+      "mean_actions_successful": 3.0,
+      "total_events": 23
+    }
+  },
+  "note": "Fixed deterministic scenarios only; not evidence of general performance."
+}
