@@ -86,4 +86,4 @@ results/                          build-environment reports
 | Milestone | Build environment | Your laptop (Linux) |
 |---|---|---|
 | M1 | 38 tests OK, 20/20 checks | **Accepted** 2026-10-24 |
-| M1.1 | 57 tests OK, 31/31 checks | Pending — run step 2 |
+| M1.1 | 57 tests OK, 31/31 checks | **Accepted** 2026-10-24 |

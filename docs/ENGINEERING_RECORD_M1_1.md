@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M1.1
 
-**Version:** 0.2.0 · **Date:** 2026-10-24 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.2.0 · **Date:** 2026-10-24 · **Status:** build-environment passed; **accepted on Linux (user's laptop), 2026-10-24**
 
 ## 1. Review of M1
 
@@ -87,15 +87,13 @@ Full data: `results/m1_1_sweep.json`, `results/m1_affect_comparison.json`.
 
 ## 7. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Accepted, 2026-10-24.** After `git pull` to commit `5c50695`, the user ran:
 
 ```
-git pull
 python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
 ```
 
-M1.1 counts as accepted only when the output shows `Ran 57 tests ... OK`
-and `31/31 validation checks passed` (or all V01–V31 lines `[PASS]`).
+User-reported output: `Ran 57 tests ... OK` and `31/31 validation checks passed`.
 
 ## 8. Next milestone
 
