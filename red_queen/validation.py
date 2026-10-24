@@ -164,6 +164,172 @@ def check_m1_regression() -> CheckResult:
     return True, f"{len(M1_FROZEN_SEQUENCES) * 2} M1 episodes match frozen sequences"
 
 
+# ---- M2 checks ---------------------------------------------------------
+
+# Frozen M1.1 fault-scenario behaviour (default affect config), commit 5c50695.
+M1_1_FROZEN_SEQUENCES = {
+    "flaky_restart": ("restart_service",) * 4,
+    "flaky_restart_low_battery": ("restart_service",) * 4 + ("charge", "charge"),
+    "charger_outage": ("charge",) * 4,
+}
+
+
+def _filled_memory(path=":memory:", **kwargs):
+    from .memory import EpisodeMemory
+    from .memory_cli import record_all
+
+    memory = EpisodeMemory(path, **kwargs)
+    record_all(memory)
+    return memory
+
+
+def check_memory_roundtrip() -> CheckResult:
+    from .memory import EpisodeMemory
+
+    config = AffectConfig(enabled=True)
+    result = run_scenario(get_scenario("disturbance_mid_recovery"), True, affect=config)
+    with EpisodeMemory(":memory:") as memory:
+        rid = memory.record(result, config)
+        rec = memory.get(rid)
+        events = memory.events(rid)
+    ok = (
+        rec is not None and rec.valid and rec.actions == result.actions and rec.success == result.success
+        and rec.final_state == result.final_state.to_dict() and events == list(result.events)
+    )
+    return ok, f"actions_match={rec is not None and rec.actions == result.actions} events={len(events)}"
+
+
+def check_memory_persists() -> CheckResult:
+    import tempfile
+    from pathlib import Path
+
+    from .memory import EpisodeMemory
+
+    with tempfile.TemporaryDirectory() as tmp:
+        db = Path(tmp) / "m.sqlite"
+        _filled_memory(db).close()
+        with EpisodeMemory(db) as reopened:
+            n, ok_integrity = reopened.count(), reopened.integrity_ok()
+    expected = len(SCENARIOS) * 2
+    return n == expected and ok_integrity, f"episodes after reopen={n}/{expected} integrity={ok_integrity}"
+
+
+def check_lexical_retrieval() -> CheckResult:
+    memory = _filled_memory()
+    top = memory.search("restart blocked", limit=3)
+    memory.close()
+    names = [r.scenario for r in top]
+    ok = len(top) == 3 and all(n.startswith("flaky_restart") for n in names) and top[0].score == 2
+    return ok, f"top3={names}"
+
+
+def check_retrieval_deterministic() -> CheckResult:
+    a, b = _filled_memory(), _filled_memory()
+    ra = [(r.episode_id, r.score) for r in a.search("charge blocked failure", limit=10)]
+    rb = [(r.episode_id, r.score) for r in b.search("charge blocked failure", limit=10)]
+    a.close(), b.close()
+    return ra == rb and bool(ra), f"identical={ra == rb} results={len(ra)}"
+
+
+def check_memory_caps() -> CheckResult:
+    memory = _filled_memory(max_episodes=5, max_events_per_episode=2)
+    n, ids = memory.count(), [r.episode_id for r in memory.search("scenario", limit=20)]
+    max_events = max(memory.event_count(i) for i in ids)
+    memory.close()
+    expected_ids = list(range(len(SCENARIOS) * 2, len(SCENARIOS) * 2 - 5, -1))
+    ok = n == 5 and ids == expected_ids and max_events <= 2
+    return ok, f"kept={n} newest_ids={ids} max_events_per_episode={max_events}"
+
+
+def check_query_limits() -> CheckResult:
+    from .memory import MAX_QUERY_CHARS, MAX_RESULTS
+
+    memory = _filled_memory()
+    rejected = 0
+    for kwargs in ({"query": "a" * (MAX_QUERY_CHARS + 1)}, {"query": "x", "limit": 0},
+                   {"query": "x", "limit": MAX_RESULTS + 1}):
+        try:
+            memory.search(**kwargs)
+        except ValueError:
+            rejected += 1
+    memory.close()
+    return rejected == 3, f"rejected {rejected}/3 out-of-bounds queries"
+
+
+def check_sql_injection_inert() -> CheckResult:
+    memory = _filled_memory()
+    before = memory.count()
+    for q in ("x'; DROP TABLE episodes;--", "\" OR 1=1 --", "%' OR '1'='1"):
+        memory.search(q)
+    after, ok_integrity = memory.count(), memory.integrity_ok()
+    memory.close()
+    return before == after and ok_integrity, f"episodes before={before} after={after} integrity={ok_integrity}"
+
+
+def check_schema_version_enforced() -> CheckResult:
+    import sqlite3
+    import tempfile
+    from pathlib import Path
+
+    from .memory import EpisodeMemory, MemoryStoreError
+
+    with tempfile.TemporaryDirectory() as tmp:
+        db = Path(tmp) / "m.sqlite"
+        EpisodeMemory(db).close()
+        conn = sqlite3.connect(db)
+        with conn:
+            conn.execute("UPDATE meta SET value = '999' WHERE key = 'schema_version'")
+        conn.close()
+        try:
+            EpisodeMemory(db).close()
+            wrong_version_refused = False
+        except MemoryStoreError:
+            wrong_version_refused = True
+        junk = Path(tmp) / "junk.sqlite"
+        junk.write_bytes(b"this is not a database" * 100)
+        try:
+            EpisodeMemory(junk).close()
+            junk_refused = False
+        except MemoryStoreError:
+            junk_refused = True
+    ok = wrong_version_refused and junk_refused
+    return ok, f"wrong_version_refused={wrong_version_refused} corrupt_file_refused={junk_refused}"
+
+
+def check_tampered_record_flagged() -> CheckResult:
+    memory = _filled_memory()
+    memory._conn.execute("UPDATE episodes SET actions_json = ? WHERE id = 1", ('["shell", "rm -rf /"]',))
+    memory._conn.execute("UPDATE episodes SET actions_json = ? WHERE id = 2", ("not json",))
+    r1, r2, r3 = memory.get(1), memory.get(2), memory.get(3)
+    memory.close()
+    ok = (not r1.valid) and (not r2.valid) and r3.valid and r1.source == "memory"
+    return ok, f"tampered_invalid={not r1.valid} malformed_invalid={not r2.valid} clean_valid={r3.valid}"
+
+
+def check_memory_does_not_change_behaviour() -> CheckResult:
+    from .memory import EpisodeMemory
+
+    with EpisodeMemory(":memory:") as memory:
+        for s in SCENARIOS:
+            for enabled in (False, True):
+                config = AffectConfig(enabled=enabled)
+                first = run_scenario(s, enabled, affect=config)
+                memory.record(first, config)
+                second = run_scenario(s, enabled, affect=config)  # memory now non-empty
+                if first.to_dict() != second.to_dict():
+                    return False, f"{s.name} affect={enabled} changed after recording"
+    return True, f"{len(SCENARIOS) * 2} episodes identical with and without stored memory"
+
+
+def check_m1_1_regression() -> CheckResult:
+    for name, expected in M1_1_FROZEN_SEQUENCES.items():
+        for enabled in (False, True):
+            got = run_scenario(get_scenario(name), enabled).actions
+            if got != expected:
+                return False, f"{name} affect={enabled}: {got} != {expected}"
+    return True, f"{len(M1_1_FROZEN_SEQUENCES) * 2} M1.1 episodes match frozen sequences"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -196,6 +362,22 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("sweep_report_complete", check_sweep_complete),
         ("sweep_deterministic", check_sweep_deterministic),
         ("m1_behaviour_unchanged", check_m1_regression),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M2 (V32 onward)
+    for name, fn in (
+        ("memory_roundtrip", check_memory_roundtrip),
+        ("memory_persists_across_reopen", check_memory_persists),
+        ("lexical_retrieval_ranks_relevant", check_lexical_retrieval),
+        ("retrieval_deterministic", check_retrieval_deterministic),
+        ("memory_caps_enforced", check_memory_caps),
+        ("query_limits_enforced", check_query_limits),
+        ("sql_injection_inert", check_sql_injection_inert),
+        ("schema_and_corrupt_file_refused", check_schema_version_enforced),
+        ("tampered_record_flagged_invalid", check_tampered_record_flagged),
+        ("memory_does_not_change_behaviour", check_memory_does_not_change_behaviour),
+        ("m1_1_behaviour_unchanged", check_m1_1_regression),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1
