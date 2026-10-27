@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "red-queen"
-version = "0.7.0"
-description = "RED QUEEN AI - M3.3: simulated recovery with scoring, affect, memory, bounded memory-informed planning and policy enforcement"
+version = "0.8.0"
+description = "RED QUEEN AI - M3.4: simulated recovery with scoring, affect, memory, bounded memory-informed planning, policy enforcement, slack-planning study"
 requires-python = ">=3.10"
 dependencies = []
 

@@ -1,4 +1,4 @@
-# RED QUEEN AI — Milestone M3.3
+# RED QUEEN AI — Milestone M3.4
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
@@ -34,6 +34,8 @@ execution, no real-world actions.
     it observes differs from what it predicted. If no plan exists, it stops.
 11. With memory, the planner uses remembered faults to choose between
     equally short plans. Memory can never make a plan longer.
+12. An optional `slack` setting (M3.4) lets the planner consider plans up to
+    3 steps longer. It was tested and gave no benefit here, so it is off by default.
 
 Allowed actions (the only ones that can ever run):
 
@@ -65,8 +67,8 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 158 tests ... OK` and `82/82 validation checks passed`
-   (takes about 15-25 seconds).
+   Expected: `Ran 170 tests ... OK` and `90/90 validation checks passed`
+   (takes about 30-60 seconds).
 3. Optional reports:
    ```
    python3 -m red_queen.experiments --output results/m1_affect_comparison.json
@@ -94,6 +96,10 @@ git --version
    ```
    python3 -m red_queen.memory_planning_study
    ```
+9. Optional slack study (about 35-60 seconds):
+   ```
+   python3 -m red_queen.slack_study
+   ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 
@@ -117,14 +123,16 @@ red_queen/
   memory_advice.py bounded advisory memory (M2.1)
   memory_experiment.py  empty/irrelevant/relevant memory comparison (M2.1)
   policy.py        policy allowlists + execution-boundary executor (M3)
-  planner.py       bounded breadth-first planner (M3), risk tie-break (M3.3)
+  planner.py       bounded BFS planner (M3), risk tie-break (M3.3), slack option (M3.4)
   planning_agent.py plan / validate / act / replan agent (M3)
   planning_experiment.py reactive vs planner x 3 policies (M3)
   scenario_study.py reactive vs planner vs reversed-order planner (M3.2)
   memory_planning_study.py six agents with/without memory (M3.3)
-  validation.py    82 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
-                   V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3)
-tests/             158 unittest tests
+  slack_study.py   slack k=0..3 vs reactive+memory (M3.4)
+  validation.py    90 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+                   V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
+                   V83-V90 M3.4)
+tests/             170 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -132,6 +140,7 @@ docs/ENGINEERING_RECORD_M2_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_2.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_3.md   (accepted on Linux)
+docs/ENGINEERING_RECORD_M3_4.md
 results/                          build-environment reports
 ```
 
@@ -146,3 +155,4 @@ results/                          build-environment reports
 | M3 | 121 tests OK, 63/63 checks | **Accepted** 2026-10-27 |
 | M3.2 | 140 tests OK, 73/73 checks | **Accepted** 2026-10-27 |
 | M3.3 | 158 tests OK, 82/82 checks | **Accepted** 2026-10-27 |
+| M3.4 | 170 tests OK, 90/90 checks | Pending — run step 2 |

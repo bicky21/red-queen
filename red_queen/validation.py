@@ -946,6 +946,171 @@ def check_memory_planning_named_deterministic() -> CheckResult:
     return a == b and all_ok, f"named part deterministic={a == b} all_succeeded={all_ok}"
 
 
+# ---- M3.4 checks -------------------------------------------------------
+
+
+def check_slack_validated() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+
+    rejected = 0
+    for bad in (-1, 4, True, 1.5, "2"):
+        try:
+            BoundedPlanner(RecoveryGoal(), slack=bad)
+        except ValueError:
+            rejected += 1
+    return rejected == 5, f"rejected {rejected}/5 invalid slack values"
+
+
+def check_slack_zero_and_no_risk_identical() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+
+    goal = RecoveryGoal()
+    risk = lambda d: {"restart_service": 0.9} if d < 3 else {"charge": 0.3}  # noqa: E731
+    for start in _m33_starts():
+        base_no_risk = BoundedPlanner(goal).plan(start, ACTIONS_ALL())
+        base_risk = BoundedPlanner(goal).plan(start, ACTIONS_ALL(), risk=risk)
+        for k in (1, 2, 3):
+            if BoundedPlanner(goal, slack=k).plan(start, ACTIONS_ALL()).actions != base_no_risk.actions:
+                return False, f"slack={k} without risk changed the plan at {start.to_dict()}"
+        if BoundedPlanner(goal, slack=0).plan(start, ACTIONS_ALL(), risk=risk).actions != base_risk.actions:
+            return False, f"slack=0 differs from M3.3 at {start.to_dict()}"
+    return True, f"{len(_m33_starts())} starts: slack ignored without risk; slack=0 equals M3.3"
+
+
+def _risk_table(seed):
+    import random
+
+    rng = random.Random(seed)
+    table = {(d, a): rng.choice([0, 0, 0, 0.3, 0.6, 0.9]) for d in range(14) for a in ACTIONS_ALL()}
+    return lambda d, t=table: {a: t[(d, a)] for a in ACTIONS_ALL()}
+
+
+def check_slack_plans_valid_and_bounded() -> CheckResult:
+    from .actions import apply_action
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+
+    goal = RecoveryGoal()
+    checked = 0
+    for seed in range(40):
+        risk = _risk_table(seed)
+        for start in _m33_starts()[seed % 6::6]:
+            shortest = BoundedPlanner(goal).plan(start, ACTIONS_ALL(), risk=risk)
+            p = BoundedPlanner(goal, slack=3).plan(start, ACTIONS_ALL(), risk=risk)
+            checked += 1
+            s = start
+            for i, (a, predicted) in enumerate(zip(p.actions, p.predicted)):
+                s = apply_action(s, a)
+                if s != predicted or (i < len(p.actions) - 1 and goal.is_satisfied(s)):
+                    return False, f"invalid slack plan at {start.to_dict()}: {p.actions}"
+            if (p.reaches_goal != shortest.reaches_goal or len(p.actions) > len(shortest.actions) + 3
+                    or (p.actions and not goal.is_satisfied(s))):
+                return False, f"slack plan out of bounds at {start.to_dict()}: {p.actions}"
+    return True, f"{checked} slack plans: model-consistent, end at goal, within +3 steps"
+
+
+def check_slack_changes_only_when_cheaper() -> CheckResult:
+    """Slack may change a plan only if the new plan's expected cost
+    (length + summed risk) is strictly lower. Frozen rate: 1 of 1800."""
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+
+    goal = RecoveryGoal()
+    starts = _m33_starts()
+    total = changed = 0
+    for seed in range(300):
+        risk = _risk_table(1000 + seed)
+        for start in starts[seed % 7::7]:
+            total += 1
+            a = BoundedPlanner(goal).plan(start, ACTIONS_ALL(), risk=risk)
+            b = BoundedPlanner(goal, slack=3).plan(start, ACTIONS_ALL(), risk=risk)
+            if a.actions != b.actions:
+                changed += 1
+                if not len(b.actions) + b.risk < len(a.actions) + a.risk - 1e-9:
+                    return False, f"slack changed plan without lower expected cost at {start.to_dict()}"
+    return changed == 1, (f"{total} random-risk plans; changed by slack=3: {changed} (expected 1), "
+                          f"each change strictly cheaper")
+
+
+def check_slack_no_effect_on_fault_cases() -> CheckResult:
+    from .scenario_study import grid_cases
+    from .scenarios import ALL_SCENARIOS
+    from .slack_study import run_case
+
+    cases = [(s.name, s.make_env) for s in ALL_SCENARIOS]
+    for i, (start, faults, disturbances) in enumerate(grid_cases()):
+        if faults and not disturbances:
+            cases.append((f"grid_{i:04d}",
+                          lambda s=start, f=faults: SimulatedEnvironment(s, {}, f)))
+    diffs = 0
+    for name, make_env in cases:
+        c = run_case(name, make_env)
+        if not all(v["success"] for v in c.values()):
+            return False, f"{name}: an agent failed"
+        diffs += sum(c[f"planner_memory_k{k}"]["action_count"] != c["planner_memory_k0"]["action_count"]
+                     for k in (1, 2, 3))
+        diffs += c["planner_reversed_memory_k3"]["action_count"] != c["planner_reversed_memory_k0"]["action_count"]
+    return diffs == 0, f"{len(cases)} cases (18 named + fault-only grid); slack changed action count {diffs} times"
+
+
+def check_slack_keeps_impossible_goal_detection() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .memory_advice import MemoryAdvisor
+    from .memory_planning_study import prior_memory
+    from .planner import BoundedPlanner
+    from .planning_agent import STOP_NO_PLAN, PlanningAgent
+    from .policy import POLICIES, WAIT_ONLY_POLICY
+
+    results = []
+    for name, policy in (("service_down", POLICIES["no_restart"]), ("overheating", POLICIES["no_cool"]),
+                         ("low_battery", WAIT_ONLY_POLICY)):
+        s = get_scenario(name)
+        with prior_memory(s.name, s.make_env) as memory:
+            agent = PlanningAgent(RecoveryGoal(), planner=BoundedPlanner(RecoveryGoal(), slack=3),
+                                  policy=policy, advisor=MemoryAdvisor(memory, s.name))
+            r = agent.run(s.make_env(), s.name)
+        results.append((name, r.action_count, r.stop_reason))
+        if r.action_count != 0 or r.stop_reason != STOP_NO_PLAN:
+            return False, f"{results}"
+    return True, f"impossible goals still detected with slack=3: {results}"
+
+
+def check_slack_node_budget_fallback() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+
+    goal = RecoveryGoal()
+    start = get_scenario("compound_failure").initial
+    risk = lambda d: {"charge": 0.9} if d < 2 else {}  # noqa: E731
+    needed = BoundedPlanner(goal).plan(start, ACTIONS_ALL(), risk=risk).nodes_expanded
+    shortest = BoundedPlanner(goal, max_nodes=needed).plan(start, ACTIONS_ALL(), risk=risk)
+    limited = BoundedPlanner(goal, max_nodes=needed, slack=3).plan(start, ACTIONS_ALL(), risk=risk)
+    fell_back = limited.nodes_expanded == shortest.nodes_expanded  # fallback returns the shortest plan object
+    unlimited = BoundedPlanner(goal, slack=3).plan(start, ACTIONS_ALL(), risk=risk)
+    searched_more = unlimited.nodes_expanded > 2 * needed  # proves the budget really was too small
+    ok = shortest.reaches_goal and limited.actions == shortest.actions and fell_back and searched_more
+    return ok, (f"budget={needed}: fell_back={fell_back} plan={limited.actions}; "
+                f"unbounded slack search used {unlimited.nodes_expanded} nodes")
+
+
+def check_slack_poisoned_memory_recovers() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .memory_advice import MemoryAdvisor
+    from .planner import BoundedPlanner
+    from .planning_agent import PlanningAgent
+    from .scenarios import ALL_SCENARIOS
+
+    for s in ALL_SCENARIOS:
+        with _poisoned_memory(s.name, s.make_env) as memory:
+            r = PlanningAgent(RecoveryGoal(), planner=BoundedPlanner(RecoveryGoal(), slack=3),
+                              advisor=MemoryAdvisor(memory, s.name)).run(s.make_env(), s.name)
+            if not r.success:
+                return False, f"{s.name} failed with slack=3 and poisoned memory"
+    return True, f"{len(ALL_SCENARIOS)} poisoned-memory episodes with slack=3 all recovered"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -1054,6 +1219,19 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("invalid_memory_ignored_by_planner", check_invalid_memory_ignored_by_planner),
         ("observation_overrides_memory_in_planner", check_observation_wins_in_planner),
         ("memory_planning_named_deterministic", check_memory_planning_named_deterministic),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M3.4 (V83 onward)
+    for name, fn in (
+        ("slack_value_validated", check_slack_validated),
+        ("slack_zero_and_no_risk_identical", check_slack_zero_and_no_risk_identical),
+        ("slack_plans_valid_and_bounded", check_slack_plans_valid_and_bounded),
+        ("slack_changes_plan_only_when_cheaper", check_slack_changes_only_when_cheaper),
+        ("slack_no_effect_on_fault_cases", check_slack_no_effect_on_fault_cases),
+        ("slack_keeps_impossible_goal_detection", check_slack_keeps_impossible_goal_detection),
+        ("slack_node_budget_falls_back_safely", check_slack_node_budget_fallback),
+        ("slack_poisoned_memory_recovers", check_slack_poisoned_memory_recovers),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1
