@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M3.4
 
-**Version:** 0.8.0 · **Date:** 2026-10-27 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.8.0 · **Date:** 2026-10-27 · **Status:** build-environment passed; **accepted on Linux (user's laptop), 2026-10-27**
 **Outcome:** negative result. Slack planning is implemented and tested but **not adopted** (default `slack=0`).
 
 ## 1. Review of M3.3
@@ -83,21 +83,14 @@ Data: `results/m3_4_slack_study.json`.
 
 ## 7. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Accepted, 2026-10-27.** After `git pull` to commit `effd462`, the user ran:
 
 ```
-git pull
 python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
 ```
 
-M3.4 is accepted when the output shows `Ran 170 tests ... OK` and
-`90/90 validation checks passed`. The full run takes about 30–60 seconds.
-
-Optional (about 35–60 seconds):
-
-```
-python3 -m red_queen.slack_study
-```
+User-reported output: `Ran 170 tests in 16.752s ... OK` and `90/90 validation checks passed`,
+including V86 (1 of 1,800, strictly cheaper) and V89 (budget 528, fallback confirmed).
 
 ## 8. Next milestone
 

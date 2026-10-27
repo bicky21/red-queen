@@ -140,7 +140,7 @@ docs/ENGINEERING_RECORD_M2_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_2.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_3.md   (accepted on Linux)
-docs/ENGINEERING_RECORD_M3_4.md
+docs/ENGINEERING_RECORD_M3_4.md   (accepted on Linux)
 results/                          build-environment reports
 ```
 
@@ -155,4 +155,4 @@ results/                          build-environment reports
 | M3 | 121 tests OK, 63/63 checks | **Accepted** 2026-10-27 |
 | M3.2 | 140 tests OK, 73/73 checks | **Accepted** 2026-10-27 |
 | M3.3 | 158 tests OK, 82/82 checks | **Accepted** 2026-10-27 |
-| M3.4 | 170 tests OK, 90/90 checks | Pending — run step 2 |
+| M3.4 | 170 tests OK, 90/90 checks | **Accepted** 2026-10-27 |
