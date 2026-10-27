@@ -16,6 +16,13 @@ M3.5: with `predict_disturbances=True` (and an advisor that offers
 upcoming steps. If one does not happen, the observation will not match the
 prediction and the agent replans from what it observed.
 
+M3.6: `disturbance_guard` stops disturbance prediction for the rest of the
+episode once memory has been shown wrong:
+  "on_contradiction" - after a prediction mismatch at a step where memory
+                       expected a disturbance
+  "on_any_mismatch"  - after any prediction mismatch
+None (default) keeps the M3.5 behaviour.
+
 Bounds: max_steps (actions), max_replans (planning calls after the first),
 max_policy_denials (rejected plans or executions), and the planner's own
 depth and node limits. Every limit ends the episode with a named stop
@@ -35,6 +42,7 @@ from .state import SystemState
 from .verification import GoalVerifier
 
 STOP_NO_PLAN = "no_plan_found"
+GUARDS = (None, "on_contradiction", "on_any_mismatch")  # M3.6
 STOP_MAX_REPLANS = "max_replans_reached"
 
 
@@ -49,6 +57,7 @@ class PlanningAgent:
         max_policy_denials: int = 3,
         advisor=None,
         predict_disturbances: bool = False,
+        disturbance_guard: Optional[str] = None,
     ) -> None:
         if max_steps < 0 or max_replans < 0 or max_policy_denials < 1:
             raise ValueError("invalid bounds")
@@ -62,6 +71,11 @@ class PlanningAgent:
         self.predict_disturbances = bool(predict_disturbances)
         if self.predict_disturbances and not hasattr(advisor, "remembered_disturbances"):
             raise ValueError("predict_disturbances needs an advisor with remembered_disturbances()")
+        if disturbance_guard not in GUARDS:
+            raise ValueError(f"disturbance_guard must be one of {GUARDS}")
+        if disturbance_guard is not None and not self.predict_disturbances:
+            raise ValueError("disturbance_guard needs predict_disturbances=True")
+        self.disturbance_guard = disturbance_guard
         self.verifier = GoalVerifier(goal)
 
     def run(self, env: SimulatedEnvironment, scenario: str = "") -> EpisodeResult:
@@ -76,6 +90,8 @@ class PlanningAgent:
         remembered: Dict[int, str] = (
             dict(self.advisor.remembered_disturbances()) if self.predict_disturbances else {}
         )
+        guard_tripped_at: Optional[int] = None
+        remembered_at_start = dict(remembered)
         plan_risks: List[float] = []
 
         while len(actions) < self.max_steps:
@@ -142,6 +158,11 @@ class PlanningAgent:
             if env.observe() != predicted:  # observation disagrees with the plan
                 mismatches += 1
                 queue, expected = [], []
+                if guard_tripped_at is None and remembered and (
+                        self.disturbance_guard == "on_any_mismatch"
+                        or (self.disturbance_guard == "on_contradiction" and len(actions) in remembered)):
+                    guard_tripped_at = len(actions)
+                    remembered.clear()  # memory proved wrong: stop predicting disturbances
             else:
                 worked.add(action)
 
@@ -171,7 +192,8 @@ class PlanningAgent:
                 "plan_rejections": plan_rejections,
                 "policy_denials": len(executor.denials),
                 **({} if self.advisor is None else {"memory": True, "plan_risks": plan_risks}),
-                **({"remembered_disturbances": {str(k): v for k, v in sorted(remembered.items())}}
+                **({"remembered_disturbances": {str(k): v for k, v in sorted(remembered_at_start.items())}}
                    if self.predict_disturbances else {}),
+                **({"guard_tripped_at": guard_tripped_at} if self.disturbance_guard else {}),
             },
         )

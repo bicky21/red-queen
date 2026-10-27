@@ -1,0 +1,189 @@
+{
+  "milestone": "M3.6",
+  "version": "0.10.0",
+  "stride": 1,
+  "agents": [
+    "reactive",
+    "planner",
+    "planner_reversed",
+    "reactive_memory",
+    "planner_memory",
+    "planner_dist_memory",
+    "planner_reversed_dist_memory",
+    "planner_dist_guard",
+    "planner_reversed_dist_guard"
+  ],
+  "levels": [
+    {
+      "level": 0.0,
+      "cases": 1680,
+      "total_actions": {
+        "reactive": 8741,
+        "planner": 8428,
+        "planner_reversed": 8713,
+        "reactive_memory": 8134,
+        "planner_memory": 8271,
+        "planner_dist_memory": 8062,
+        "planner_reversed_dist_memory": 7857,
+        "planner_dist_guard": 8086,
+        "planner_reversed_dist_guard": 7899
+      },
+      "successes": {
+        "reactive": 1680,
+        "planner": 1680,
+        "planner_reversed": 1680,
+        "reactive_memory": 1680,
+        "planner_memory": 1680,
+        "planner_dist_memory": 1680,
+        "planner_reversed_dist_memory": 1680,
+        "planner_dist_guard": 1680,
+        "planner_reversed_dist_guard": 1680
+      },
+      "cases_worse_than_no_memory": {
+        "reactive_memory": 2,
+        "planner_memory": 5,
+        "planner_dist_memory": 35,
+        "planner_dist_guard": 42,
+        "planner_reversed_dist_memory": 27,
+        "planner_reversed_dist_guard": 37
+      }
+    },
+    {
+      "level": 0.25,
+      "cases": 1680,
+      "total_actions": {
+        "reactive": 8741,
+        "planner": 8428,
+        "planner_reversed": 8713,
+        "reactive_memory": 8286,
+        "planner_memory": 8327,
+        "planner_dist_memory": 8258,
+        "planner_reversed_dist_memory": 8151,
+        "planner_dist_guard": 8225,
+        "planner_reversed_dist_guard": 8163
+      },
+      "successes": {
+        "reactive": 1680,
+        "planner": 1680,
+        "planner_reversed": 1680,
+        "reactive_memory": 1680,
+        "planner_memory": 1680,
+        "planner_dist_memory": 1680,
+        "planner_reversed_dist_memory": 1680,
+        "planner_dist_guard": 1680,
+        "planner_reversed_dist_guard": 1680
+      },
+      "cases_worse_than_no_memory": {
+        "reactive_memory": 10,
+        "planner_memory": 16,
+        "planner_dist_memory": 107,
+        "planner_dist_guard": 80,
+        "planner_reversed_dist_memory": 88,
+        "planner_reversed_dist_guard": 78
+      }
+    },
+    {
+      "level": 0.5,
+      "cases": 1680,
+      "total_actions": {
+        "reactive": 8741,
+        "planner": 8428,
+        "planner_reversed": 8713,
+        "reactive_memory": 8390,
+        "planner_memory": 8360,
+        "planner_dist_memory": 8364,
+        "planner_reversed_dist_memory": 8333,
+        "planner_dist_guard": 8325,
+        "planner_reversed_dist_guard": 8320
+      },
+      "successes": {
+        "reactive": 1680,
+        "planner": 1680,
+        "planner_reversed": 1680,
+        "reactive_memory": 1680,
+        "planner_memory": 1680,
+        "planner_dist_memory": 1680,
+        "planner_reversed_dist_memory": 1680,
+        "planner_dist_guard": 1680,
+        "planner_reversed_dist_guard": 1680
+      },
+      "cases_worse_than_no_memory": {
+        "reactive_memory": 33,
+        "planner_memory": 30,
+        "planner_dist_memory": 147,
+        "planner_dist_guard": 118,
+        "planner_reversed_dist_memory": 142,
+        "planner_reversed_dist_guard": 120
+      }
+    },
+    {
+      "level": 1.0,
+      "cases": 1680,
+      "total_actions": {
+        "reactive": 8741,
+        "planner": 8428,
+        "planner_reversed": 8713,
+        "reactive_memory": 8590,
+        "planner_memory": 8415,
+        "planner_dist_memory": 8532,
+        "planner_reversed_dist_memory": 8665,
+        "planner_dist_guard": 8459,
+        "planner_reversed_dist_guard": 8606
+      },
+      "successes": {
+        "reactive": 1680,
+        "planner": 1680,
+        "planner_reversed": 1680,
+        "reactive_memory": 1680,
+        "planner_memory": 1680,
+        "planner_dist_memory": 1680,
+        "planner_reversed_dist_memory": 1680,
+        "planner_dist_guard": 1680,
+        "planner_reversed_dist_guard": 1680
+      },
+      "cases_worse_than_no_memory": {
+        "reactive_memory": 40,
+        "planner_memory": 47,
+        "planner_dist_memory": 217,
+        "planner_dist_guard": 158,
+        "planner_reversed_dist_memory": 216,
+        "planner_reversed_dist_guard": 163
+      }
+    },
+    {
+      "level": "unrelated",
+      "cases": 1680,
+      "total_actions": {
+        "reactive": 8741,
+        "planner": 8428,
+        "planner_reversed": 8713,
+        "reactive_memory": 8360,
+        "planner_memory": 8330,
+        "planner_dist_memory": 8472,
+        "planner_reversed_dist_memory": 8526,
+        "planner_dist_guard": 8417,
+        "planner_reversed_dist_guard": 8484
+      },
+      "successes": {
+        "reactive": 1680,
+        "planner": 1680,
+        "planner_reversed": 1680,
+        "reactive_memory": 1680,
+        "planner_memory": 1680,
+        "planner_dist_memory": 1680,
+        "planner_reversed_dist_memory": 1680,
+        "planner_dist_guard": 1680,
+        "planner_reversed_dist_guard": 1680
+      },
+      "cases_worse_than_no_memory": {
+        "reactive_memory": 7,
+        "planner_memory": 1,
+        "planner_dist_memory": 173,
+        "planner_dist_guard": 139,
+        "planner_reversed_dist_memory": 195,
+        "planner_reversed_dist_guard": 158
+      }
+    }
+  ],
+  "note": "Fixed deterministic cases only; not evidence of general performance."
+}

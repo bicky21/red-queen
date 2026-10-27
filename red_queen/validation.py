@@ -1298,6 +1298,157 @@ def check_prediction_requires_advisor() -> CheckResult:
     return rejected == 2, f"rejected {rejected}/2 configs without a disturbance-capable advisor"
 
 
+# ---- M3.6 checks -------------------------------------------------------
+
+# Frozen M3.6 subset totals (every 8th grid case = 210 cases), recorded at build time.
+M3_6_SUBSET_TOTALS = {
+    0.0: {"reactive_memory": 1026, "planner_memory": 1049, "planner_dist_memory": 1024,
+          "planner_reversed_dist_memory": 995, "planner_dist_guard": 1031, "planner_reversed_dist_guard": 1006},
+    1.0: {"reactive_memory": 1094, "planner_memory": 1070, "planner_dist_memory": 1098,
+          "planner_reversed_dist_memory": 1119, "planner_dist_guard": 1082, "planner_reversed_dist_guard": 1110},
+    "unrelated": {"reactive_memory": 1063, "planner_memory": 1059, "planner_dist_memory": 1076,
+                  "planner_reversed_dist_memory": 1082, "planner_dist_guard": 1070,
+                  "planner_reversed_dist_guard": 1076},
+}
+_M36_CACHE = {}
+
+
+def _m36_subset():
+    if "report" not in _M36_CACHE:
+        from .noisy_memory_study import run_noisy_memory_study
+
+        _M36_CACHE["report"] = run_noisy_memory_study(stride=8)
+    return _M36_CACHE["report"]
+
+
+def check_distort_properties() -> CheckResult:
+    from .environment import DISTURBANCES
+    from .memory_noise import FAULTABLE, NOISE_LEVELS, distort
+    from .scenario_study import grid_cases
+
+    cases = list(grid_cases())
+    for i, (_, faults, dist) in enumerate(cases):
+        if distort(faults, dist, 0.0, str(i)) != (tuple(faults), tuple(sorted(dist))):
+            return False, f"level 0 changed case {i}"
+        for level in NOISE_LEVELS:
+            a = distort(faults, dist, level, str(i))
+            if a != distort(faults, dist, level, str(i)):
+                return False, f"case {i} level {level} not deterministic"
+            nf, nd = a
+            if any(f[0] not in FAULTABLE or not 1 <= f[1] <= f[2] for f in nf) or \
+                    any(s < 1 or n not in DISTURBANCES for s, n in nd):
+                return False, f"case {i} level {level} produced invalid output {a}"
+    try:
+        distort((), (), 1.5, "x")
+        bad_level_refused = False
+    except ValueError:
+        bad_level_refused = True
+    return bad_level_refused, (f"{len(cases)} cases x {len(NOISE_LEVELS)} levels: deterministic, valid; "
+                               f"level 0 = exact memory; invalid level refused={bad_level_refused}")
+
+
+def check_distortion_grows_with_level() -> CheckResult:
+    from .memory_noise import NOISE_LEVELS, distort
+    from .scenario_study import grid_cases
+
+    cases = list(grid_cases())
+    changed = []
+    for level in NOISE_LEVELS:
+        changed.append(sum(1 for i, (_, f, d) in enumerate(cases)
+                           if distort(f, d, level, str(i)) != (tuple(f), tuple(sorted(d)))))
+    ok = changed[0] == 0 and all(a < b for a, b in zip(changed, changed[1:])) and changed[-1] > len(cases) // 2
+    return ok, f"cases changed per level {dict(zip(NOISE_LEVELS, changed))} of {len(cases)}"
+
+
+def check_guard_none_identical() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .memory_advice import MemoryAdvisor
+    from .memory_planning_study import prior_memory
+    from .planning_agent import PlanningAgent
+    from .scenarios import ALL_SCENARIOS
+
+    goal = RecoveryGoal()
+    for s in ALL_SCENARIOS:
+        with prior_memory(s.name, s.make_env) as memory:
+            a = PlanningAgent(goal, advisor=MemoryAdvisor(memory, s.name), predict_disturbances=True).run(
+                s.make_env(), s.name)
+            b = PlanningAgent(goal, advisor=MemoryAdvisor(memory, s.name), predict_disturbances=True,
+                              disturbance_guard=None).run(s.make_env(), s.name)
+        if a.to_dict() != b.to_dict() or "guard_tripped_at" in b.stats:
+            return False, f"{s.name}: guard=None differs from M3.5"
+    return True, f"{len(ALL_SCENARIOS)} episodes identical to M3.5 with guard=None"
+
+
+def check_guard_config_validated() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .memory import EpisodeMemory
+    from .memory_advice import MemoryAdvisor
+    from .planning_agent import PlanningAgent
+
+    rejected = 0
+    with EpisodeMemory(":memory:") as memory:
+        adv = MemoryAdvisor(memory, "x")
+        for kwargs in ({"predict_disturbances": True, "disturbance_guard": "sometimes"},
+                       {"predict_disturbances": False, "disturbance_guard": "on_any_mismatch"}):
+            try:
+                PlanningAgent(RecoveryGoal(), advisor=adv, **kwargs)
+            except ValueError:
+                rejected += 1
+    return rejected == 2, f"rejected {rejected}/2 invalid guard configurations"
+
+
+def check_guard_trips_only_when_wrong() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .memory_advice import MemoryAdvisor
+    from .memory_planning_study import prior_memory
+    from .planning_agent import PlanningAgent
+
+    goal = RecoveryGoal()
+    s = get_scenario("disturbance_mid_recovery")
+    with prior_memory(s.name, s.make_env) as memory:  # exact memory
+        exact = PlanningAgent(goal, advisor=MemoryAdvisor(memory, s.name), predict_disturbances=True,
+                              disturbance_guard="on_any_mismatch").run(s.make_env(), s.name)
+    wrong_env = lambda: SimulatedEnvironment(SystemState(30, 40, True), {2: "battery_drain"})  # noqa: E731
+    with prior_memory(s.name, wrong_env) as memory:  # memory of a different disturbance
+        wrong = PlanningAgent(goal, advisor=MemoryAdvisor(memory, s.name), predict_disturbances=True,
+                              disturbance_guard="on_any_mismatch").run(s.make_env(), s.name)
+    ok = (exact.success and exact.stats["guard_tripped_at"] is None
+          and wrong.success and wrong.stats["guard_tripped_at"] is not None)
+    return ok, (f"exact memory: tripped={exact.stats['guard_tripped_at']}; "
+                f"wrong memory: tripped at step {wrong.stats['guard_tripped_at']}, success={wrong.success}")
+
+
+def check_noisy_memory_never_fails() -> CheckResult:
+    report = _m36_subset()
+    runs = sum(l["cases"] * len(l["successes"]) for l in report["levels"])
+    failed = sum(l["cases"] - s for l in report["levels"] for s in l["successes"].values())
+    return failed == 0, f"{runs} runs over 5 memory-noise levels; failures={failed}"
+
+
+def check_noisy_subset_frozen() -> CheckResult:
+    report = _m36_subset()
+    got = {l["level"]: {a: l["total_actions"][a] for a in M3_6_SUBSET_TOTALS[0.0]}
+           for l in report["levels"] if l["level"] in M3_6_SUBSET_TOTALS}
+    return got == M3_6_SUBSET_TOTALS, f"subset totals at levels 0.0 / 1.0 / unrelated match frozen values: {got == M3_6_SUBSET_TOTALS}"
+
+
+def check_guard_improves_worst_case() -> CheckResult:
+    report = _m36_subset()
+    levels = report["levels"]
+    out = []
+    for guard, plain, base in (("planner_dist_guard", "planner_dist_memory", "planner"),
+                               ("planner_reversed_dist_guard", "planner_reversed_dist_memory", "planner_reversed")):
+        worst_guard = max(l["total_actions"][guard] - l["total_actions"][base] for l in levels)
+        worst_plain = max(l["total_actions"][plain] - l["total_actions"][base] for l in levels)
+        exact = next(l for l in levels if l["level"] == 0.0)
+        cost = (exact["total_actions"][guard] - exact["total_actions"][plain]) / exact["total_actions"][plain]
+        out.append((guard, worst_plain, worst_guard, round(cost * 100, 2)))
+        if not (worst_guard < worst_plain and cost <= 0.02):
+            return False, f"{out}"
+    return True, "worst-case regret vs no memory (no guard -> guard), cost at exact memory %: " + \
+        "; ".join(f"{g}: {a} -> {b}, {c}%" for g, a, b, c in out)
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -1434,6 +1585,19 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("policy_and_no_plan_preserved", check_disturbance_policy_preserved),
         ("disturbance_named_deterministic", check_disturbance_named_deterministic),
         ("prediction_requires_capable_advisor", check_prediction_requires_advisor),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M3.6 (V101 onward)
+    for name, fn in (
+        ("memory_distortion_deterministic_valid", check_distort_properties),
+        ("memory_distortion_grows_with_level", check_distortion_grows_with_level),
+        ("guard_off_identical_to_m3_5", check_guard_none_identical),
+        ("guard_config_validated", check_guard_config_validated),
+        ("guard_trips_only_on_wrong_memory", check_guard_trips_only_when_wrong),
+        ("noisy_memory_never_causes_failure", check_noisy_memory_never_fails),
+        ("noisy_memory_subset_totals_frozen", check_noisy_subset_frozen),
+        ("guard_reduces_worst_case_regret", check_guard_improves_worst_case),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

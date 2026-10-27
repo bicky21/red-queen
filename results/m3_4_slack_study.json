@@ -1,6 +1,6 @@
 {
-  "milestone": "M3.5",
-  "version": "0.9.0",
+  "milestone": "M3.6",
+  "version": "0.10.0",
   "agents": [
     "reactive_memory",
     "planner_memory_k0",
