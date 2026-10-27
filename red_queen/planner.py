@@ -21,6 +21,14 @@ function, gives exactly the M3.3 / M3 behaviour. Reachability never changes:
 a slack search only runs after a shortest plan has been found, and falls
 back to that plan if its own node budget runs out.
 
+M3.5: an optional `disturbances` function gives, for each plan depth, the
+name of a disturbance expected right after that step's action (or None).
+Predictions then include it, so transitions depend on time; the search keys
+states by (depth, state) and is bounded by max_depth/max_nodes. If that search
+finds no plan (or runs out of nodes) the planner falls back to the plan it
+would have made without disturbances, so reachability never gets worse.
+Slack (M3.4) is not applied in this mode.
+
 The planner only predicts. It never executes anything.
 """
 
@@ -31,6 +39,7 @@ from dataclasses import dataclass
 from typing import Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 from .actions import ACTION_NAMES, apply_action
+from .environment import DISTURBANCES
 from .goal import RecoveryGoal
 from .scoring import clamp_discount
 from .state import SystemState
@@ -48,6 +57,7 @@ class Plan:
 
 RiskFn = Callable[[int], Mapping[str, float]]  # plan depth (0-based) -> action -> risk
 MAX_SLACK = 3  # M3.4: hard cap on extra plan length
+DisturbanceFn = Callable[[int], Optional[str]]  # M3.5: plan depth (0-based) -> disturbance name or None
 
 
 class BoundedPlanner:
@@ -72,11 +82,19 @@ class BoundedPlanner:
         self.action_order = order
         self.slack = slack
 
-    def plan(self, start: SystemState, allowed: Iterable[str], risk: Optional[RiskFn] = None) -> Plan:
+    def plan(self, start: SystemState, allowed: Iterable[str], risk: Optional[RiskFn] = None,
+             disturbances: Optional[DisturbanceFn] = None) -> Plan:
         allowed_set = set(allowed)
         order = [a for a in self.action_order if a in allowed_set]
         if self.goal.is_satisfied(start):
             return Plan((), (), True, 0, False)
+        if disturbances is not None:
+            aware = self._plan_with_disturbances(start, order, risk, disturbances)
+            if aware.reaches_goal:
+                return aware
+            fallback = self.plan(start, allowed, risk=risk)  # safe: the plan made without disturbances
+            return Plan(fallback.actions, fallback.predicted, fallback.reaches_goal,
+                        aware.nodes_expanded + fallback.nodes_expanded, fallback.hit_node_limit, fallback.risk)
         if risk is not None:
             shortest = self._plan_min_risk(start, order, risk)
             if self.slack == 0 or not shortest.reaches_goal:
@@ -191,6 +209,49 @@ class BoundedPlanner:
         return Plan(tuple(reversed(actions)), tuple(reversed(states)), True, nodes, False,
                     round(best[0] - length, 9))
 
+    def _plan_with_disturbances(self, start: SystemState, order: Sequence[str], risk: Optional[RiskFn],
+                                disturbances: DisturbanceFn) -> Plan:
+        """Layered BFS where the predicted state after an action at depth d also
+        receives the disturbance expected at d. Ends at the first layer with a
+        goal state (shortest under this prediction); ties by lowest risk, then
+        discovery order."""
+        layers: List[Dict[SystemState, Tuple[float, Optional[SystemState], Optional[str]]]] = [
+            {start: (0.0, None, None)}
+        ]
+        nodes = 0
+        for depth in range(self.max_depth):
+            step_risk = _sanitise(risk(depth), order) if risk is not None else {}
+            dist = _sanitise_disturbance(disturbances, depth)
+            nxt_layer: Dict[SystemState, Tuple[float, Optional[SystemState], Optional[str]]] = {}
+            for state, (cost, _, _) in layers[depth].items():
+                for action in order:
+                    if nodes >= self.max_nodes:
+                        return Plan((), (), False, nodes, True)
+                    nxt = apply_action(state, action)
+                    if dist is not None:
+                        nxt = DISTURBANCES[dist](nxt)
+                    nodes += 1
+                    c = round(cost + step_risk.get(action, 0.0), 9)
+                    if nxt not in nxt_layer or c < nxt_layer[nxt][0]:
+                        nxt_layer[nxt] = (c, state, action)
+            layers.append(nxt_layer)
+            goals = [s for s in nxt_layer if self.goal.is_satisfied(s)]
+            if goals:
+                end = min(goals, key=lambda s: nxt_layer[s][0])
+                total = nxt_layer[end][0]
+                actions: List[str] = []
+                states: List[SystemState] = []
+                state = end
+                for d in range(depth + 1, 0, -1):
+                    _, prev, action = layers[d][state]
+                    actions.append(action)
+                    states.append(state)
+                    state = prev
+                return Plan(tuple(reversed(actions)), tuple(reversed(states)), True, nodes, False, total)
+            if not nxt_layer:
+                break
+        return Plan((), (), False, nodes, False)
+
     @staticmethod
     def _reconstruct(parent, end: SystemState, nodes: int) -> Plan:
         actions, states = [], []
@@ -216,3 +277,12 @@ def _sanitise(raw: Mapping[str, float], order: Sequence[str]) -> Dict[str, float
             if v > 0:
                 out[action] = v
     return out
+
+
+def _sanitise_disturbance(fn: DisturbanceFn, depth: int) -> Optional[str]:
+    """Untrusted disturbance input: only known disturbance names are used."""
+    try:
+        name = fn(depth)
+    except Exception:  # a broken advisor must not break planning
+        return None
+    return name if isinstance(name, str) and name in DISTURBANCES else None

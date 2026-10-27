@@ -1111,6 +1111,193 @@ def check_slack_poisoned_memory_recovers() -> CheckResult:
     return True, f"{len(ALL_SCENARIOS)} poisoned-memory episodes with slack=3 all recovered"
 
 
+# ---- M3.5 checks -------------------------------------------------------
+
+# Frozen M3.5 grid totals (default policy, 1680 cases), recorded at build time.
+M3_5_GRID_TOTALS = {
+    "reactive_memory": 8134, "planner_memory": 8271, "planner_reversed_memory": 8219,
+    "planner_dist_memory": 8062, "planner_reversed_dist_memory": 7857,
+}
+
+
+def _insert_event(memory, step, kind, name):
+    eid = memory._conn.execute("SELECT id FROM episodes ORDER BY id LIMIT 1").fetchone()[0]
+    memory._conn.execute(
+        "INSERT INTO events (episode_id, step, kind, name, before_json, after_json) VALUES (?, ?, ?, ?, '{}', '{}')",
+        (eid, step, kind, name))
+
+
+def check_disturbance_extraction() -> CheckResult:
+    from .memory_advice import MemoryAdvisor
+    from .memory_planning_study import prior_memory
+
+    s = get_scenario("disturbance_mid_recovery")
+    with prior_memory(s.name, s.make_env) as memory:
+        adv = MemoryAdvisor(memory, s.name)
+        remembered = adv.remembered_disturbances()
+        summary_keys = sorted(adv.summary())
+    ok = (remembered == {1: "heat_spike", 3: "service_crash"}
+          and summary_keys == ["events_ignored", "nonzero_entries", "records_ignored_invalid", "records_used"])
+    return ok, f"remembered={remembered} summary keys unchanged={summary_keys}"
+
+
+def check_disturbance_input_sanitised() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .memory_advice import MemoryAdvisor
+    from .memory_planning_study import prior_memory
+    from .planner import BoundedPlanner
+
+    s = get_scenario("low_battery")
+    with prior_memory(s.name, s.make_env) as memory:
+        for step, name in ((2, "meteor"), (-1, "heat_spike"), (0, "battery_drain")):
+            _insert_event(memory, step, "disturbance", name)
+        memory._conn.execute("INSERT INTO events (episode_id, step, kind, name, before_json, after_json) "
+                             "VALUES (1, 'x', 'disturbance', 'heat_spike', '{}', '{}')")
+        adv = MemoryAdvisor(memory, s.name)
+        remembered, ignored = adv.remembered_disturbances(), adv.disturbance_events_ignored
+
+    def boom(depth):
+        raise RuntimeError("broken advisor")
+
+    planner, start = BoundedPlanner(RecoveryGoal()), get_scenario("compound_failure").initial
+    base = planner.plan(start, ACTIONS_ALL())
+    junk_ok = all(planner.plan(start, ACTIONS_ALL(), disturbances=fn).actions == base.actions
+                  for fn in (boom, lambda d: "meteor", lambda d: 42, lambda d: None))
+    ok = remembered == {} and ignored == 4 and junk_ok
+    return ok, f"remembered={remembered} ignored={ignored} junk_disturbance_inputs_harmless={junk_ok}"
+
+
+def check_disturbance_off_identical() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .memory_advice import MemoryAdvisor
+    from .memory_planning_study import prior_memory
+    from .planner import BoundedPlanner
+    from .planning_agent import PlanningAgent
+    from .scenarios import ALL_SCENARIOS
+
+    goal = RecoveryGoal()
+    planner = BoundedPlanner(goal)
+    for start in _m33_starts():
+        if planner.plan(start, ACTIONS_ALL(), disturbances=lambda d: None).actions != \
+                planner.plan(start, ACTIONS_ALL(), risk=lambda d: {}).actions:
+            return False, f"no-disturbance prediction changed the plan at {start.to_dict()}"
+    for s in ALL_SCENARIOS:
+        with prior_memory(s.name, s.make_env) as memory:
+            a = PlanningAgent(goal, advisor=MemoryAdvisor(memory, s.name)).run(s.make_env(), s.name)
+            b = PlanningAgent(goal, advisor=MemoryAdvisor(memory, s.name),
+                              predict_disturbances=False).run(s.make_env(), s.name)
+        if a.actions != b.actions or a.events != b.events or "remembered_disturbances" in b.stats:
+            return False, f"{s.name}: predict_disturbances=False differs from M3.3"
+    return True, f"{len(_m33_starts())} plans and {len(ALL_SCENARIOS)} episodes identical with prediction off"
+
+
+def check_prediction_avoids_replans() -> CheckResult:
+    from .disturbance_study import run_agent
+    from .memory_planning_study import prior_memory
+
+    s = get_scenario("disturbance_mid_recovery")
+    with prior_memory(s.name, s.make_env) as memory:
+        with_pred = run_agent("planner_dist_memory", s.name, s.make_env, memory)
+        without = run_agent("planner_memory", s.name, s.make_env, memory)
+    ok = (with_pred.success and with_pred.stats["prediction_mismatches"] == 0
+          and without.stats["prediction_mismatches"] == 2)
+    return ok, (f"mismatches with prediction={with_pred.stats['prediction_mismatches']} "
+                f"(without={without.stats['prediction_mismatches']}); actions {with_pred.action_count} "
+                f"vs {without.action_count}")
+
+
+def check_disturbance_fallback() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+
+    planner, start = BoundedPlanner(RecoveryGoal()), get_scenario("overheating").initial
+    base = planner.plan(start, ACTIONS_ALL())
+    p = planner.plan(start, ACTIONS_ALL(), disturbances=lambda d: "heat_spike")  # never cool enough
+    ok = p.reaches_goal and p.actions == base.actions
+    return ok, f"impossible-under-prediction falls back to {p.actions} (no-prediction plan {base.actions})"
+
+
+def check_disturbance_grid() -> CheckResult:
+    from .disturbance_study import run_case
+    from .scenario_study import grid_cases
+
+    totals = {a: 0 for a in M3_5_GRID_TOTALS}
+    all_ok = True
+    for i, (start, faults, disturbances) in enumerate(grid_cases()):
+        make_env = lambda s=start, f=faults, d=disturbances: SimulatedEnvironment(s, dict(d), f)  # noqa: E731
+        c = run_case(f"grid_{i:04d}", make_env)
+        for a in totals:
+            totals[a] += c[a]["action_count"]
+            all_ok &= c[a]["success"]
+    beats = (totals["planner_dist_memory"] < totals["reactive_memory"]
+             and totals["planner_reversed_dist_memory"] < totals["reactive_memory"])
+    ok = totals == M3_5_GRID_TOTALS and all_ok and beats
+    return ok, f"totals={totals} all_succeeded={all_ok} both_orders_beat_reactive_memory={beats}"
+
+
+def check_fake_disturbances_bounded() -> CheckResult:
+    from .disturbance_study import run_agent
+    from .memory_planning_study import prior_memory
+    from .scenarios import ALL_SCENARIOS
+
+    worst = 0
+    for s in ALL_SCENARIOS:
+        for fake in ("battery_drain", "heat_spike", "service_crash"):
+            with prior_memory(s.name, s.make_env) as memory:
+                for step in range(1, 21):
+                    _insert_event(memory, step, "disturbance", fake)
+                r = run_agent("planner_dist_memory", s.name, s.make_env, memory)
+            if not r.success:
+                return False, f"{s.name} failed with fake {fake} at every step"
+            worst = max(worst, r.action_count)
+    return True, f"{len(ALL_SCENARIOS) * 3} episodes with fake disturbances at every step recovered; max actions={worst}"
+
+
+def check_disturbance_policy_preserved() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .memory_advice import MemoryAdvisor
+    from .memory_planning_study import prior_memory
+    from .planning_agent import STOP_NO_PLAN, PlanningAgent
+    from .policy import ALL_POLICIES
+    from .scenarios import ALL_SCENARIOS
+
+    runs = 0
+    for policy in ALL_POLICIES.values():
+        for s in ALL_SCENARIOS:
+            with prior_memory(s.name, s.make_env) as memory:
+                r = PlanningAgent(RecoveryGoal(), policy=policy, advisor=MemoryAdvisor(memory, s.name),
+                                  predict_disturbances=True).run(s.make_env(), s.name)
+            runs += 1
+            if not set(r.actions) <= policy.allowed:
+                return False, f"{s.name}/{policy.name}: executed action outside policy"
+            if not r.success and (r.action_count > 3 or r.stop_reason != STOP_NO_PLAN):
+                return False, f"{s.name}/{policy.name}: failed without early no-plan stop ({r.stop_reason})"
+    return True, f"{runs} runs: actions within policy; every failure stopped early with no_plan_found"
+
+
+def check_disturbance_named_deterministic() -> CheckResult:
+    from .disturbance_study import run_case
+    from .scenarios import ALL_SCENARIOS
+
+    a = {s.name: run_case(s.name, s.make_env) for s in ALL_SCENARIOS}
+    b = {s.name: run_case(s.name, s.make_env) for s in ALL_SCENARIOS}
+    all_ok = all(v["success"] for c in a.values() for v in c.values())
+    return a == b and all_ok, f"named part deterministic={a == b} all_succeeded={all_ok}"
+
+
+def check_prediction_requires_advisor() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planning_agent import PlanningAgent
+
+    rejected = 0
+    for advisor in (None, object()):
+        try:
+            PlanningAgent(RecoveryGoal(), advisor=advisor, predict_disturbances=True)
+        except ValueError:
+            rejected += 1
+    return rejected == 2, f"rejected {rejected}/2 configs without a disturbance-capable advisor"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -1232,6 +1419,21 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("slack_keeps_impossible_goal_detection", check_slack_keeps_impossible_goal_detection),
         ("slack_node_budget_falls_back_safely", check_slack_node_budget_fallback),
         ("slack_poisoned_memory_recovers", check_slack_poisoned_memory_recovers),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M3.5 (V91 onward)
+    for name, fn in (
+        ("disturbances_extracted_from_memory", check_disturbance_extraction),
+        ("disturbance_input_sanitised", check_disturbance_input_sanitised),
+        ("prediction_off_identical_to_m3_3", check_disturbance_off_identical),
+        ("prediction_avoids_needless_replans", check_prediction_avoids_replans),
+        ("unsolvable_prediction_falls_back", check_disturbance_fallback),
+        ("disturbance_grid_totals_frozen", check_disturbance_grid),
+        ("fake_disturbances_cannot_block_recovery", check_fake_disturbances_bounded),
+        ("policy_and_no_plan_preserved", check_disturbance_policy_preserved),
+        ("disturbance_named_deterministic", check_disturbance_named_deterministic),
+        ("prediction_requires_capable_advisor", check_prediction_requires_advisor),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

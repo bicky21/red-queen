@@ -10,6 +10,10 @@ The agent's scorer multiplies an action's positive expected gain by
 make an action look less attractive; it can never add, remove or force an
 action, and the agent drops the discount once an action is observed to work.
 
+M3.5: `remembered_disturbances()` additionally reports disturbances seen at
+a given step in at least half of the used records (known disturbance names
+and valid steps only). It does not change `discounts()` or `summary()`.
+
 All retrieved data is treated as untrusted:
   * records marked invalid by the store are ignored
   * events with unknown actions, unknown kinds or bad steps are ignored
@@ -20,6 +24,7 @@ from __future__ import annotations
 from typing import Dict, Mapping, Tuple
 
 from .actions import ACTIONS
+from .environment import DISTURBANCES
 from .memory import MAX_RESULTS, EpisodeMemory
 from .scoring import clamp_discount
 
@@ -34,6 +39,8 @@ class MemoryAdvisor:
         self.events_ignored = 0
         attempts: Dict[Tuple[int, str], int] = {}
         blocked: Dict[Tuple[int, str], int] = {}
+        seen_disturbances: Dict[Tuple[int, str], int] = {}
+        self.disturbance_events_ignored = 0
 
         for record in memory.search(f"scenario {scenario}", limit=limit):
             if record.scenario != scenario:
@@ -44,7 +51,14 @@ class MemoryAdvisor:
             self.records_used += 1
             for event in memory.events(record.episode_id):
                 step, kind, name = event.get("step"), event.get("kind"), event.get("name")
-                if kind in ("disturbance", "rejected"):
+                if kind == "disturbance":
+                    if (name in DISTURBANCES and not isinstance(step, bool)
+                            and isinstance(step, int) and step >= 1):
+                        seen_disturbances[(step, name)] = seen_disturbances.get((step, name), 0) + 1
+                    else:
+                        self.disturbance_events_ignored += 1
+                    continue
+                if kind == "rejected":
                     continue
                 if (
                     kind not in _COUNTED_KINDS
@@ -63,6 +77,16 @@ class MemoryAdvisor:
         self._table: Dict[Tuple[int, str], float] = {
             key: clamp_discount(blocked.get(key, 0) / count) for key, count in attempts.items()
         }
+        # Majority rule per step: at least half of the used records, highest count, then name.
+        best: Dict[int, Tuple[int, str]] = {}
+        for (step, name), count in sorted(seen_disturbances.items()):
+            if 2 * count >= self.records_used and (step not in best or count > best[step][0]):
+                best[step] = (count, name)
+        self._disturbances: Dict[int, str] = {step: name for step, (_, name) in sorted(best.items())}
+
+    def remembered_disturbances(self) -> Dict[int, str]:
+        """M3.5: absolute step -> disturbance name expected after that step's action."""
+        return dict(self._disturbances)
 
     def discounts(self, step: int) -> Mapping[str, float]:
         return {name: d for (s, name), d in sorted(self._table.items()) if s == step and d > 0}

@@ -11,6 +11,11 @@ supplies remembered per-step fault risk. It only breaks ties between plans
 of the shortest length, and an action observed to work in this episode
 loses its risk (observation wins). Without an advisor, behaviour is M3.
 
+M3.5: with `predict_disturbances=True` (and an advisor that offers
+`remembered_disturbances()`), plans also predict disturbances remembered for
+upcoming steps. If one does not happen, the observation will not match the
+prediction and the agent replans from what it observed.
+
 Bounds: max_steps (actions), max_replans (planning calls after the first),
 max_policy_denials (rejected plans or executions), and the planner's own
 depth and node limits. Every limit ends the episode with a named stop
@@ -43,6 +48,7 @@ class PlanningAgent:
         max_replans: int = 20,
         max_policy_denials: int = 3,
         advisor=None,
+        predict_disturbances: bool = False,
     ) -> None:
         if max_steps < 0 or max_replans < 0 or max_policy_denials < 1:
             raise ValueError("invalid bounds")
@@ -53,6 +59,9 @@ class PlanningAgent:
         self.max_replans = max_replans
         self.max_policy_denials = max_policy_denials
         self.advisor = advisor
+        self.predict_disturbances = bool(predict_disturbances)
+        if self.predict_disturbances and not hasattr(advisor, "remembered_disturbances"):
+            raise ValueError("predict_disturbances needs an advisor with remembered_disturbances()")
         self.verifier = GoalVerifier(goal)
 
     def run(self, env: SimulatedEnvironment, scenario: str = "") -> EpisodeResult:
@@ -64,6 +73,9 @@ class PlanningAgent:
         plans = mismatches = nodes = plan_rejections = 0
         stop_reason: Optional[str] = None
         worked: Set[str] = set()
+        remembered: Dict[int, str] = (
+            dict(self.advisor.remembered_disturbances()) if self.predict_disturbances else {}
+        )
         plan_risks: List[float] = []
 
         while len(actions) < self.max_steps:
@@ -84,7 +96,13 @@ class PlanningAgent:
                         raw = self.advisor.discounts(offset + depth + 1)
                         return {a: d for a, d in raw.items() if a not in seen}
 
-                    plan = self.planner.plan(observed, self.policy.allowed, risk=risk)
+                    if self.predict_disturbances:
+                        plan = self.planner.plan(
+                            observed, self.policy.allowed, risk=risk,
+                            disturbances=lambda depth, offset=offset: remembered.get(offset + depth + 1),
+                        )
+                    else:
+                        plan = self.planner.plan(observed, self.policy.allowed, risk=risk)
                     plan_risks.append(getattr(plan, "risk", 0.0))
                 plans += 1
                 nodes += plan.nodes_expanded
@@ -153,5 +171,7 @@ class PlanningAgent:
                 "plan_rejections": plan_rejections,
                 "policy_denials": len(executor.denials),
                 **({} if self.advisor is None else {"memory": True, "plan_risks": plan_risks}),
+                **({"remembered_disturbances": {str(k): v for k, v in sorted(remembered.items())}}
+                   if self.predict_disturbances else {}),
             },
         )

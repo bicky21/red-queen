@@ -1,0 +1,726 @@
+{
+  "milestone": "M3.5",
+  "version": "0.9.0",
+  "agents": [
+    "reactive_memory",
+    "planner_memory",
+    "planner_reversed_memory",
+    "planner_dist_memory",
+    "planner_reversed_dist_memory"
+  ],
+  "named": {
+    "cases": {
+      "nominal": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 0,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 0,
+          "replans": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 0,
+          "replans": 0
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 0,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 0,
+          "replans": 0
+        }
+      },
+      "low_battery": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 2,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 2,
+          "replans": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 2,
+          "replans": 0
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 2,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 2,
+          "replans": 0
+        }
+      },
+      "overheating": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 2,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 2,
+          "replans": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 2,
+          "replans": 0
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 2,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 2,
+          "replans": 0
+        }
+      },
+      "service_down": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 1,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 1,
+          "replans": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 1,
+          "replans": 0
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 1,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 1,
+          "replans": 0
+        }
+      },
+      "overheated_service_down": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 3,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 3,
+          "replans": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 3,
+          "replans": 0
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 3,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 3,
+          "replans": 0
+        }
+      },
+      "compound_failure": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 7,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 7,
+          "replans": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 7,
+          "replans": 0
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 7,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 7,
+          "replans": 0
+        }
+      },
+      "disturbance_mid_recovery": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 6,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 6,
+          "replans": 2
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 6,
+          "replans": 2
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 6,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 6,
+          "replans": 0
+        }
+      },
+      "flaky_restart": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 3
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 3
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 3
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 3
+        }
+      },
+      "flaky_restart_low_battery": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 5,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 1
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 1
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 1
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 1
+        }
+      },
+      "charger_outage": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 2
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 2
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 2
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 2
+        }
+      },
+      "battery_empty": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 3,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 3,
+          "replans": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 3,
+          "replans": 0
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 3,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 3,
+          "replans": 0
+        }
+      },
+      "max_heat_service_down": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 5,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 5,
+          "replans": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 5,
+          "replans": 0
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 5,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 5,
+          "replans": 0
+        }
+      },
+      "deep_battery_flaky_restart": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 0
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 0
+        }
+      },
+      "flaky_restart_then_crash": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 7,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 7,
+          "replans": 1
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 4,
+          "replans": 0
+        }
+      },
+      "flaky_restart_heat_spike": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 6,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 6,
+          "replans": 1
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 6,
+          "replans": 1
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 6,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 6,
+          "replans": 0
+        }
+      },
+      "cool_outage_battery_drain": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 6,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 9,
+          "replans": 3
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 8,
+          "replans": 2
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 9,
+          "replans": 3
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 8,
+          "replans": 2
+        }
+      },
+      "charger_outage_overheating": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 5,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 7,
+          "replans": 2
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 5,
+          "replans": 0
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 7,
+          "replans": 2
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 5,
+          "replans": 0
+        }
+      },
+      "double_disturbance": {
+        "reactive_memory": {
+          "success": true,
+          "action_count": 8,
+          "replans": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 8,
+          "replans": 2
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 8,
+          "replans": 2
+        },
+        "planner_dist_memory": {
+          "success": true,
+          "action_count": 7,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "success": true,
+          "action_count": 7,
+          "replans": 0
+        }
+      }
+    },
+    "summary": {
+      "reactive_memory": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 78,
+        "replans": 0
+      },
+      "planner_memory": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 79,
+        "replans": 16
+      },
+      "planner_reversed_memory": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 79,
+        "replans": 14
+      },
+      "planner_dist_memory": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 78,
+        "replans": 11
+      },
+      "planner_reversed_dist_memory": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 75,
+        "replans": 8
+      }
+    }
+  },
+  "grid": {
+    "cases": 1680,
+    "summary": {
+      "reactive_memory": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8134,
+        "replans": 0
+      },
+      "planner_memory": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8271,
+        "replans": 1734
+      },
+      "planner_reversed_memory": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8219,
+        "replans": 1641
+      },
+      "planner_dist_memory": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8062,
+        "replans": 923
+      },
+      "planner_reversed_dist_memory": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 7857,
+        "replans": 686
+      }
+    },
+    "by_case_type": {
+      "fault+disturbance": {
+        "reactive_memory": {
+          "episodes": 1296,
+          "successes": 1296,
+          "total_actions": 6552,
+          "replans": 0
+        },
+        "planner_memory": {
+          "episodes": 1296,
+          "successes": 1296,
+          "total_actions": 6677,
+          "replans": 1497
+        },
+        "planner_reversed_memory": {
+          "episodes": 1296,
+          "successes": 1296,
+          "total_actions": 6632,
+          "replans": 1421
+        },
+        "planner_dist_memory": {
+          "episodes": 1296,
+          "successes": 1296,
+          "total_actions": 6497,
+          "replans": 791
+        },
+        "planner_reversed_dist_memory": {
+          "episodes": 1296,
+          "successes": 1296,
+          "total_actions": 6325,
+          "replans": 587
+        }
+      },
+      "fault+no_disturbance": {
+        "reactive_memory": {
+          "episodes": 216,
+          "successes": 216,
+          "total_actions": 812,
+          "replans": 0
+        },
+        "planner_memory": {
+          "episodes": 216,
+          "successes": 216,
+          "total_actions": 852,
+          "replans": 132
+        },
+        "planner_reversed_memory": {
+          "episodes": 216,
+          "successes": 216,
+          "total_actions": 819,
+          "replans": 99
+        },
+        "planner_dist_memory": {
+          "episodes": 216,
+          "successes": 216,
+          "total_actions": 852,
+          "replans": 132
+        },
+        "planner_reversed_dist_memory": {
+          "episodes": 216,
+          "successes": 216,
+          "total_actions": 819,
+          "replans": 99
+        }
+      },
+      "no_fault+disturbance": {
+        "reactive_memory": {
+          "episodes": 144,
+          "successes": 144,
+          "total_actions": 690,
+          "replans": 0
+        },
+        "planner_memory": {
+          "episodes": 144,
+          "successes": 144,
+          "total_actions": 662,
+          "replans": 105
+        },
+        "planner_reversed_memory": {
+          "episodes": 144,
+          "successes": 144,
+          "total_actions": 688,
+          "replans": 121
+        },
+        "planner_dist_memory": {
+          "episodes": 144,
+          "successes": 144,
+          "total_actions": 633,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "episodes": 144,
+          "successes": 144,
+          "total_actions": 633,
+          "replans": 0
+        }
+      },
+      "no_fault+no_disturbance": {
+        "reactive_memory": {
+          "episodes": 24,
+          "successes": 24,
+          "total_actions": 80,
+          "replans": 0
+        },
+        "planner_memory": {
+          "episodes": 24,
+          "successes": 24,
+          "total_actions": 80,
+          "replans": 0
+        },
+        "planner_reversed_memory": {
+          "episodes": 24,
+          "successes": 24,
+          "total_actions": 80,
+          "replans": 0
+        },
+        "planner_dist_memory": {
+          "episodes": 24,
+          "successes": 24,
+          "total_actions": 80,
+          "replans": 0
+        },
+        "planner_reversed_dist_memory": {
+          "episodes": 24,
+          "successes": 24,
+          "total_actions": 80,
+          "replans": 0
+        }
+      }
+    },
+    "head_to_head": {
+      "planner_dist_memory_vs_reactive_memory": {
+        "planner_dist_memory_fewer": 287,
+        "reactive_memory_fewer": 218,
+        "equal": 1175
+      },
+      "planner_reversed_dist_memory_vs_reactive_memory": {
+        "planner_reversed_dist_memory_fewer": 320,
+        "reactive_memory_fewer": 109,
+        "equal": 1251
+      },
+      "planner_dist_memory_vs_planner_memory": {
+        "planner_dist_memory_fewer": 224,
+        "planner_memory_fewer": 43,
+        "equal": 1413
+      },
+      "planner_reversed_dist_memory_vs_planner_reversed_memory": {
+        "planner_reversed_dist_memory_fewer": 319,
+        "planner_reversed_memory_fewer": 46,
+        "equal": 1315
+      },
+      "planner_dist_memory_vs_planner_reversed_dist_memory": {
+        "planner_dist_memory_fewer": 91,
+        "planner_reversed_dist_memory_fewer": 221,
+        "equal": 1368
+      }
+    }
+  },
+  "note": "Fixed deterministic cases only; not evidence of general performance."
+}
