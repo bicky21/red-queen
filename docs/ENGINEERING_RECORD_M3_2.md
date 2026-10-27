@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M3.2
 
-**Version:** 0.6.0 · **Date:** 2026-10-27 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.6.0 · **Date:** 2026-10-27 · **Status:** build-environment passed; **accepted on Linux (user's laptop), 2026-10-27**
 
 ## 1. Review of M3
 
@@ -119,21 +119,14 @@ Data: `results/m3_2_scenario_study.json`.
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Accepted, 2026-10-27.** After `git pull` to commit `737e0de`, the user ran:
 
 ```
-git pull
 python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
 ```
 
-M3.2 is accepted when the output shows `Ran 140 tests ... OK` and
-`73/73 validation checks passed`.
-
-Optional:
-
-```
-python3 -m red_queen.scenario_study
-```
+User-reported output: `Ran 140 tests ... OK` and `73/73 validation checks passed`,
+including V69 with the same frozen grid totals (8741 / 8428 / 8713).
 
 ## 9. Next milestone
 
