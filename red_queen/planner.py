@@ -8,6 +8,12 @@ fixed order (sorted names by default; `action_order` can change it, M3.2)
 and visited states are skipped, so the result is fully deterministic. The
 order only chooses *which* shortest plan is returned, never its length.
 
+M3.3: an optional `risk` function gives, for each plan depth, a per-action
+risk in [0, MAX_MEMORY_DISCOUNT] (e.g. remembered chance of being blocked).
+It is used ONLY to choose among plans of the shortest length: plan length,
+reachability and the allowed action set are unaffected. With `risk=None`
+the original M3 search runs unchanged.
+
 The planner only predicts. It never executes anything.
 """
 
@@ -15,10 +21,11 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass
-from typing import Dict, Iterable, Optional, Sequence, Tuple
+from typing import Callable, Dict, Iterable, Mapping, Optional, Sequence, Tuple
 
 from .actions import ACTION_NAMES, apply_action
 from .goal import RecoveryGoal
+from .scoring import clamp_discount
 from .state import SystemState
 
 
@@ -29,6 +36,10 @@ class Plan:
     reaches_goal: bool
     nodes_expanded: int
     hit_node_limit: bool
+    risk: float = 0.0  # M3.3: summed tie-break risk of the chosen plan
+
+
+RiskFn = Callable[[int], Mapping[str, float]]  # plan depth (0-based) -> action -> risk
 
 
 class BoundedPlanner:
@@ -49,11 +60,13 @@ class BoundedPlanner:
         self.max_nodes = max_nodes
         self.action_order = order
 
-    def plan(self, start: SystemState, allowed: Iterable[str]) -> Plan:
+    def plan(self, start: SystemState, allowed: Iterable[str], risk: Optional[RiskFn] = None) -> Plan:
         allowed_set = set(allowed)
         order = [a for a in self.action_order if a in allowed_set]
         if self.goal.is_satisfied(start):
             return Plan((), (), True, 0, False)
+        if risk is not None:
+            return self._plan_min_risk(start, order, risk)
 
         parent: Dict[SystemState, Optional[Tuple[SystemState, str]]] = {start: None}
         depth = {start: 0}
@@ -77,6 +90,40 @@ class BoundedPlanner:
                 frontier.append(nxt)
         return Plan((), (), False, nodes, False)
 
+    def _plan_min_risk(self, start: SystemState, order: Sequence[str], risk: RiskFn) -> Plan:
+        """Layer-by-layer BFS. Within a layer each state keeps its lowest-risk
+        parent; the first layer containing a goal state ends the search, so the
+        plan is always of the shortest length. Ties keep discovery order."""
+        parent: Dict[SystemState, Optional[Tuple[SystemState, str]]] = {start: None}
+        cost: Dict[SystemState, float] = {start: 0.0}
+        layer = [start]
+        nodes = 0
+        for depth in range(self.max_depth):
+            step_risk = _sanitise(risk(depth), order)
+            nxt_layer: Dict[SystemState, None] = {}
+            for state in layer:
+                for action in order:
+                    if nodes >= self.max_nodes:
+                        return Plan((), (), False, nodes, True)
+                    nxt = apply_action(state, action)
+                    nodes += 1
+                    if nxt in parent and nxt not in nxt_layer:
+                        continue  # reached in an earlier layer, or is the start
+                    c = round(cost[state] + step_risk.get(action, 0.0), 9)
+                    if nxt not in nxt_layer or c < cost[nxt]:
+                        parent[nxt] = (state, action)
+                        cost[nxt] = c
+                        nxt_layer[nxt] = None
+            goals = [s for s in nxt_layer if self.goal.is_satisfied(s)]
+            if goals:
+                best = min(goals, key=lambda s: cost[s])  # min() keeps the first of equal costs
+                plan = self._reconstruct(parent, best, nodes)
+                return Plan(plan.actions, plan.predicted, True, nodes, False, cost[best])
+            if not nxt_layer:
+                break
+            layer = list(nxt_layer)
+        return Plan((), (), False, nodes, False)
+
     @staticmethod
     def _reconstruct(parent, end: SystemState, nodes: int) -> Plan:
         actions, states = [], []
@@ -87,3 +134,18 @@ class BoundedPlanner:
             states.append(node)
             node = prev
         return Plan(tuple(reversed(actions)), tuple(reversed(states)), True, nodes, False)
+
+
+def _sanitise(raw: Mapping[str, float], order: Sequence[str]) -> Dict[str, float]:
+    """Untrusted risk input: keep only allowed actions, clamp to [0, cap], drop NaN/junk."""
+    out: Dict[str, float] = {}
+    try:
+        items = list(raw.items())
+    except AttributeError:
+        return out
+    for action, value in items:
+        if action in order:
+            v = clamp_discount(value)
+            if v > 0:
+                out[action] = v
+    return out

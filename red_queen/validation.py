@@ -769,6 +769,183 @@ def check_m3_results_unchanged() -> CheckResult:
     return got == expected, f"M3 planning totals={got} (expected {expected})"
 
 
+# ---- M3.3 checks -------------------------------------------------------
+
+# Frozen M3.3 fault-grid totals (default policy, 1680 cases), recorded at build time.
+M3_3_GRID_TOTALS = {
+    "reactive": 8741, "reactive_memory": 8134, "planner": 8428, "planner_reversed": 8713,
+    "planner_memory": 8271, "planner_reversed_memory": 8219,
+}
+
+
+def _m33_starts():
+    from .scenario_study import GRID_STARTS
+    from .scenarios import ALL_SCENARIOS
+
+    return list(GRID_STARTS) + [s.initial for s in ALL_SCENARIOS]
+
+
+def check_zero_risk_identical() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .memory import EpisodeMemory
+    from .memory_advice import MemoryAdvisor
+    from .planner import BoundedPlanner
+    from .planning_agent import PlanningAgent
+    from .scenario_study import REVERSED_ORDER
+    from .scenarios import ALL_SCENARIOS
+
+    goal = RecoveryGoal()
+    for order in (ACTIONS_ALL(), REVERSED_ORDER):
+        planner = BoundedPlanner(goal, action_order=order)
+        for start in _m33_starts():
+            if planner.plan(start, ACTIONS_ALL()).actions != planner.plan(start, ACTIONS_ALL(), risk=lambda d: {}).actions:
+                return False, f"zero-risk plan differs at {start.to_dict()}"
+    for s in ALL_SCENARIOS:
+        with EpisodeMemory(":memory:") as memory:
+            a = PlanningAgent(goal, advisor=MemoryAdvisor(memory, s.name)).run(s.make_env(), s.name)
+        b = PlanningAgent(goal).run(s.make_env(), s.name)
+        if a.actions != b.actions or a.events != b.events:
+            return False, f"{s.name}: empty-memory planner differs from no-memory planner"
+    return True, f"{len(_m33_starts()) * 2} zero-risk plans and {len(ALL_SCENARIOS)} empty-memory episodes identical"
+
+
+def check_risk_never_changes_length() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+
+    goal = RecoveryGoal()
+    planner = BoundedPlanner(goal)
+    risks = [lambda d: {a: 0.9 for a in ACTIONS_ALL()}]
+    risks += [lambda d, a=a: {a: 0.9} for a in ACTIONS_ALL()]
+    risks += [lambda d: {"charge": 0.9} if d % 2 else {"cool": 0.9, "restart_service": 0.5}]
+    checked = 0
+    for start in _m33_starts():
+        base = planner.plan(start, ACTIONS_ALL())
+        for risk in risks:
+            p = planner.plan(start, ACTIONS_ALL(), risk=risk)
+            checked += 1
+            if len(p.actions) != len(base.actions) or p.reaches_goal != base.reaches_goal:
+                return False, f"length changed at {start.to_dict()}: {base.actions} -> {p.actions}"
+    return True, f"{checked} risk-weighted plans: length and reachability unchanged"
+
+
+def check_risk_input_sanitised() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+    from .scoring import MAX_MEMORY_DISCOUNT
+
+    goal = RecoveryGoal()
+    planner = BoundedPlanner(goal)
+    start = get_scenario("compound_failure").initial
+    allowed = ("charge", "cool", "restart_service")
+    bad_inputs = [
+        lambda d: {"charge": float("nan"), "cool": -5, "restart_service": 99, "shell": 1.0},
+        lambda d: None,
+        lambda d: {"charge": "high"},
+        lambda d: {"wait": 0.9},  # not allowed here
+    ]
+    for risk in bad_inputs:
+        p = planner.plan(start, allowed, risk=risk)
+        if not p.reaches_goal or not set(p.actions) <= set(allowed) or p.risk > MAX_MEMORY_DISCOUNT * len(p.actions):
+            return False, f"bad risk input broke the plan: {p}"
+    return True, f"{len(bad_inputs)} malformed risk inputs handled; plans valid and within cap"
+
+
+def check_risk_picks_lower_risk_plan() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+    from .scenario_study import REVERSED_ORDER
+
+    goal = RecoveryGoal()
+    planner = BoundedPlanner(goal, action_order=REVERSED_ORDER)
+    start = get_scenario("deep_battery_flaky_restart").initial
+    plain = planner.plan(start, ACTIONS_ALL())
+    risky = planner.plan(start, ACTIONS_ALL(), risk=lambda d: {"restart_service": 0.9} if d < 3 else {})
+    ok = plain.actions[0] == "restart_service" and risky.actions[-1] == "restart_service" and risky.risk == 0.0
+    return ok, f"reversed order alone: {plain.actions}; with risk: {risky.actions} (risk={risky.risk})"
+
+
+def check_memory_planning_grid() -> CheckResult:
+    from .memory_planning_study import run_grid_part
+
+    g = run_grid_part()
+    totals = {a: s["total_actions"] for a, s in g["summary"].items()}
+    all_ok = all(s["successes"] == s["episodes"] for s in g["summary"].values())
+    improves = (totals["planner_memory"] < totals["planner"]
+                and totals["planner_reversed_memory"] < totals["planner_reversed"])
+    ok = totals == M3_3_GRID_TOTALS and all_ok and improves and g["cases"] == 1680
+    return ok, f"totals={totals} all_succeeded={all_ok} memory_improves_both_orders={improves}"
+
+
+def _poisoned_memory(name, make_env):
+    from .memory_planning_study import prior_memory
+
+    memory = prior_memory(name, make_env)
+    memory._conn.execute("UPDATE events SET kind = 'blocked' WHERE kind = 'action'")
+    return memory
+
+
+def check_poisoned_memory_planner() -> CheckResult:
+    from .memory_planning_study import run_agent
+    from .scenarios import ALL_SCENARIOS
+
+    for s in ALL_SCENARIOS:
+        with _poisoned_memory(s.name, s.make_env) as memory:
+            for agent in ("planner_memory", "planner_reversed_memory"):
+                if not run_agent(agent, s.name, s.make_env, memory).success:
+                    return False, f"{s.name} {agent} failed under poisoned memory"
+    return True, f"{len(ALL_SCENARIOS) * 2} poisoned-memory planner episodes all recovered"
+
+
+def check_invalid_memory_ignored_by_planner() -> CheckResult:
+    from .memory_planning_study import prior_memory, run_agent
+
+    s = get_scenario("deep_battery_flaky_restart")
+    with prior_memory(s.name, s.make_env) as memory:
+        memory._conn.execute("UPDATE episodes SET actions_json = '[\"shell\"]'")
+        a = run_agent("planner_reversed_memory", s.name, s.make_env, memory)
+    b = run_agent("planner_reversed", s.name, s.make_env, None)
+    return a.actions == b.actions, f"tampered memory: {a.action_count} actions; no memory: {b.action_count}"
+
+
+class _RecordingPlanner:
+    def __init__(self):
+        from .goal import RecoveryGoal
+        from .planner import BoundedPlanner
+
+        self.inner = BoundedPlanner(RecoveryGoal())
+        self.first_step_risk = []
+
+    def plan(self, start, allowed, risk=None):
+        self.first_step_risk.append(sorted(risk(0)) if risk else None)
+        return self.inner.plan(start, allowed, risk=risk)
+
+
+class _FlatAdvisor:
+    def discounts(self, step):
+        return {a: 0.5 for a in ACTIONS_ALL()}
+
+
+def check_observation_wins_in_planner() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planning_agent import PlanningAgent
+
+    rec = _RecordingPlanner()
+    env = SimulatedEnvironment(SystemState(10, 30, False), {2: "battery_drain"})
+    r = PlanningAgent(RecoveryGoal(), planner=rec, advisor=_FlatAdvisor()).run(env)
+    ok = (r.success and len(rec.first_step_risk) >= 2 and "charge" in rec.first_step_risk[0]
+          and "charge" not in rec.first_step_risk[1])
+    return ok, f"risk keys per planning call={rec.first_step_risk} success={r.success}"
+
+
+def check_memory_planning_named_deterministic() -> CheckResult:
+    from .memory_planning_study import run_named_part
+
+    a, b = run_named_part(), run_named_part()
+    all_ok = all(s["successes"] == s["episodes"] for s in a["summary"].values())
+    return a == b and all_ok, f"named part deterministic={a == b} all_succeeded={all_ok}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -863,6 +1040,20 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("extended_runs_policy_compliant", check_extended_policy_compliance),
         ("scenario_study_deterministic", check_scenario_study_deterministic),
         ("m3_planning_results_unchanged", check_m3_results_unchanged),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M3.3 (V74 onward)
+    for name, fn in (
+        ("zero_risk_and_empty_memory_identical", check_zero_risk_identical),
+        ("risk_never_changes_plan_length", check_risk_never_changes_length),
+        ("risk_input_sanitised", check_risk_input_sanitised),
+        ("risk_selects_lower_risk_plan", check_risk_picks_lower_risk_plan),
+        ("memory_planning_grid_totals_frozen", check_memory_planning_grid),
+        ("poisoned_memory_planner_recovers", check_poisoned_memory_planner),
+        ("invalid_memory_ignored_by_planner", check_invalid_memory_ignored_by_planner),
+        ("observation_overrides_memory_in_planner", check_observation_wins_in_planner),
+        ("memory_planning_named_deterministic", check_memory_planning_named_deterministic),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

@@ -1,0 +1,700 @@
+{
+  "milestone": "M3.3",
+  "version": "0.7.0",
+  "agents": [
+    "reactive",
+    "reactive_memory",
+    "planner",
+    "planner_reversed",
+    "planner_memory",
+    "planner_reversed_memory"
+  ],
+  "memory_source": "one prior reactive (affect off) episode of the same case",
+  "named": {
+    "cases": {
+      "nominal": {
+        "reactive": {
+          "success": true,
+          "action_count": 0,
+          "blocked_events": 0
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 0,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 0,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 0,
+          "blocked_events": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 0,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 0,
+          "blocked_events": 0
+        }
+      },
+      "low_battery": {
+        "reactive": {
+          "success": true,
+          "action_count": 2,
+          "blocked_events": 0
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 2,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 2,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 2,
+          "blocked_events": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 2,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 2,
+          "blocked_events": 0
+        }
+      },
+      "overheating": {
+        "reactive": {
+          "success": true,
+          "action_count": 2,
+          "blocked_events": 0
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 2,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 2,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 2,
+          "blocked_events": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 2,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 2,
+          "blocked_events": 0
+        }
+      },
+      "service_down": {
+        "reactive": {
+          "success": true,
+          "action_count": 1,
+          "blocked_events": 0
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 1,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 1,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 1,
+          "blocked_events": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 1,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 1,
+          "blocked_events": 0
+        }
+      },
+      "overheated_service_down": {
+        "reactive": {
+          "success": true,
+          "action_count": 3,
+          "blocked_events": 0
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 3,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 3,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 3,
+          "blocked_events": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 3,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 3,
+          "blocked_events": 0
+        }
+      },
+      "compound_failure": {
+        "reactive": {
+          "success": true,
+          "action_count": 7,
+          "blocked_events": 0
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 7,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 7,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 7,
+          "blocked_events": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 7,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 7,
+          "blocked_events": 0
+        }
+      },
+      "disturbance_mid_recovery": {
+        "reactive": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 0
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 0
+        }
+      },
+      "flaky_restart": {
+        "reactive": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 3
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 3
+        },
+        "planner": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 3
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 3
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 3
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 3
+        }
+      },
+      "flaky_restart_low_battery": {
+        "reactive": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 3
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 5,
+          "blocked_events": 2
+        },
+        "planner": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 1
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 3
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 1
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 1
+        }
+      },
+      "charger_outage": {
+        "reactive": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 2
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 2
+        },
+        "planner": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 2
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 2
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 2
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 2
+        }
+      },
+      "battery_empty": {
+        "reactive": {
+          "success": true,
+          "action_count": 3,
+          "blocked_events": 0
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 3,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 3,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 3,
+          "blocked_events": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 3,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 3,
+          "blocked_events": 0
+        }
+      },
+      "max_heat_service_down": {
+        "reactive": {
+          "success": true,
+          "action_count": 5,
+          "blocked_events": 0
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 5,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 5,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 5,
+          "blocked_events": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 5,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 5,
+          "blocked_events": 0
+        }
+      },
+      "deep_battery_flaky_restart": {
+        "reactive": {
+          "success": true,
+          "action_count": 7,
+          "blocked_events": 3
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 7,
+          "blocked_events": 3
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 0
+        }
+      },
+      "flaky_restart_then_crash": {
+        "reactive": {
+          "success": true,
+          "action_count": 8,
+          "blocked_events": 1
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 7,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 8,
+          "blocked_events": 1
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 4,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 7,
+          "blocked_events": 0
+        }
+      },
+      "flaky_restart_heat_spike": {
+        "reactive": {
+          "success": true,
+          "action_count": 9,
+          "blocked_events": 3
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 9,
+          "blocked_events": 3
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 0
+        }
+      },
+      "cool_outage_battery_drain": {
+        "reactive": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 0
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 6,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 9,
+          "blocked_events": 2
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 8,
+          "blocked_events": 2
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 9,
+          "blocked_events": 2
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 8,
+          "blocked_events": 2
+        }
+      },
+      "charger_outage_overheating": {
+        "reactive": {
+          "success": true,
+          "action_count": 5,
+          "blocked_events": 0
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 5,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 7,
+          "blocked_events": 2
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 5,
+          "blocked_events": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 7,
+          "blocked_events": 2
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 5,
+          "blocked_events": 0
+        }
+      },
+      "double_disturbance": {
+        "reactive": {
+          "success": true,
+          "action_count": 8,
+          "blocked_events": 0
+        },
+        "reactive_memory": {
+          "success": true,
+          "action_count": 8,
+          "blocked_events": 0
+        },
+        "planner": {
+          "success": true,
+          "action_count": 8,
+          "blocked_events": 0
+        },
+        "planner_reversed": {
+          "success": true,
+          "action_count": 8,
+          "blocked_events": 0
+        },
+        "planner_memory": {
+          "success": true,
+          "action_count": 8,
+          "blocked_events": 0
+        },
+        "planner_reversed_memory": {
+          "success": true,
+          "action_count": 8,
+          "blocked_events": 0
+        }
+      }
+    },
+    "summary": {
+      "reactive": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 86,
+        "blocked_events": 15
+      },
+      "reactive_memory": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 78,
+        "blocked_events": 7
+      },
+      "planner": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 79,
+        "blocked_events": 10
+      },
+      "planner_reversed": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 88,
+        "blocked_events": 17
+      },
+      "planner_memory": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 79,
+        "blocked_events": 10
+      },
+      "planner_reversed_memory": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 79,
+        "blocked_events": 8
+      }
+    }
+  },
+  "grid": {
+    "cases": 1680,
+    "summary": {
+      "reactive": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8741,
+        "blocked_events": 1224
+      },
+      "reactive_memory": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8134,
+        "blocked_events": 512
+      },
+      "planner": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8428,
+        "blocked_events": 1100
+      },
+      "planner_reversed": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8713,
+        "blocked_events": 1208
+      },
+      "planner_memory": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8271,
+        "blocked_events": 917
+      },
+      "planner_reversed_memory": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8219,
+        "blocked_events": 652
+      }
+    },
+    "head_to_head": {
+      "planner_memory_vs_planner": {
+        "planner_memory_fewer": 140,
+        "planner_fewer": 5,
+        "equal": 1535
+      },
+      "planner_reversed_memory_vs_planner_reversed": {
+        "planner_reversed_memory_fewer": 367,
+        "planner_reversed_fewer": 14,
+        "equal": 1299
+      },
+      "planner_memory_vs_planner_reversed_memory": {
+        "planner_memory_fewer": 259,
+        "planner_reversed_memory_fewer": 307,
+        "equal": 1114
+      },
+      "planner_memory_vs_reactive_memory": {
+        "planner_memory_fewer": 172,
+        "reactive_memory_fewer": 296,
+        "equal": 1212
+      },
+      "reactive_memory_vs_reactive": {
+        "reactive_memory_fewer": 455,
+        "reactive_fewer": 2,
+        "equal": 1223
+      }
+    }
+  },
+  "note": "Fixed deterministic cases only; not evidence of general performance."
+}

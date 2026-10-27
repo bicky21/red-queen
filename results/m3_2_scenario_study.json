@@ -1,6 +1,6 @@
 {
-  "milestone": "M3.2",
-  "version": "0.6.0",
+  "milestone": "M3.3",
+  "version": "0.7.0",
   "agents": [
     "reactive",
     "planner",

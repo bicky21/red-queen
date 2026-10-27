@@ -1,10 +1,11 @@
-# RED QUEEN AI — Milestone M3.2
+# RED QUEEN AI — Milestone M3.3
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
 an affect parameter sweep, persistent SQLite episodic memory, bounded
 advisory memory, a bounded planner with policy enforcement, and an
-expanded scenario study with a planner tie-break control.
+expanded scenario study with a planner tie-break control, and
+memory-informed planning.
 
 Pure Python standard library. No dependencies, no network, no shell
 execution, no real-world actions.
@@ -31,6 +32,8 @@ execution, no real-world actions.
 10. The **planning agent** searches ahead for the shortest permitted plan,
     checks the plan against the policy, follows it, and replans when what
     it observes differs from what it predicted. If no plan exists, it stops.
+11. With memory, the planner uses remembered faults to choose between
+    equally short plans. Memory can never make a plan longer.
 
 Allowed actions (the only ones that can ever run):
 
@@ -62,7 +65,8 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 140 tests ... OK` and `73/73 validation checks passed`.
+   Expected: `Ran 158 tests ... OK` and `82/82 validation checks passed`
+   (takes about 15-25 seconds).
 3. Optional reports:
    ```
    python3 -m red_queen.experiments --output results/m1_affect_comparison.json
@@ -85,6 +89,10 @@ git --version
 7. Optional scenario study (18 scenarios x 4 policies, plus a 1,680-case fault grid):
    ```
    python3 -m red_queen.scenario_study
+   ```
+8. Optional memory-informed planning study (6 agents, about 7 seconds):
+   ```
+   python3 -m red_queen.memory_planning_study
    ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
@@ -109,19 +117,21 @@ red_queen/
   memory_advice.py bounded advisory memory (M2.1)
   memory_experiment.py  empty/irrelevant/relevant memory comparison (M2.1)
   policy.py        policy allowlists + execution-boundary executor (M3)
-  planner.py       bounded breadth-first planner (M3)
+  planner.py       bounded breadth-first planner (M3), risk tie-break (M3.3)
   planning_agent.py plan / validate / act / replan agent (M3)
   planning_experiment.py reactive vs planner x 3 policies (M3)
   scenario_study.py reactive vs planner vs reversed-order planner (M3.2)
-  validation.py    73 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
-                   V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2)
-tests/             140 unittest tests
+  memory_planning_study.py six agents with/without memory (M3.3)
+  validation.py    82 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+                   V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3)
+tests/             158 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M2_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_2.md   (accepted on Linux)
+docs/ENGINEERING_RECORD_M3_3.md
 results/                          build-environment reports
 ```
 
@@ -135,3 +145,4 @@ results/                          build-environment reports
 | M2.1 | 94 tests OK, 50/50 checks | **Accepted** 2026-10-24 |
 | M3 | 121 tests OK, 63/63 checks | **Accepted** 2026-10-27 |
 | M3.2 | 140 tests OK, 73/73 checks | **Accepted** 2026-10-27 |
+| M3.3 | 158 tests OK, 82/82 checks | Pending — run step 2 |
