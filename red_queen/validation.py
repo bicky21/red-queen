@@ -646,6 +646,129 @@ def check_m2_1_results_unchanged() -> CheckResult:
     return got == (70, 70, 68), f"memory experiment total actions empty/irrelevant/relevant={got} (expected 70/70/68)"
 
 
+# ---- M3.2 checks -------------------------------------------------------
+
+# Frozen M3.2 fault-grid totals (default policy, 1680 cases), recorded at build time.
+M3_2_GRID_TOTALS = {"reactive": 8741, "planner": 8428, "planner_reversed": 8713}
+
+
+def check_extended_scenarios_isolated() -> CheckResult:
+    from .scenarios import ALL_SCENARIOS, EXTENDED_SCENARIOS, SCENARIOS_BY_NAME
+
+    ok = (len(SCENARIOS) == 10 and len(EXTENDED_SCENARIOS) == 8
+          and len(ALL_SCENARIOS) == 18 and len(SCENARIOS_BY_NAME) == 18
+          and all(get_scenario(s.name) is s for s in EXTENDED_SCENARIOS)
+          and not set(s.name for s in EXTENDED_SCENARIOS) & set(s.name for s in SCENARIOS))
+    return ok, f"core={len(SCENARIOS)} extended={len(EXTENDED_SCENARIOS)} lookup={len(SCENARIOS_BY_NAME)}"
+
+
+def check_all_agents_recover_extended() -> CheckResult:
+    from .scenario_study import AGENTS, run_agent
+    from .scenarios import ALL_SCENARIOS
+
+    failed = [(s.name, a) for s in ALL_SCENARIOS for a in AGENTS
+              if not run_agent(a, s.make_env, max_steps=s.max_steps).success]
+    total = len(ALL_SCENARIOS) * len(AGENTS)
+    return not failed, f"recovered {total - len(failed)}/{total} failed={failed}"
+
+
+def check_plan_length_order_invariant() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+    from .scenario_study import GRID_STARTS, REVERSED_ORDER
+    from .scenarios import ALL_SCENARIOS
+
+    goal = RecoveryGoal()
+    fwd, rev = BoundedPlanner(goal), BoundedPlanner(goal, action_order=REVERSED_ORDER)
+    starts = list(GRID_STARTS) + [s.initial for s in ALL_SCENARIOS]
+    differing_plans = 0
+    for start in starts:
+        a, b = fwd.plan(start, ACTIONS_ALL()), rev.plan(start, ACTIONS_ALL())
+        if len(a.actions) != len(b.actions) or a.reaches_goal != b.reaches_goal:
+            return False, f"length differs at {start.to_dict()}: {a.actions} vs {b.actions}"
+        differing_plans += a.actions != b.actions
+    return True, f"{len(starts)} start states: equal plan lengths; {differing_plans} with different action order"
+
+
+def check_action_order_validated() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+
+    rejected = 0
+    for bad in (("charge", "cool"), ("charge", "cool", "restart_service", "shell"),
+                ("charge", "charge", "cool", "wait")):
+        try:
+            BoundedPlanner(RecoveryGoal(), action_order=bad)
+        except ValueError:
+            rejected += 1
+    return rejected == 3, f"rejected {rejected}/3 invalid action orders"
+
+
+def check_reactive_optimal_fault_free() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+
+    goal, planner = RecoveryGoal(), BoundedPlanner(RecoveryGoal())
+    states = [SystemState(b, t, up) for b in range(0, 101, 5) for t in range(0, 101, 5) for up in (False, True)]
+    worse = []
+    for s in states:
+        r = RecoveryAgent(goal, AffectConfig(enabled=False), 20).run(SimulatedEnvironment(s))
+        shortest = len(planner.plan(s, ACTIONS_ALL()).actions)
+        if not r.success or r.action_count != shortest:
+            worse.append((s.to_dict(), r.action_count, shortest))
+    return not worse, f"{len(states)} fault-free start states; reactive not optimal in {len(worse)}"
+
+
+def check_grid_totals() -> CheckResult:
+    from .scenario_study import run_grid_part
+
+    g = run_grid_part()
+    totals = {a: s["total_actions"] for a, s in g["summary"].items()}
+    all_ok = all(s["successes"] == s["episodes"] for s in g["summary"].values())
+    ok = totals == M3_2_GRID_TOTALS and all_ok and g["cases"] == 1680
+    return ok, f"cases={g['cases']} totals={totals} all_succeeded={all_ok}"
+
+
+def check_wait_only_policy() -> CheckResult:
+    from .planning_agent import STOP_NO_PLAN
+    from .policy import WAIT_ONLY_POLICY
+    from .scenario_study import run_agent
+
+    s = get_scenario("low_battery")
+    p = run_agent("planner", s.make_env, WAIT_ONLY_POLICY)
+    r = run_agent("reactive", s.make_env, WAIT_ONLY_POLICY)
+    ok = (p.action_count == 0 and p.stop_reason == STOP_NO_PLAN and not p.success
+          and not r.success and set(r.actions) == {"wait"} and r.action_count == 20)
+    return ok, f"planner actions={p.action_count} stop={p.stop_reason}; reactive {r.action_count}x{set(r.actions)}"
+
+
+def check_extended_policy_compliance() -> CheckResult:
+    from .policy import ALL_POLICIES
+    from .scenario_study import run_named_part
+
+    part = run_named_part()
+    leaked = [(r["scenario"], r["policy"], r["agent"]) for r in part["rows"]
+              if not set(r["actions"]) <= ALL_POLICIES[r["policy"]].allowed]
+    return not leaked, f"{len(part['rows'])} runs; executed actions outside policy: {len(leaked)}"
+
+
+def check_scenario_study_deterministic() -> CheckResult:
+    from .scenario_study import run_named_part
+
+    a, b = run_named_part(), run_named_part()
+    return a == b and len(a["rows"]) == 216, f"rows={len(a['rows'])}/216 deterministic={a == b}"
+
+
+def check_m3_results_unchanged() -> CheckResult:
+    from .planning_experiment import run_planning_experiment
+
+    s = run_planning_experiment()["summary"]
+    got = tuple(s[k]["total_actions"] for k in ("default/reactive", "default/planner", "no_restart/reactive",
+                                                 "no_restart/planner", "no_cool/reactive", "no_cool/planner"))
+    expected = (35, 33, 128, 11, 97, 16)
+    return got == expected, f"M3 planning totals={got} (expected {expected})"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -725,6 +848,21 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("impossible_goal_detected_by_planner", check_impossible_goal_detected),
         ("planning_experiment_complete_deterministic", check_planning_experiment),
         ("m2_1_memory_results_unchanged", check_m2_1_results_unchanged),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M3.2 (V64 onward)
+    for name, fn in (
+        ("extended_scenarios_isolated", check_extended_scenarios_isolated),
+        ("all_agents_recover_all_18_scenarios", check_all_agents_recover_extended),
+        ("plan_length_invariant_to_action_order", check_plan_length_order_invariant),
+        ("action_order_validated", check_action_order_validated),
+        ("reactive_optimal_on_fault_free_states", check_reactive_optimal_fault_free),
+        ("fault_grid_totals_frozen", check_grid_totals),
+        ("wait_only_policy_detected", check_wait_only_policy),
+        ("extended_runs_policy_compliant", check_extended_policy_compliance),
+        ("scenario_study_deterministic", check_scenario_study_deterministic),
+        ("m3_planning_results_unchanged", check_m3_results_unchanged),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

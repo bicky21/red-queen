@@ -58,6 +58,11 @@ POLICIES: Dict[str, Policy] = {
     "no_cool": Policy("no_cool", frozenset(ACTIONS) - {"cool"}),
 }
 
+# M3.2: extra policy for the extended study only. Kept out of POLICIES so the
+# M3 planning experiment keeps exactly its previous inputs and results.
+WAIT_ONLY_POLICY = Policy("wait_only", frozenset({"wait"}))
+ALL_POLICIES: Dict[str, Policy] = {**POLICIES, "wait_only": WAIT_ONLY_POLICY}
+
 
 class PolicyExecutor:
     """Execution boundary: policy check + action budget, then the environment."""

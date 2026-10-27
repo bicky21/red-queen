@@ -1,0 +1,3627 @@
+{
+  "milestone": "M3.2",
+  "version": "0.6.0",
+  "agents": [
+    "reactive",
+    "planner",
+    "planner_reversed"
+  ],
+  "named": {
+    "rows": [
+      {
+        "scenario": "nominal",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "nominal",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "nominal",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "low_battery",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "low_battery",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "low_battery",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheating",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "cool",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheating",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "cool",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheating",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "cool",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "service_down",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 1,
+        "actions": [
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "service_down",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 1,
+        "actions": [
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "service_down",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 1,
+        "actions": [
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheated_service_down",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 3,
+        "actions": [
+          "cool",
+          "restart_service",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheated_service_down",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 3,
+        "actions": [
+          "cool",
+          "cool",
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheated_service_down",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 3,
+        "actions": [
+          "cool",
+          "restart_service",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "compound_failure",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 7,
+        "actions": [
+          "cool",
+          "restart_service",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "compound_failure",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 7,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "cool",
+          "cool",
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "compound_failure",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 7,
+        "actions": [
+          "cool",
+          "restart_service",
+          "cool",
+          "cool",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "disturbance_mid_recovery",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 6,
+        "actions": [
+          "charge",
+          "cool",
+          "cool",
+          "restart_service",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "disturbance_mid_recovery",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 6,
+        "actions": [
+          "charge",
+          "charge",
+          "cool",
+          "cool",
+          "cool",
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "disturbance_mid_recovery",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 6,
+        "actions": [
+          "charge",
+          "cool",
+          "cool",
+          "restart_service",
+          "cool",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "flaky_restart",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "flaky_restart",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "flaky_restart_low_battery",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 6,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "flaky_restart_low_battery",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "restart_service",
+          "restart_service"
+        ],
+        "blocked_events": 1
+      },
+      {
+        "scenario": "flaky_restart_low_battery",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 6,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "charger_outage",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "charger_outage",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "charger_outage",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "battery_empty",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 3,
+        "actions": [
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "battery_empty",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 3,
+        "actions": [
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "battery_empty",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 3,
+        "actions": [
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "max_heat_service_down",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 5,
+        "actions": [
+          "cool",
+          "restart_service",
+          "cool",
+          "cool",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "max_heat_service_down",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 5,
+        "actions": [
+          "charge",
+          "cool",
+          "cool",
+          "cool",
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "max_heat_service_down",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 5,
+        "actions": [
+          "cool",
+          "restart_service",
+          "cool",
+          "cool",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "deep_battery_flaky_restart",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 7,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "deep_battery_flaky_restart",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "deep_battery_flaky_restart",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 7,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "flaky_restart_then_crash",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 8,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 1
+      },
+      {
+        "scenario": "flaky_restart_then_crash",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "cool",
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_then_crash",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 8,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "cool",
+          "cool",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 1
+      },
+      {
+        "scenario": "flaky_restart_heat_spike",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 9,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "flaky_restart_heat_spike",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 6,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "cool",
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_heat_spike",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 9,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "cool",
+          "cool",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "cool_outage_battery_drain",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 6,
+        "actions": [
+          "restart_service",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "cool_outage_battery_drain",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 9,
+        "actions": [
+          "charge",
+          "cool",
+          "cool",
+          "cool",
+          "cool",
+          "restart_service",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "cool_outage_battery_drain",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 8,
+        "actions": [
+          "restart_service",
+          "cool",
+          "cool",
+          "cool",
+          "cool",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "charger_outage_overheating",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 5,
+        "actions": [
+          "cool",
+          "cool",
+          "charge",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "charger_outage_overheating",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 7,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "cool",
+          "cool"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "charger_outage_overheating",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 5,
+        "actions": [
+          "cool",
+          "cool",
+          "cool",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "double_disturbance",
+        "policy": "default",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 8,
+        "actions": [
+          "restart_service",
+          "charge",
+          "cool",
+          "cool",
+          "charge",
+          "charge",
+          "cool",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "double_disturbance",
+        "policy": "default",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 8,
+        "actions": [
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "cool",
+          "cool",
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "double_disturbance",
+        "policy": "default",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 8,
+        "actions": [
+          "restart_service",
+          "charge",
+          "cool",
+          "cool",
+          "cool",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "nominal",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "nominal",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "nominal",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "low_battery",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "low_battery",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "low_battery",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheating",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "cool",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheating",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "cool",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheating",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "cool",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "service_down",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "service_down",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "service_down",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheated_service_down",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "cool",
+          "cool",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheated_service_down",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheated_service_down",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "compound_failure",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "cool",
+          "charge",
+          "cool",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "compound_failure",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "compound_failure",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "disturbance_mid_recovery",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "cool",
+          "cool",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "disturbance_mid_recovery",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 3,
+        "actions": [
+          "charge",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "disturbance_mid_recovery",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 3,
+        "actions": [
+          "charge",
+          "cool",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_low_battery",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_low_battery",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_low_battery",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "charger_outage",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "charger_outage",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "charger_outage",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "battery_empty",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 3,
+        "actions": [
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "battery_empty",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 3,
+        "actions": [
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "battery_empty",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 3,
+        "actions": [
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "max_heat_service_down",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "cool",
+          "cool",
+          "cool",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "max_heat_service_down",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "max_heat_service_down",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "deep_battery_flaky_restart",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "deep_battery_flaky_restart",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "deep_battery_flaky_restart",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_then_crash",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "cool",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_then_crash",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_then_crash",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_heat_spike",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "cool",
+          "charge",
+          "cool",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_heat_spike",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_heat_spike",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "cool_outage_battery_drain",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "charge",
+          "cool",
+          "cool",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 1
+      },
+      {
+        "scenario": "cool_outage_battery_drain",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "cool_outage_battery_drain",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "charger_outage_overheating",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 5,
+        "actions": [
+          "cool",
+          "cool",
+          "charge",
+          "charge",
+          "cool"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "charger_outage_overheating",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 7,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "cool",
+          "cool"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "charger_outage_overheating",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 5,
+        "actions": [
+          "cool",
+          "cool",
+          "cool",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "double_disturbance",
+        "policy": "no_restart",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "charge",
+          "cool",
+          "cool",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "cool",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "double_disturbance",
+        "policy": "no_restart",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "double_disturbance",
+        "policy": "no_restart",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "nominal",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "nominal",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "nominal",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "low_battery",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "low_battery",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "low_battery",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 2,
+        "actions": [
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheating",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "restart_service",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheating",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheating",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "service_down",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 1,
+        "actions": [
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "service_down",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 1,
+        "actions": [
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "service_down",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 1,
+        "actions": [
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheated_service_down",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "restart_service",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheated_service_down",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheated_service_down",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "compound_failure",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "compound_failure",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "compound_failure",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "disturbance_mid_recovery",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "charge",
+          "restart_service",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "disturbance_mid_recovery",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 1,
+        "actions": [
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "disturbance_mid_recovery",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 1,
+        "actions": [
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "flaky_restart",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "flaky_restart",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "flaky_restart_low_battery",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 6,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "flaky_restart_low_battery",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "restart_service",
+          "restart_service"
+        ],
+        "blocked_events": 1
+      },
+      {
+        "scenario": "flaky_restart_low_battery",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 6,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "charger_outage",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "charger_outage",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "charger_outage",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "battery_empty",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 3,
+        "actions": [
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "battery_empty",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 3,
+        "actions": [
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "battery_empty",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 3,
+        "actions": [
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "max_heat_service_down",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "max_heat_service_down",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "max_heat_service_down",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "deep_battery_flaky_restart",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 7,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "deep_battery_flaky_restart",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 4,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "restart_service"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "deep_battery_flaky_restart",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 7,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "flaky_restart_then_crash",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "charge",
+          "charge",
+          "charge",
+          "restart_service",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 1
+      },
+      {
+        "scenario": "flaky_restart_then_crash",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_then_crash",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_heat_spike",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "restart_service",
+          "charge",
+          "charge",
+          "charge",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 3
+      },
+      {
+        "scenario": "flaky_restart_heat_spike",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 1,
+        "actions": [
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_heat_spike",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 1,
+        "actions": [
+          "restart_service"
+        ],
+        "blocked_events": 1
+      },
+      {
+        "scenario": "cool_outage_battery_drain",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "restart_service",
+          "charge",
+          "charge",
+          "charge",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "cool_outage_battery_drain",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "cool_outage_battery_drain",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "charger_outage_overheating",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 2
+      },
+      {
+        "scenario": "charger_outage_overheating",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "charger_outage_overheating",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "double_disturbance",
+        "policy": "no_cool",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "restart_service",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "double_disturbance",
+        "policy": "no_cool",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 2,
+        "actions": [
+          "charge",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "double_disturbance",
+        "policy": "no_cool",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 2,
+        "actions": [
+          "restart_service",
+          "charge"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "nominal",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "nominal",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "nominal",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": true,
+        "stop_reason": "goal_believed_satisfied",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "low_battery",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "low_battery",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "low_battery",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheating",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheating",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheating",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "service_down",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "service_down",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "service_down",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheated_service_down",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheated_service_down",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "overheated_service_down",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "compound_failure",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "compound_failure",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "compound_failure",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "disturbance_mid_recovery",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "disturbance_mid_recovery",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "disturbance_mid_recovery",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_low_battery",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_low_battery",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_low_battery",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "charger_outage",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "charger_outage",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "charger_outage",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "battery_empty",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "battery_empty",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "battery_empty",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "max_heat_service_down",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "max_heat_service_down",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "max_heat_service_down",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "deep_battery_flaky_restart",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "deep_battery_flaky_restart",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "deep_battery_flaky_restart",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_then_crash",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_then_crash",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_then_crash",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_heat_spike",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_heat_spike",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "flaky_restart_heat_spike",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "cool_outage_battery_drain",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "cool_outage_battery_drain",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "cool_outage_battery_drain",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "charger_outage_overheating",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "charger_outage_overheating",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "charger_outage_overheating",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "double_disturbance",
+        "policy": "wait_only",
+        "agent": "reactive",
+        "success": false,
+        "stop_reason": "max_steps_reached",
+        "action_count": 20,
+        "actions": [
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait",
+          "wait"
+        ],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "double_disturbance",
+        "policy": "wait_only",
+        "agent": "planner",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      },
+      {
+        "scenario": "double_disturbance",
+        "policy": "wait_only",
+        "agent": "planner_reversed",
+        "success": false,
+        "stop_reason": "no_plan_found",
+        "action_count": 0,
+        "actions": [],
+        "blocked_events": 0
+      }
+    ],
+    "summary": {
+      "default/reactive": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 86,
+        "actions_in_failed_episodes": 0,
+        "blocked_events": 15
+      },
+      "default/planner": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 79,
+        "actions_in_failed_episodes": 0,
+        "blocked_events": 10
+      },
+      "default/planner_reversed": {
+        "episodes": 18,
+        "successes": 18,
+        "total_actions": 88,
+        "actions_in_failed_episodes": 0,
+        "blocked_events": 17
+      },
+      "no_restart/reactive": {
+        "episodes": 18,
+        "successes": 6,
+        "total_actions": 256,
+        "actions_in_failed_episodes": 240,
+        "blocked_events": 3
+      },
+      "no_restart/planner": {
+        "episodes": 18,
+        "successes": 6,
+        "total_actions": 21,
+        "actions_in_failed_episodes": 3,
+        "blocked_events": 4
+      },
+      "no_restart/planner_reversed": {
+        "episodes": 18,
+        "successes": 6,
+        "total_actions": 19,
+        "actions_in_failed_episodes": 3,
+        "blocked_events": 2
+      },
+      "no_cool/reactive": {
+        "episodes": 18,
+        "successes": 8,
+        "total_actions": 227,
+        "actions_in_failed_episodes": 200,
+        "blocked_events": 17
+      },
+      "no_cool/planner": {
+        "episodes": 18,
+        "successes": 8,
+        "total_actions": 26,
+        "actions_in_failed_episodes": 4,
+        "blocked_events": 6
+      },
+      "no_cool/planner_reversed": {
+        "episodes": 18,
+        "successes": 8,
+        "total_actions": 31,
+        "actions_in_failed_episodes": 4,
+        "blocked_events": 12
+      },
+      "wait_only/reactive": {
+        "episodes": 18,
+        "successes": 1,
+        "total_actions": 340,
+        "actions_in_failed_episodes": 340,
+        "blocked_events": 0
+      },
+      "wait_only/planner": {
+        "episodes": 18,
+        "successes": 1,
+        "total_actions": 0,
+        "actions_in_failed_episodes": 0,
+        "blocked_events": 0
+      },
+      "wait_only/planner_reversed": {
+        "episodes": 18,
+        "successes": 1,
+        "total_actions": 0,
+        "actions_in_failed_episodes": 0,
+        "blocked_events": 0
+      }
+    },
+    "pairwise": {
+      "reactive_vs_planner": {
+        "reactive_fewer": 3,
+        "planner_fewer": 45,
+        "equal": 24
+      },
+      "reactive_vs_planner_reversed": {
+        "reactive_fewer": 1,
+        "planner_reversed_fewer": 39,
+        "equal": 32
+      },
+      "planner_vs_planner_reversed": {
+        "planner_fewer": 6,
+        "planner_reversed_fewer": 3,
+        "equal": 63
+      }
+    }
+  },
+  "grid": {
+    "cases": 1680,
+    "summary": {
+      "reactive": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8741,
+        "actions_in_failed_episodes": 0,
+        "blocked_events": 1224
+      },
+      "planner": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8428,
+        "actions_in_failed_episodes": 0,
+        "blocked_events": 1100
+      },
+      "planner_reversed": {
+        "episodes": 1680,
+        "successes": 1680,
+        "total_actions": 8713,
+        "actions_in_failed_episodes": 0,
+        "blocked_events": 1208
+      }
+    },
+    "pairwise": {
+      "reactive_vs_planner": {
+        "reactive_fewer": 325,
+        "planner_fewer": 499,
+        "equal": 856
+      },
+      "reactive_vs_planner_reversed": {
+        "reactive_fewer": 108,
+        "planner_reversed_fewer": 122,
+        "equal": 1450
+      },
+      "planner_vs_planner_reversed": {
+        "planner_fewer": 552,
+        "planner_reversed_fewer": 366,
+        "equal": 762
+      }
+    }
+  },
+  "note": "Fixed deterministic cases only; not evidence of general performance."
+}

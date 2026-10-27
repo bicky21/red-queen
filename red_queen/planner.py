@@ -3,9 +3,10 @@
 Breadth-first search over the policy-allowed actions using the agent's
 transition model. It returns the shortest action sequence that the model
 predicts reaches the goal. Search is bounded by `max_depth` (plan length)
-and `max_nodes` (successor states generated). Actions are expanded in
-sorted name order and visited states are skipped, so the result is fully
-deterministic.
+and `max_nodes` (successor states generated). Actions are expanded in a
+fixed order (sorted names by default; `action_order` can change it, M3.2)
+and visited states are skipped, so the result is fully deterministic. The
+order only chooses *which* shortest plan is returned, never its length.
 
 The planner only predicts. It never executes anything.
 """
@@ -14,7 +15,7 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass
-from typing import Dict, Iterable, Optional, Tuple
+from typing import Dict, Iterable, Optional, Sequence, Tuple
 
 from .actions import ACTION_NAMES, apply_action
 from .goal import RecoveryGoal
@@ -31,16 +32,26 @@ class Plan:
 
 
 class BoundedPlanner:
-    def __init__(self, goal: RecoveryGoal, max_depth: int = 10, max_nodes: int = 20000) -> None:
+    def __init__(
+        self,
+        goal: RecoveryGoal,
+        max_depth: int = 10,
+        max_nodes: int = 20000,
+        action_order: Sequence[str] = ACTION_NAMES,
+    ) -> None:
         if max_depth < 0 or max_nodes < 0:
             raise ValueError("max_depth and max_nodes must be >= 0")
+        order = tuple(action_order)
+        if sorted(order) != sorted(ACTION_NAMES):
+            raise ValueError("action_order must be a permutation of the action allowlist")
         self.goal = goal
         self.max_depth = max_depth
         self.max_nodes = max_nodes
+        self.action_order = order
 
     def plan(self, start: SystemState, allowed: Iterable[str]) -> Plan:
         allowed_set = set(allowed)
-        order = [a for a in ACTION_NAMES if a in allowed_set]
+        order = [a for a in self.action_order if a in allowed_set]
         if self.goal.is_satisfied(start):
             return Plan((), (), True, 0, False)
 

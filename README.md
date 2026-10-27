@@ -1,9 +1,10 @@
-# RED QUEEN AI — Milestone M3
+# RED QUEEN AI — Milestone M3.2
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
 an affect parameter sweep, persistent SQLite episodic memory, bounded
-advisory memory, and a bounded planner with policy enforcement.
+advisory memory, a bounded planner with policy enforcement, and an
+expanded scenario study with a planner tie-break control.
 
 Pure Python standard library. No dependencies, no network, no shell
 execution, no real-world actions.
@@ -61,7 +62,7 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 121 tests ... OK` and `63/63 validation checks passed`.
+   Expected: `Ran 140 tests ... OK` and `73/73 validation checks passed`.
 3. Optional reports:
    ```
    python3 -m red_queen.experiments --output results/m1_affect_comparison.json
@@ -81,6 +82,10 @@ git --version
    ```
    python3 -m red_queen.planning_experiment
    ```
+7. Optional scenario study (18 scenarios x 4 policies, plus a 1,680-case fault grid):
+   ```
+   python3 -m red_queen.scenario_study
+   ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 
@@ -96,7 +101,7 @@ red_queen/
   scoring.py       one-step action scoring
   agent.py         reactive agent: bounded observe-score-act loop
   verification.py  independent goal verifier
-  scenarios.py     7 M1 + 3 fault scenarios
+  scenarios.py     7 M1 + 3 fault scenarios + 8 extended (M3.2)
   experiments.py   affect on/off comparison
   sweeps.py        affect parameter sweep (M1.1)
   memory.py        SQLite episodic memory + lexical search (M2)
@@ -107,14 +112,16 @@ red_queen/
   planner.py       bounded breadth-first planner (M3)
   planning_agent.py plan / validate / act / replan agent (M3)
   planning_experiment.py reactive vs planner x 3 policies (M3)
-  validation.py    63 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
-                   V43-V50 M2.1, V51-V63 M3)
-tests/             121 unittest tests
+  scenario_study.py reactive vs planner vs reversed-order planner (M3.2)
+  validation.py    73 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+                   V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2)
+tests/             140 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M2_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3.md     (accepted on Linux)
+docs/ENGINEERING_RECORD_M3_2.md
 results/                          build-environment reports
 ```
 
@@ -127,3 +134,4 @@ results/                          build-environment reports
 | M2 | 77 tests OK, 42/42 checks | **Accepted** 2026-10-24 |
 | M2.1 | 94 tests OK, 50/50 checks | **Accepted** 2026-10-24 |
 | M3 | 121 tests OK, 63/63 checks | **Accepted** 2026-10-27 |
+| M3.2 | 140 tests OK, 73/73 checks | Pending — run step 2 |
