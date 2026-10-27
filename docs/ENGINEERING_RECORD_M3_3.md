@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M3.3
 
-**Version:** 0.7.0 · **Date:** 2026-10-27 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.7.0 · **Date:** 2026-10-27 · **Status:** build-environment passed; **accepted on Linux (user's laptop), 2026-10-27**
 
 ## 1. Review of M3.2
 
@@ -95,21 +95,14 @@ Data: `results/m3_3_memory_planning_study.json`.
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Accepted, 2026-10-27.** After `git pull` to commit `5c2e64b`, the user ran:
 
 ```
-git pull
 python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
 ```
 
-M3.3 is accepted when the output shows `Ran 158 tests ... OK` and
-`82/82 validation checks passed`. The full run now takes about 15–25 seconds.
-
-Optional (about 7 seconds):
-
-```
-python3 -m red_queen.memory_planning_study
-```
+User-reported output: `Ran 158 tests in 8.999s ... OK` and `82/82 validation checks passed`,
+including V78 with identical frozen grid totals.
 
 ## 9. Next milestone
 
