@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M3.5
 
-**Version:** 0.9.0 · **Date:** 2026-10-27 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.9.0 · **Date:** 2026-10-27 · **Status:** build-environment passed; **accepted on Linux (user's laptop), 2026-10-27**
 **Outcome:** adopted as the recommended memory-planning configuration (opt-in flag `predict_disturbances=True`).
 
 ## 1. Review of M3.4
@@ -93,21 +93,14 @@ Data: `results/m3_5_disturbance_study.json`.
 
 ## 7. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Accepted, 2026-10-27.** After `git pull` to commit `30e4cb8`, the user ran:
 
 ```
-git pull
 python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
 ```
 
-M3.5 is accepted when the output shows `Ran 186 tests ... OK` and
-`100/100 validation checks passed`. The full run takes about 1–2 minutes.
-
-Optional (about 10–20 seconds):
-
-```
-python3 -m red_queen.disturbance_study
-```
+User-reported output: `Ran 186 tests in 25.907s ... OK` and `100/100 validation checks passed`,
+including V96 with identical frozen grid totals.
 
 ## 8. Next milestone
 
