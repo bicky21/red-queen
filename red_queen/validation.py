@@ -1647,6 +1647,155 @@ def check_proposal_study_deterministic() -> CheckResult:
     return same, f"two study runs identical={same}"
 
 
+# ---- M4.1 checks -------------------------------------------------------
+
+
+def check_loopback_only() -> CheckResult:
+    from .llm_adapter import LocalModelError, check_local_url
+
+    good = ["http://127.0.0.1:11434", "http://localhost:11434", "http://[::1]:11434"]
+    bad = ["http://10.0.0.1:11434", "https://localhost:11434", "http://example.com",
+           "http://127.0.0.1.evil.com:11434", "http://localhost:11434/api/generate", "http://u:p@localhost:1"]
+    accepted = sum(1 for u in good if check_local_url(u))
+    refused = 0
+    for u in bad:
+        try:
+            check_local_url(u)
+        except LocalModelError:
+            refused += 1
+    return accepted == 3 and refused == len(bad), f"loopback accepted {accepted}/3; non-local refused {refused}/{len(bad)}"
+
+
+def check_no_proxy_no_redirect() -> CheckResult:
+    import os
+    from unittest import mock
+
+    from .fake_ollama import FakeOllama
+    from .llm_adapter import LocalModelError, OllamaProposer, _request
+    from .proposals import ProposalContext
+    from .goal import RecoveryGoal
+    from .policy import DEFAULT_POLICY
+
+    ctx = ProposalContext.build(SystemState(20, 30, True), RecoveryGoal(), DEFAULT_POLICY, 0, 20)
+    with FakeOllama("smart") as f, mock.patch.dict(os.environ, {"HTTP_PROXY": "http://10.255.255.1:9",
+                                                                   "http_proxy": "http://10.255.255.1:9"}):
+        proxy_ignored = "actions" in OllamaProposer("fake", f.url, timeout=5).propose(ctx)
+    with FakeOllama("redirect") as f:
+        try:
+            OllamaProposer("fake", f.url, timeout=5).propose(ctx)
+            redirect_refused = False
+        except LocalModelError:
+            redirect_refused = True
+    try:
+        _request("http://127.0.0.1:1", "/api/pull", {}, 1.0, 100)
+        endpoint_refused = False
+    except LocalModelError:
+        endpoint_refused = True
+    ok = proxy_ignored and redirect_refused and endpoint_refused
+    return ok, f"proxy env ignored={proxy_ignored}; redirect refused={redirect_refused}; other endpoints refused={endpoint_refused}"
+
+
+def check_timeout_and_size_caps() -> CheckResult:
+    import time
+
+    from .fake_ollama import FakeOllama
+    from .goal import RecoveryGoal
+    from .llm_adapter import LocalModelError, OllamaProposer
+    from .policy import DEFAULT_POLICY
+    from .proposals import ProposalContext
+
+    ctx = ProposalContext.build(SystemState(20, 30, True), RecoveryGoal(), DEFAULT_POLICY, 0, 20)
+    results = {}
+    for mode, kwargs in (("slow", {"delay": 1.0}), ("huge", {})):
+        with FakeOllama(mode, **kwargs) as f:
+            t0 = time.monotonic()
+            try:
+                OllamaProposer("fake", f.url, timeout=0.25).propose(ctx)
+                results[mode] = "accepted?!"
+            except LocalModelError as exc:
+                results[mode] = f"refused in {time.monotonic() - t0:.2f}s ({exc})"
+    ok = all(v.startswith("refused") for v in results.values()) and \
+        float(results["slow"].split(" in ")[1].split("s")[0]) < 0.9
+    return ok, f"{results}"
+
+
+def _llm_runs(mode, scenarios, policies):
+    from .fake_ollama import FakeOllama
+    from .goal import RecoveryGoal
+    from .llm_adapter import OllamaProposer
+    from .planning_agent import PlanningAgent
+
+    out = []
+    with FakeOllama(mode) as f:
+        for policy in policies:
+            for s in scenarios:
+                base = PlanningAgent(RecoveryGoal(), policy=policy).run(s.make_env(), s.name)
+                r = PlanningAgent(RecoveryGoal(), policy=policy,
+                                  proposer=OllamaProposer("fake", f.url, timeout=5)).run(s.make_env(), s.name)
+                out.append((s, policy, base, r))
+    return out
+
+
+def check_adapter_failures_are_rejections() -> CheckResult:
+    from .policy import DEFAULT_POLICY
+
+    scenarios = [get_scenario(n) for n in ("compound_failure", "flaky_restart_heat_spike", "double_disturbance")]
+    for mode in ("huge", "not_json", "no_field", "redirect", "http_error"):
+        for s, policy, base, r in _llm_runs(mode, scenarios, [DEFAULT_POLICY]):
+            if r.actions != base.actions or r.stats["proposals_accepted"] or \
+                    set(r.stats["proposal_rejections"]) != {"proposer_error"}:
+                return False, f"{mode}/{s.name}: {r.stats}"
+    return True, "5 server failure modes x 3 scenarios: every call a proposer_error, runs identical to planner"
+
+
+def check_smart_fake_model_end_to_end() -> CheckResult:
+    from .policy import ALL_POLICIES
+    from .proposal_study import run_pair
+    from .scenarios import ALL_SCENARIOS
+
+    runs = _llm_runs("smart", ALL_SCENARIOS, list(ALL_POLICIES.values()))
+    calls = sum(r.stats["proposal_calls"] for *_, r in runs)
+    accepted = sum(r.stats["proposals_accepted"] for *_, r in runs)
+    outside = sum(1 for s, pol, base, r in runs for a in r.actions if a not in pol.allowed)
+    regress = sum(1 for s, pol, base, r in runs if base.success and not r.success)
+    same_as_stub = all(r.actions == run_pair("planner_reversed", s.make_env, pol, s.name)[1].actions
+                       for s, pol, base, r in runs)
+    ok = calls > 0 and accepted == calls and outside == 0 and regress == 0 and same_as_stub
+    return ok, (f"{len(runs)} runs over HTTP: accepted {accepted}/{calls}; outside policy={outside}; "
+                f"regressions={regress}; identical to M4 stub proposer={same_as_stub}")
+
+
+def check_hostile_model_end_to_end() -> CheckResult:
+    from .policy import ALL_POLICIES
+    from .scenarios import ALL_SCENARIOS
+
+    runs = _llm_runs("hostile", ALL_SCENARIOS, list(ALL_POLICIES.values()))
+    accepted = sum(r.stats["proposals_accepted"] for *_, r in runs)
+    differ = sum(1 for s, pol, base, r in runs if r.actions != base.actions or r.events != base.events)
+    return accepted == 0 and differ == 0, f"{len(runs)} runs over HTTP: accepted={accepted}; differing from planner={differ}"
+
+
+def check_model_off_by_default() -> CheckResult:
+    import contextlib
+    import io
+    import inspect
+
+    from .goal import RecoveryGoal
+    from .llm_trial import main as trial_main
+    from .planning_agent import PlanningAgent
+
+    default_none = inspect.signature(PlanningAgent).parameters["proposer"].default is None
+    agent_ok = PlanningAgent(RecoveryGoal()).proposer is None
+    try:
+        with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
+            trial_main([])
+        needs_flag = False
+    except SystemExit as exc:
+        needs_flag = exc.code == 2
+    ok = default_none and agent_ok and needs_flag
+    return ok, f"proposer default None={default_none}; agent has no model={agent_ok}; trial refuses without --model={needs_flag}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -1810,6 +1959,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("hostile_rationale_has_no_effect", check_rationale_has_no_effect),
         ("proposer_context_isolated", check_context_isolation),
         ("proposal_study_deterministic", check_proposal_study_deterministic),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M4.1 (V118 onward)
+    for name, fn in (
+        ("model_url_loopback_only", check_loopback_only),
+        ("no_proxy_no_redirect_endpoint_allowlist", check_no_proxy_no_redirect),
+        ("model_timeout_and_size_caps", check_timeout_and_size_caps),
+        ("model_server_failures_are_rejections", check_adapter_failures_are_rejections),
+        ("fake_model_end_to_end_accepted", check_smart_fake_model_end_to_end),
+        ("hostile_model_end_to_end_rejected", check_hostile_model_end_to_end),
+        ("model_off_by_default", check_model_off_by_default),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

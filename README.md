@@ -1,4 +1,4 @@
-# RED QUEEN AI — Milestone M4
+# RED QUEEN AI — Milestone M4.1
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
@@ -45,7 +45,10 @@ execution, no real-world actions.
 14. An optional **proposer** (M4) can suggest plans as text, the way a language
     model would. Its text is strictly parsed and checked against the allowed
     actions, the policy and the model before anything runs; otherwise the
-    planner's own plan is used. No language model is connected yet.
+    planner's own plan is used.
+15. Optionally (M4.1), a **local Ollama model** can be that proposer. It only
+    talks to your own machine, has a time and size limit, and is off unless you
+    pass `--model`. Its suggestions go through exactly the same checks.
 
 Allowed actions (the only ones that can ever run):
 
@@ -77,8 +80,8 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 220 tests ... OK` and `117/117 validation checks passed`
-   (takes about 1-3 minutes).
+   Expected: `Ran 239 tests ... OK` and `124/124 validation checks passed`
+   (takes about 1-3 minutes; does not need Ollama).
 3. Optional reports:
    ```
    python3 -m red_queen.experiments --output results/m1_affect_comparison.json
@@ -122,6 +125,13 @@ git --version
     ```
     python3 -m red_queen.proposal_study
     ```
+13. Optional real local-model trial (needs Ollama running):
+    ```
+    python3 -m red_queen.llm_trial --list-models
+    python3 -m red_queen.llm_trial --model llama3.2 --output results/m4_1_llm_trial.json
+    ```
+    If Ollama is not running, start it with `ollama serve` in another terminal.
+    If no model is installed, get a small one with `ollama pull llama3.2`.
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 
@@ -157,10 +167,14 @@ red_queen/
   noisy_memory_study.py 9 agents x 5 memory-noise levels (M3.6)
   proposals.py     untrusted proposal interface: context, prompt, parser, validator, gate (M4)
   proposal_study.py stub proposers vs planner alone (M4)
-  validation.py    117 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+  llm_adapter.py   loopback-only Ollama proposer, timeout + size caps (M4.1)
+  llm_trial.py     real local-model trial runner (M4.1, opt-in)
+  fake_ollama.py   TEST ONLY: fake local Ollama server (M4.1)
+  validation.py    124 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
-                   V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4)
-tests/             220 unittest tests
+                   V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4,
+                   V118-V124 M4.1)
+tests/             239 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -172,6 +186,7 @@ docs/ENGINEERING_RECORD_M3_4.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_5.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_6.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M4.md     (accepted on Linux)
+docs/ENGINEERING_RECORD_M4_1.md
 results/                          build-environment reports
 ```
 
@@ -190,3 +205,4 @@ results/                          build-environment reports
 | M3.5 | 186 tests OK, 100/100 checks | **Accepted** 2026-10-27 |
 | M3.6 | 200 tests OK, 108/108 checks | **Accepted** 2026-10-28 |
 | M4 | 220 tests OK, 117/117 checks | **Accepted** 2026-10-28 |
+| M4.1 | 239 tests OK, 124/124 checks (fake server) | Pending — run step 2, then the model trial |
