@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M4.1
 
-**Version:** 0.12.1 · **Date:** 2026-10-28 · **Status:** test suite accepted on Linux (user's laptop, commit `378f3bb`); patch 0.12.1 pending re-test; **real-model trial pending on the user's laptop**
+**Version:** 0.12.1 · **Date:** 2026-10-28 · **Status:** accepted on Linux (user's laptop, Python 3.14, patch 0.12.1); **real-model trial completed on the user's laptop**
 **Outcome:** an opt-in, loopback-only adapter that lets a local Ollama model act as an M4 proposer. In the build environment it was exercised end to end against a fake local server. No real model has been run yet.
 
 ## 1. Review of M4
@@ -81,19 +81,66 @@ Using 2 scenarios fixed it. The code was unchanged.
 
 Build environment after the patch: **Ran 241 tests, OK**, 0 `ResourceWarning`s; **124/124 validation checks passed**.
 
-## 6. Real-model trial (user's laptop) — pending
+## 6. Real-model trial (user's laptop) — completed 2026-10-28
 
-Run on the laptop where Ollama is installed:
+**User-environment result, not reproduced in the build environment.**
+Model `qwen3.5:4b` on Ollama, `--think off`, default policy, 18 named scenarios,
+version 0.12.1:
 
 ```
-cd ~/red-queen
-git pull
-python3 -m red_queen.llm_trial --list-models          # user's laptop: qwen3.5:4b
 python3 -m red_queen.llm_trial --model qwen3.5:4b --think off --output results/m4_1_llm_trial.json
 ```
 
-The results will be recorded here as **user-environment results**, kept
-separate from the build-environment results above.
+| Scenario | Success | Actions (planner alone) | Accepted / calls | Time |
+|---|---|---|---|---|
+| nominal | yes | 0 (0) | 0/0 | 0.0 s |
+| low_battery | yes | 2 (2) | 0/1 | 11.5 s |
+| overheating | yes | 2 (2) | 0/1 | 3.4 s |
+| service_down | yes | **2 (1)** | **1/1** | 3.7 s |
+| overheated_service_down | yes | 3 (3) | 0/1 | 3.3 s |
+| compound_failure | yes | 7 (7) | 0/1 | 3.3 s |
+| disturbance_mid_recovery | yes | 6 (6) | 0/3 | 10.5 s |
+| flaky_restart | yes | 4 (4) | **2/2** | 6.9 s |
+| flaky_restart_low_battery | yes | **6 (4)** | **1/2** | 5.8 s |
+| charger_outage | yes | 4 (4) | 0/3 | 7.1 s |
+| battery_empty | yes | 3 (3) | 0/1 | 3.0 s |
+| max_heat_service_down | yes | 5 (5) | 0/1 | 14.7 s |
+| deep_battery_flaky_restart | yes | 4 (4) | 0/1 | 3.5 s |
+| flaky_restart_then_crash | yes | 4 (4) | 0/1 | 3.2 s |
+| flaky_restart_heat_spike | yes | 6 (6) | 0/2 | 5.8 s |
+| cool_outage_battery_drain | yes | 9 (9) | 0/3 | 8.3 s |
+| charger_outage_overheating | yes | 7 (7) | 0/3 | 10.1 s |
+| double_disturbance | yes | 8 (8) | 0/3 | 9.9 s |
+
+Summary as printed by the trial runner:
+
+| Metric | Value |
+|---|---|
+| Success | 18/18 (planner alone 18/18) |
+| Actions | 82 (planner alone 79) |
+| Proposal calls / accepted | 30 / 4 (**acceptance rate 13.3%**) |
+| Actions taken from model proposals | 9 |
+| Rejection reasons | `does_not_reach_goal` 25, `not_json` 1 |
+| Model errors / mean latency | 0 / 3.80 s per call |
+| Total time | 114.0 s |
+| **Actions outside policy** | **0** |
+| **Success regressions** | **0** |
+
+(The planner-alone action counts in the table come from the build
+environment's deterministic planner. They match the user's per-run totals,
+79 in both.)
+
+### Findings (one model, one machine, one prompt)
+
+1. **The safety boundary held with a real model.** There were 0 actions outside policy and 0 regressions, and every rejected proposal fell back to the planner.
+2. **The model rarely produces a plan that actually reaches the goal.** 25 of 30 proposals were rejected as `does_not_reach_goal`. The most likely cause is the multi-step arithmetic (battery and temperature thresholds), not the format: only 1 reply was invalid JSON once `--think off` was used.
+3. **Accepted proposals were valid but costlier.** All 4 passed every check, yet two of them were longer than the planner's plan: `service_down` (+1 action) and `flaky_restart_low_battery` (+2 actions). Net effect: **+3 actions, 3.8% more, and no benefit.**
+4. **Cost:** about 3.8 s per model call, compared with near-zero time for the planner.
+
+**Conclusion for this configuration:** the model adds no value over the
+bounded planner in this domain. The M4 design worked as intended:
+untrusted output could not cause harm, and it was used only when it was
+provably valid.
 
 ## 7. Limitations
 
@@ -115,8 +162,8 @@ User-reported output: `Ran 239 tests in 52.628s ... OK` and `124/124 validation 
 The log contained one `ResourceWarning` (see patch 0.12.1). `--list-models` reported
 one installed model: `qwen3.5:4b`.
 
-**Patch 0.12.1 is pending re-test.** Expected: `Ran 241 tests ... OK`, `124/124 validation checks passed`,
-and no `ResourceWarning`.
+**Patch 0.12.1 accepted, 2026-10-28.** After `git pull` to commit `49a8c43`, the user reported
+`Ran 241 tests in 53.469s ... OK` and `124/124 validation checks passed`, with no `ResourceWarning`.
 
 ## 9. Next milestone
 

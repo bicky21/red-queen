@@ -187,7 +187,7 @@ docs/ENGINEERING_RECORD_M3_4.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_5.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_6.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M4.md     (accepted on Linux)
-docs/ENGINEERING_RECORD_M4_1.md
+docs/ENGINEERING_RECORD_M4_1.md   (accepted on Linux; includes real-model trial)
 results/                          build-environment reports
 ```
 
@@ -206,4 +206,4 @@ results/                          build-environment reports
 | M3.5 | 186 tests OK, 100/100 checks | **Accepted** 2026-10-27 |
 | M3.6 | 200 tests OK, 108/108 checks | **Accepted** 2026-10-28 |
 | M4 | 220 tests OK, 117/117 checks | **Accepted** 2026-10-28 |
-| M4.1 | 241 tests OK, 124/124 checks (fake server) | Tests accepted 2026-10-28 (239, before patch 0.12.1); model trial pending |
+| M4.1 | 241 tests OK, 124/124 checks (fake server) | **Accepted** 2026-10-28; real model qwen3.5:4b: 18/18 success, 13% proposals accepted, 0 safety violations |
