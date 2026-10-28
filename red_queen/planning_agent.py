@@ -23,6 +23,15 @@ episode once memory has been shown wrong:
   "on_any_mismatch"  - after any prediction mismatch
 None (default) keeps the M3.5 behaviour.
 
+M4: an optional untrusted `proposer` (LLM-ready interface; see
+proposals.py) is asked for a plan whenever the agent needs one. Its TEXT is
+strictly parsed and validated (allowlist, policy, step budget, model
+simulation, goal, at most `proposal_max_extra_steps` longer than the
+planner's own plan). Only a validated proposal is queued; otherwise the
+planner's plan is used. The ProposalGate bounds calls and disables the
+proposer after repeated rejections. M4 does not combine a proposer with
+memory or disturbance prediction.
+
 Bounds: max_steps (actions), max_replans (planning calls after the first),
 max_policy_denials (rejected plans or executions), and the planner's own
 depth and node limits. Every limit ends the episode with a named stop
@@ -38,6 +47,7 @@ from .environment import SimulatedEnvironment
 from .goal import RecoveryGoal
 from .planner import BoundedPlanner
 from .policy import DEFAULT_POLICY, Policy, PolicyDenied, PolicyExecutor
+from .proposals import ProposalGate
 from .state import SystemState
 from .verification import GoalVerifier
 
@@ -58,6 +68,10 @@ class PlanningAgent:
         advisor=None,
         predict_disturbances: bool = False,
         disturbance_guard: Optional[str] = None,
+        proposer=None,
+        proposal_max_extra_steps: int = 2,
+        proposal_max_calls: int = 10,
+        proposal_max_rejections: int = 3,
     ) -> None:
         if max_steps < 0 or max_replans < 0 or max_policy_denials < 1:
             raise ValueError("invalid bounds")
@@ -76,6 +90,15 @@ class PlanningAgent:
         if disturbance_guard is not None and not self.predict_disturbances:
             raise ValueError("disturbance_guard needs predict_disturbances=True")
         self.disturbance_guard = disturbance_guard
+        if proposer is not None and advisor is not None:
+            raise ValueError("M4: a proposer cannot be combined with memory or disturbance prediction")
+        if proposer is not None and not callable(getattr(proposer, "propose", None)):
+            raise ValueError("proposer must have a propose(context) method")
+        self.proposer = proposer
+        self.proposal_settings = (proposal_max_extra_steps, proposal_max_calls, proposal_max_rejections)
+        if proposer is not None:
+            ProposalGate(proposer, goal, policy, proposal_max_calls, proposal_max_rejections,
+                         proposal_max_extra_steps)  # validates the bounds now
         self.verifier = GoalVerifier(goal)
 
     def run(self, env: SimulatedEnvironment, scenario: str = "") -> EpisodeResult:
@@ -93,6 +116,12 @@ class PlanningAgent:
         guard_tripped_at: Optional[int] = None
         remembered_at_start = dict(remembered)
         plan_risks: List[float] = []
+        gate = None
+        if self.proposer is not None:
+            extra, calls, rejections = self.proposal_settings
+            gate = ProposalGate(self.proposer, self.goal, self.policy, calls, rejections, extra)
+        from_proposals = 0
+        queue_source = "planner"
 
         while len(actions) < self.max_steps:
             observed = env.observe()
@@ -134,6 +163,13 @@ class PlanningAgent:
                         break
                     continue
                 queue, expected = list(plan.actions), list(plan.predicted)
+                queue_source = "planner"
+                if gate is not None:
+                    proposal = gate.try_propose(observed, len(actions), self.max_steps - len(actions),
+                                                len(plan.actions))
+                    if proposal is not None:
+                        queue, expected = list(proposal.actions), list(proposal.predicted)
+                        queue_source = "proposal"
 
             action, predicted = queue.pop(0), expected.pop(0)
             try:
@@ -145,6 +181,7 @@ class PlanningAgent:
                     break
                 continue
             actions.append(action)
+            from_proposals += queue_source == "proposal"
             records.append(
                 StepRecord(
                     step=len(actions),
@@ -195,5 +232,6 @@ class PlanningAgent:
                 **({"remembered_disturbances": {str(k): v for k, v in sorted(remembered_at_start.items())}}
                    if self.predict_disturbances else {}),
                 **({"guard_tripped_at": guard_tripped_at} if self.disturbance_guard else {}),
+                **({**gate.stats(), "actions_from_proposals": from_proposals} if gate is not None else {}),
             },
         )

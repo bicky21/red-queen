@@ -1,4 +1,4 @@
-# RED QUEEN AI — Milestone M3.6
+# RED QUEEN AI — Milestone M4
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
@@ -42,6 +42,10 @@ execution, no real-world actions.
     With `disturbance_guard="on_any_mismatch"` (M3.6), the planner stops
     predicting disturbances once memory has been proven wrong in the current run.
     This pair of settings is the recommended setup for memory-assisted planning.
+14. An optional **proposer** (M4) can suggest plans as text, the way a language
+    model would. Its text is strictly parsed and checked against the allowed
+    actions, the policy and the model before anything runs; otherwise the
+    planner's own plan is used. No language model is connected yet.
 
 Allowed actions (the only ones that can ever run):
 
@@ -73,7 +77,7 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 200 tests ... OK` and `108/108 validation checks passed`
+   Expected: `Ran 220 tests ... OK` and `117/117 validation checks passed`
    (takes about 1-3 minutes).
 3. Optional reports:
    ```
@@ -114,6 +118,10 @@ git --version
     ```
     python3 -m red_queen.noisy_memory_study
     ```
+12. Optional proposal study (stub proposers, a few seconds):
+    ```
+    python3 -m red_queen.proposal_study
+    ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 
@@ -147,10 +155,12 @@ red_queen/
   disturbance_study.py disturbance prediction vs reactive+memory (M3.5)
   memory_noise.py  seeded distortion of remembered faults/disturbances (M3.6)
   noisy_memory_study.py 9 agents x 5 memory-noise levels (M3.6)
-  validation.py    108 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+  proposals.py     untrusted proposal interface: context, prompt, parser, validator, gate (M4)
+  proposal_study.py stub proposers vs planner alone (M4)
+  validation.py    117 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
-                   V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6)
-tests/             200 unittest tests
+                   V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4)
+tests/             220 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -160,7 +170,8 @@ docs/ENGINEERING_RECORD_M3_2.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_3.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_4.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_5.md   (accepted on Linux)
-docs/ENGINEERING_RECORD_M3_6.md
+docs/ENGINEERING_RECORD_M3_6.md   (accepted on Linux)
+docs/ENGINEERING_RECORD_M4.md
 results/                          build-environment reports
 ```
 
@@ -177,4 +188,5 @@ results/                          build-environment reports
 | M3.3 | 158 tests OK, 82/82 checks | **Accepted** 2026-10-27 |
 | M3.4 | 170 tests OK, 90/90 checks | **Accepted** 2026-10-27 |
 | M3.5 | 186 tests OK, 100/100 checks | **Accepted** 2026-10-27 |
-| M3.6 | 200 tests OK, 108/108 checks | Pending — run step 2 |
+| M3.6 | 200 tests OK, 108/108 checks | **Accepted** 2026-10-28 |
+| M4 | 220 tests OK, 117/117 checks | Pending — run step 2 |

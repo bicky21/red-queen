@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M3.6
 
-**Version:** 0.10.0 · **Date:** 2026-10-27 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.10.0 · **Date:** 2026-10-27 · **Status:** build-environment passed; **accepted on Linux (user's laptop), 2026-10-28**
 **Outcome:** memory is safe under noise (no failures at any level). Disturbance prediction degrades badly when memory is wrong; a mismatch guard reduces, but does not remove, that cost. Guard adopted as an opt-in recommendation.
 
 ## 1. Review of M3.5
@@ -101,21 +101,19 @@ quality is unknown and must never cost actions, the M3.3 risk-only planner
 
 ## 7. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Accepted, 2026-10-28.** At commit `a85c682` (`git pull`: already up to date), the user ran:
 
 ```
-git pull
 python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
 ```
 
-M3.6 is accepted when the output shows `Ran 200 tests ... OK` and
-`108/108 validation checks passed`. The full run takes about 1–3 minutes.
+User-reported output: `Ran 200 tests in 35.487s ... OK` and `108/108 validation checks passed`,
+including V107 (frozen subset totals) and V108 (30 -> 14 and 12 -> 3).
 
-Optional (about 1.5–3 minutes; add `--stride 8` for a 15-second version):
-
-```
-python3 -m red_queen.noisy_memory_study
-```
+The user's log also showed one `ResourceWarning: unclosed database`. It came from
+`tests/test_m3_3_memory_planning.py`, which created an `EpisodeMemory` that was never
+closed when the expected `ValueError` was raised. Test hygiene only; no result was
+affected. Fixed in M4.
 
 ## 8. Next milestone
 

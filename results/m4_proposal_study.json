@@ -1,0 +1,568 @@
+{
+  "milestone": "M4",
+  "version": "0.11.0",
+  "proposers": [
+    "planner_reversed",
+    "valid_plan_hostile_rationale",
+    "always_wait",
+    "malformed",
+    "adversarial",
+    "crashing",
+    "random"
+  ],
+  "never_acceptable": [
+    "always_wait",
+    "malformed",
+    "adversarial",
+    "crashing"
+  ],
+  "named": {
+    "default/planner_reversed": {
+      "episodes": 18,
+      "successes": 18,
+      "baseline_successes": 18,
+      "total_actions": 88,
+      "baseline_actions": 79,
+      "proposal_calls": 39,
+      "proposals_accepted": 39,
+      "actions_from_proposals": 88,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 11
+    },
+    "default/valid_plan_hostile_rationale": {
+      "episodes": 18,
+      "successes": 18,
+      "baseline_successes": 18,
+      "total_actions": 88,
+      "baseline_actions": 79,
+      "proposal_calls": 39,
+      "proposals_accepted": 39,
+      "actions_from_proposals": 88,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 11
+    },
+    "default/always_wait": {
+      "episodes": 18,
+      "successes": 18,
+      "baseline_successes": 18,
+      "total_actions": 79,
+      "baseline_actions": 79,
+      "proposal_calls": 31,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "does_not_reach_goal": 31
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "default/malformed": {
+      "episodes": 18,
+      "successes": 18,
+      "baseline_successes": 18,
+      "total_actions": 79,
+      "baseline_actions": 79,
+      "proposal_calls": 31,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "not_json": 25,
+        "not_object": 6
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "default/adversarial": {
+      "episodes": 18,
+      "successes": 18,
+      "baseline_successes": 18,
+      "total_actions": 79,
+      "baseline_actions": 79,
+      "proposal_calls": 31,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "unknown_action": 31
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "default/crashing": {
+      "episodes": 18,
+      "successes": 18,
+      "baseline_successes": 18,
+      "total_actions": 79,
+      "baseline_actions": 79,
+      "proposal_calls": 31,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "proposer_error": 31
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "default/random": {
+      "episodes": 18,
+      "successes": 18,
+      "baseline_successes": 18,
+      "total_actions": 79,
+      "baseline_actions": 79,
+      "proposal_calls": 31,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "longer_than_allowed": 9,
+        "does_not_reach_goal": 21,
+        "passes_through_goal": 1
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "no_restart/planner_reversed": {
+      "episodes": 18,
+      "successes": 6,
+      "baseline_successes": 6,
+      "total_actions": 19,
+      "baseline_actions": 21,
+      "proposal_calls": 9,
+      "proposals_accepted": 9,
+      "actions_from_proposals": 19,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 2
+    },
+    "no_restart/valid_plan_hostile_rationale": {
+      "episodes": 18,
+      "successes": 6,
+      "baseline_successes": 6,
+      "total_actions": 19,
+      "baseline_actions": 21,
+      "proposal_calls": 9,
+      "proposals_accepted": 9,
+      "actions_from_proposals": 19,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 2
+    },
+    "no_restart/always_wait": {
+      "episodes": 18,
+      "successes": 6,
+      "baseline_successes": 6,
+      "total_actions": 21,
+      "baseline_actions": 21,
+      "proposal_calls": 11,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "does_not_reach_goal": 11
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "no_restart/malformed": {
+      "episodes": 18,
+      "successes": 6,
+      "baseline_successes": 6,
+      "total_actions": 21,
+      "baseline_actions": 21,
+      "proposal_calls": 11,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "not_json": 9,
+        "not_object": 2
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "no_restart/adversarial": {
+      "episodes": 18,
+      "successes": 6,
+      "baseline_successes": 6,
+      "total_actions": 21,
+      "baseline_actions": 21,
+      "proposal_calls": 11,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "unknown_action": 11
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "no_restart/crashing": {
+      "episodes": 18,
+      "successes": 6,
+      "baseline_successes": 6,
+      "total_actions": 21,
+      "baseline_actions": 21,
+      "proposal_calls": 11,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "proposer_error": 11
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "no_restart/random": {
+      "episodes": 18,
+      "successes": 6,
+      "baseline_successes": 6,
+      "total_actions": 21,
+      "baseline_actions": 21,
+      "proposal_calls": 11,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "longer_than_allowed": 5,
+        "does_not_reach_goal": 6
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "no_cool/planner_reversed": {
+      "episodes": 18,
+      "successes": 8,
+      "baseline_successes": 8,
+      "total_actions": 31,
+      "baseline_actions": 26,
+      "proposal_calls": 21,
+      "proposals_accepted": 21,
+      "actions_from_proposals": 31,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 4
+    },
+    "no_cool/valid_plan_hostile_rationale": {
+      "episodes": 18,
+      "successes": 8,
+      "baseline_successes": 8,
+      "total_actions": 31,
+      "baseline_actions": 26,
+      "proposal_calls": 21,
+      "proposals_accepted": 21,
+      "actions_from_proposals": 31,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 4
+    },
+    "no_cool/always_wait": {
+      "episodes": 18,
+      "successes": 8,
+      "baseline_successes": 8,
+      "total_actions": 26,
+      "baseline_actions": 26,
+      "proposal_calls": 15,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "does_not_reach_goal": 15
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "no_cool/malformed": {
+      "episodes": 18,
+      "successes": 8,
+      "baseline_successes": 8,
+      "total_actions": 26,
+      "baseline_actions": 26,
+      "proposal_calls": 15,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "not_json": 13,
+        "not_object": 2
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "no_cool/adversarial": {
+      "episodes": 18,
+      "successes": 8,
+      "baseline_successes": 8,
+      "total_actions": 26,
+      "baseline_actions": 26,
+      "proposal_calls": 15,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "unknown_action": 15
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "no_cool/crashing": {
+      "episodes": 18,
+      "successes": 8,
+      "baseline_successes": 8,
+      "total_actions": 26,
+      "baseline_actions": 26,
+      "proposal_calls": 15,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "proposer_error": 15
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "no_cool/random": {
+      "episodes": 18,
+      "successes": 8,
+      "baseline_successes": 8,
+      "total_actions": 26,
+      "baseline_actions": 26,
+      "proposal_calls": 15,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {
+        "longer_than_allowed": 7,
+        "does_not_reach_goal": 8
+      },
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "wait_only/planner_reversed": {
+      "episodes": 18,
+      "successes": 1,
+      "baseline_successes": 1,
+      "total_actions": 0,
+      "baseline_actions": 0,
+      "proposal_calls": 0,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "wait_only/valid_plan_hostile_rationale": {
+      "episodes": 18,
+      "successes": 1,
+      "baseline_successes": 1,
+      "total_actions": 0,
+      "baseline_actions": 0,
+      "proposal_calls": 0,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "wait_only/always_wait": {
+      "episodes": 18,
+      "successes": 1,
+      "baseline_successes": 1,
+      "total_actions": 0,
+      "baseline_actions": 0,
+      "proposal_calls": 0,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "wait_only/malformed": {
+      "episodes": 18,
+      "successes": 1,
+      "baseline_successes": 1,
+      "total_actions": 0,
+      "baseline_actions": 0,
+      "proposal_calls": 0,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "wait_only/adversarial": {
+      "episodes": 18,
+      "successes": 1,
+      "baseline_successes": 1,
+      "total_actions": 0,
+      "baseline_actions": 0,
+      "proposal_calls": 0,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "wait_only/crashing": {
+      "episodes": 18,
+      "successes": 1,
+      "baseline_successes": 1,
+      "total_actions": 0,
+      "baseline_actions": 0,
+      "proposal_calls": 0,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    },
+    "wait_only/random": {
+      "episodes": 18,
+      "successes": 1,
+      "baseline_successes": 1,
+      "total_actions": 0,
+      "baseline_actions": 0,
+      "proposal_calls": 0,
+      "proposals_accepted": 0,
+      "actions_from_proposals": 0,
+      "rejections": {},
+      "actions_outside_policy": 0,
+      "success_regressions": 0,
+      "differs_from_baseline": 0
+    }
+  },
+  "grid": {
+    "stride": 8,
+    "cases": 210,
+    "by_proposer": {
+      "planner_reversed": {
+        "episodes": 210,
+        "successes": 210,
+        "baseline_successes": 210,
+        "total_actions": 1107,
+        "baseline_actions": 1068,
+        "proposal_calls": 471,
+        "proposals_accepted": 471,
+        "actions_from_proposals": 1107,
+        "rejections": {},
+        "actions_outside_policy": 0,
+        "success_regressions": 0,
+        "differs_from_baseline": 165
+      },
+      "valid_plan_hostile_rationale": {
+        "episodes": 210,
+        "successes": 210,
+        "baseline_successes": 210,
+        "total_actions": 1107,
+        "baseline_actions": 1068,
+        "proposal_calls": 471,
+        "proposals_accepted": 471,
+        "actions_from_proposals": 1107,
+        "rejections": {},
+        "actions_outside_policy": 0,
+        "success_regressions": 0,
+        "differs_from_baseline": 165
+      },
+      "always_wait": {
+        "episodes": 210,
+        "successes": 210,
+        "baseline_successes": 210,
+        "total_actions": 1068,
+        "baseline_actions": 1068,
+        "proposal_calls": 425,
+        "proposals_accepted": 0,
+        "actions_from_proposals": 0,
+        "rejections": {
+          "does_not_reach_goal": 425
+        },
+        "actions_outside_policy": 0,
+        "success_regressions": 0,
+        "differs_from_baseline": 0
+      },
+      "malformed": {
+        "episodes": 210,
+        "successes": 210,
+        "baseline_successes": 210,
+        "total_actions": 1068,
+        "baseline_actions": 1068,
+        "proposal_calls": 425,
+        "proposals_accepted": 0,
+        "actions_from_proposals": 0,
+        "rejections": {
+          "not_json": 367,
+          "not_object": 58
+        },
+        "actions_outside_policy": 0,
+        "success_regressions": 0,
+        "differs_from_baseline": 0
+      },
+      "adversarial": {
+        "episodes": 210,
+        "successes": 210,
+        "baseline_successes": 210,
+        "total_actions": 1068,
+        "baseline_actions": 1068,
+        "proposal_calls": 425,
+        "proposals_accepted": 0,
+        "actions_from_proposals": 0,
+        "rejections": {
+          "unknown_action": 425
+        },
+        "actions_outside_policy": 0,
+        "success_regressions": 0,
+        "differs_from_baseline": 0
+      },
+      "crashing": {
+        "episodes": 210,
+        "successes": 210,
+        "baseline_successes": 210,
+        "total_actions": 1068,
+        "baseline_actions": 1068,
+        "proposal_calls": 425,
+        "proposals_accepted": 0,
+        "actions_from_proposals": 0,
+        "rejections": {
+          "proposer_error": 425
+        },
+        "actions_outside_policy": 0,
+        "success_regressions": 0,
+        "differs_from_baseline": 0
+      },
+      "random": {
+        "episodes": 210,
+        "successes": 210,
+        "baseline_successes": 210,
+        "total_actions": 1068,
+        "baseline_actions": 1068,
+        "proposal_calls": 425,
+        "proposals_accepted": 0,
+        "actions_from_proposals": 0,
+        "rejections": {
+          "does_not_reach_goal": 289,
+          "longer_than_allowed": 115,
+          "passes_through_goal": 21
+        },
+        "actions_outside_policy": 0,
+        "success_regressions": 0,
+        "differs_from_baseline": 0
+      }
+    }
+  },
+  "note": "Stub proposers only; no language model. Fixed deterministic cases only."
+}

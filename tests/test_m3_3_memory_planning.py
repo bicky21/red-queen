@@ -126,8 +126,8 @@ class TestStudy(unittest.TestCase):
         s = get_scenario("nominal")
         with self.assertRaises(ValueError):
             run_agent("planner_memory", s.name, s.make_env, None)
-        with self.assertRaises(ValueError):
-            run_agent("oracle", s.name, s.make_env, EpisodeMemory(":memory:"))
+        with EpisodeMemory(":memory:") as memory, self.assertRaises(ValueError):
+            run_agent("oracle", s.name, s.make_env, memory)
 
     def test_run_case_shape(self):
         s = get_scenario("flaky_restart_low_battery")

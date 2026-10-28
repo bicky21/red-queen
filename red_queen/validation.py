@@ -1449,6 +1449,204 @@ def check_guard_improves_worst_case() -> CheckResult:
         "; ".join(f"{g}: {a} -> {b}, {c}%" for g, a, b, c in out)
 
 
+# ---- M4 checks ---------------------------------------------------------
+
+M4_GRID_TOTALS = {"planner_reversed": 1107, "baseline": 1068, "accepted": 471}
+
+
+def _pipeline(text, start, policy, remaining=20):
+    """parse + validate exactly as the gate does; returns 'accepted' or the rejection reason."""
+    from .goal import RecoveryGoal
+    from .planner import BoundedPlanner
+    from .proposals import ProposalRejected, parse_proposal, validate_proposal
+
+    goal = RecoveryGoal()
+    ref = BoundedPlanner(goal).plan(start, policy.allowed)
+    try:
+        actions = parse_proposal(text)
+        validate_proposal(actions, start, goal, policy, remaining, len(ref.actions) if ref.reaches_goal else None)
+    except ProposalRejected as exc:
+        return exc.reason
+    return "accepted"
+
+
+def check_parser_rejects_bad_outputs() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .policy import POLICIES
+    from .proposals import AdversarialProposer, MalformedProposer, ProposalContext
+
+    start = get_scenario("service_down").initial
+    policy = POLICIES["no_restart"]
+    expected_malformed = ["not_json", "not_json", "not_object", "actions_not_list", "non_string_action",
+                          "empty", "unknown_keys", "duplicate_keys", "rationale_invalid", "not_json"]
+    expected_adversarial = ["unknown_action", "unknown_action", "unknown_action", "unknown_keys",
+                            "denied_by_policy", "too_many_actions", "too_long_text", "not_text", "not_text",
+                            "not_json"]
+    ctx = ProposalContext.build(start, RecoveryGoal(), policy, 0, 20)
+    m, a = MalformedProposer(), AdversarialProposer()
+    got_m = [_pipeline(m.propose(ctx), start, policy) for _ in expected_malformed]
+    got_a = [_pipeline(a.propose(ctx), start, policy) for _ in expected_adversarial]
+    missing = _pipeline('{"rationale": "no actions"}', start, policy)
+    ok = got_m == expected_malformed and got_a == expected_adversarial and missing == "missing_actions"
+    return ok, f"malformed reasons ok={got_m == expected_malformed}; adversarial reasons ok={got_a == expected_adversarial}" + \
+        ("" if ok else f" got_m={got_m} got_a={got_a}")
+
+
+def check_valid_proposal_accepted() -> CheckResult:
+    import json
+
+    from .policy import DEFAULT_POLICY
+
+    start = get_scenario("compound_failure").initial
+    plan = ["cool", "cool", "charge", "charge", "charge", "cool", "restart_service"]
+    with_rationale = json.dumps({"actions": plan, "rationale": "cool first"})
+    reordered = json.dumps({"actions": ["charge", "charge", "charge", "cool", "cool", "cool", "restart_service"]})
+    results = [_pipeline(json.dumps({"actions": plan}), start, DEFAULT_POLICY),
+               _pipeline(with_rationale, start, DEFAULT_POLICY), _pipeline(reordered, start, DEFAULT_POLICY)]
+    return results == ["accepted"] * 3, f"valid proposals: {results}"
+
+
+def check_validator_rules() -> CheckResult:
+    import json
+
+    from .policy import DEFAULT_POLICY, POLICIES
+
+    j = lambda acts: json.dumps({"actions": acts})  # noqa: E731
+    cases = [
+        (j(["restart_service"]), get_scenario("service_down").initial, POLICIES["no_restart"], 20, "denied_by_policy"),
+        (j(["charge", "charge"]), get_scenario("low_battery").initial, DEFAULT_POLICY, 1, "exceeds_step_budget"),
+        (j(["wait", "wait", "wait", "charge", "charge"]), get_scenario("low_battery").initial, DEFAULT_POLICY, 20,
+         "longer_than_allowed"),
+        (j(["charge", "charge", "wait"]), get_scenario("low_battery").initial, DEFAULT_POLICY, 20, "passes_through_goal"),
+        (j(["charge"]), get_scenario("low_battery").initial, DEFAULT_POLICY, 20, "does_not_reach_goal"),
+        (j(["charge"]), get_scenario("service_down").initial, POLICIES["no_restart"], 20, "no_reference_plan"),
+    ]
+    got = [_pipeline(text, start, pol, rem) for text, start, pol, rem, _ in cases]
+    want = [c[-1] for c in cases]
+    return got == want, f"validator reasons: {got}"
+
+
+def check_gate_bounds() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .memory import EpisodeMemory
+    from .memory_advice import MemoryAdvisor
+    from .planning_agent import PlanningAgent
+    from .policy import DEFAULT_POLICY
+    from .proposals import CrashingProposer, PlannerProposer, ProposalGate
+
+    goal = RecoveryGoal()
+    gate = ProposalGate(CrashingProposer(), goal, DEFAULT_POLICY, max_calls=10, max_rejections=3)
+    start = get_scenario("low_battery").initial
+    outcomes = [gate.try_propose(start, 0, 20, 2) for _ in range(6)]
+    disabled_ok = gate.calls == 3 and gate.disabled_after_call == 3 and all(o is None for o in outcomes)
+    good = ProposalGate(PlannerProposer(), goal, DEFAULT_POLICY, max_calls=2)
+    calls_ok = sum(good.try_propose(start, 0, 20, 2) is not None for _ in range(5)) == 2 and good.calls == 2
+    refused = 0
+    for kwargs in ({"max_calls": -1}, {"max_rejections": 0}, {"max_extra_steps": 9}):
+        try:
+            ProposalGate(PlannerProposer(), goal, DEFAULT_POLICY, **kwargs)
+        except ValueError:
+            refused += 1
+    with EpisodeMemory(":memory:") as memory:
+        for kwargs in ({"proposer": PlannerProposer(), "advisor": MemoryAdvisor(memory, "x")},
+                       {"proposer": object()}):
+            try:
+                PlanningAgent(goal, **kwargs)
+            except ValueError:
+                refused += 1
+    ok = disabled_ok and calls_ok and refused == 5
+    return ok, f"crash->disabled after 3 calls={disabled_ok}; call cap={calls_ok}; invalid configs refused={refused}/5"
+
+
+_M4_CACHE = {}
+
+
+def _m4_report():
+    if "r" not in _M4_CACHE:
+        from .proposal_study import run_proposal_study
+
+        _M4_CACHE["r"] = run_proposal_study()
+    return _M4_CACHE["r"]
+
+
+def check_proposal_safety_totals() -> CheckResult:
+    from .proposal_study import safety_totals
+
+    s = safety_totals(_m4_report())
+    ok = s["runs"] == 1974 and all(v == 0 for k, v in s.items() if k != "runs")
+    return ok, f"{s}"
+
+
+def check_correct_proposer_followed() -> CheckResult:
+    from .scenario_study import run_agent
+    from .scenarios import ALL_SCENARIOS
+    from .proposal_study import run_pair
+    from .policy import DEFAULT_POLICY
+
+    g = _m4_report()["grid"]["by_proposer"]["planner_reversed"]
+    for s in ALL_SCENARIOS:
+        _, r = run_pair("planner_reversed", s.make_env, DEFAULT_POLICY, s.name)
+        ref = run_agent("planner_reversed", s.make_env)
+        if r.actions != ref.actions:
+            return False, f"{s.name}: proposal run differs from reversed-order planner"
+    got = {"planner_reversed": g["total_actions"], "baseline": g["baseline_actions"], "accepted": g["proposals_accepted"]}
+    ok = got == M4_GRID_TOTALS and g["actions_from_proposals"] > 0
+    return ok, f"18 named runs match the reversed-order planner; grid {got}"
+
+
+def check_rationale_has_no_effect() -> CheckResult:
+    from .policy import ALL_POLICIES
+    from .proposal_study import run_pair
+    from .scenarios import ALL_SCENARIOS
+
+    for policy in ALL_POLICIES.values():
+        for s in ALL_SCENARIOS:
+            _, a = run_pair("planner_reversed", s.make_env, policy, s.name)
+            _, b = run_pair("valid_plan_hostile_rationale", s.make_env, policy, s.name)
+            if a.actions != b.actions or a.events != b.events:
+                return False, f"{s.name}/{policy.name}: hostile rationale changed behaviour"
+    return True, f"{len(ALL_SCENARIOS) * len(ALL_POLICIES)} runs identical with and without hostile rationale"
+
+
+class _MutatingProposer:
+    name = "mutating"
+
+    def propose(self, context):
+        import json
+
+        object.__setattr__(context, "allowed_actions", ("charge", "cool", "restart_service", "wait"))
+        return json.dumps({"actions": ["restart_service"]})
+
+
+def check_context_isolation() -> CheckResult:
+    from .goal import RecoveryGoal
+    from .planning_agent import PlanningAgent
+    from .policy import POLICIES
+    from .proposals import ProposalContext, render_prompt
+
+    s = get_scenario("service_down")
+    r = PlanningAgent(RecoveryGoal(), policy=POLICIES["no_restart"], proposer=_MutatingProposer()).run(
+        s.make_env(), s.name)
+    ctx = ProposalContext.build(s.initial, RecoveryGoal(), POLICIES["no_restart"], 0, 20)
+    plain = all(isinstance(v, (tuple, int, str, bool)) for v in vars(ctx).values())
+    prompt = render_prompt(ctx)
+    prompt_ok = prompt == render_prompt(ctx) and "restart_service" not in prompt and "cool" in prompt
+    s2 = get_scenario("low_battery")
+    r2 = PlanningAgent(RecoveryGoal(), policy=POLICIES["no_restart"], proposer=_MutatingProposer()).run(
+        s2.make_env(), s2.name)
+    ok = (r.action_count == 0 and r2.success and "restart_service" not in r2.actions
+          and r2.stats["proposals_accepted"] == 0 and plain and prompt_ok)
+    return ok, (f"context mutation cannot widen policy (denied action executed: "
+                f"{'restart_service' in r2.actions}); context plain={plain}; prompt deterministic and policy-filtered={prompt_ok}")
+
+
+def check_proposal_study_deterministic() -> CheckResult:
+    from .proposal_study import run_proposal_study
+
+    same = run_proposal_study() == _m4_report()
+    return same, f"two study runs identical={same}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -1598,6 +1796,20 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("noisy_memory_never_causes_failure", check_noisy_memory_never_fails),
         ("noisy_memory_subset_totals_frozen", check_noisy_subset_frozen),
         ("guard_reduces_worst_case_regret", check_guard_improves_worst_case),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M4 (V109 onward)
+    for name, fn in (
+        ("parser_rejects_malformed_and_hostile_text", check_parser_rejects_bad_outputs),
+        ("valid_proposals_accepted", check_valid_proposal_accepted),
+        ("validator_rules_enforced", check_validator_rules),
+        ("proposal_gate_bounds_enforced", check_gate_bounds),
+        ("proposal_safety_totals_zero", check_proposal_safety_totals),
+        ("correct_proposer_followed", check_correct_proposer_followed),
+        ("hostile_rationale_has_no_effect", check_rationale_has_no_effect),
+        ("proposer_context_isolated", check_context_isolation),
+        ("proposal_study_deterministic", check_proposal_study_deterministic),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1
