@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M4.1
 
-**Version:** 0.12.0 · **Date:** 2026-10-28 · **Status:** build-environment passed (fake server only); Linux acceptance pending; **real-model trial pending on the user's laptop**
+**Version:** 0.12.1 · **Date:** 2026-10-28 · **Status:** test suite accepted on Linux (user's laptop, commit `378f3bb`); patch 0.12.1 pending re-test; **real-model trial pending on the user's laptop**
 **Outcome:** an opt-in, loopback-only adapter that lets a local Ollama model act as an M4 proposer. In the build environment it was exercised end to end against a fake local server. No real model has been run yet.
 
 ## 1. Review of M4
@@ -66,6 +66,21 @@ a 0.25 s limit.
 **This shows the boundary works. It says nothing about how well a real
 model plans.**
 
+### Patch 0.12.1 (same day, after the user's first run)
+
+The user's laptop runs **Python 3.14**; the build environment runs 3.13.
+Two follow-ups came out of the user's log:
+
+1. **`ResourceWarning: Implicitly cleaning up <HTTPError 500>`** (Python 3.14 only). When the server replied with a non-2xx status, the adapter turned the `HTTPError` into a `LocalModelError` without closing the response. It now closes it. A new test (`test_http_error_response_closed`) collects warnings and fails if any `ResourceWarning` appears.
+2. **The user's model is `qwen3.5:4b`, a "thinking" model.** Such models can spend the 256-token reply budget on hidden reasoning and return an empty answer. That would fail every proposal for a reason unrelated to planning. `OllamaProposer(think=...)` and `llm_trial --think auto|on|off` were added. `auto` (the default) sends nothing, which keeps earlier behaviour; `off` sends `"think": false`. A new test checks the field is only sent when requested.
+
+One new test failed on its first run because it used `--max-scenarios 1`.
+The first scenario (`nominal`) is already healthy, so the model is never
+called, and the test inspected a request left over from an earlier call.
+Using 2 scenarios fixed it. The code was unchanged.
+
+Build environment after the patch: **Ran 241 tests, OK**, 0 `ResourceWarning`s; **124/124 validation checks passed**.
+
 ## 6. Real-model trial (user's laptop) — pending
 
 Run on the laptop where Ollama is installed:
@@ -73,8 +88,8 @@ Run on the laptop where Ollama is installed:
 ```
 cd ~/red-queen
 git pull
-python3 -m red_queen.llm_trial --list-models
-python3 -m red_queen.llm_trial --model <name from the list> --output results/m4_1_llm_trial.json
+python3 -m red_queen.llm_trial --list-models          # user's laptop: qwen3.5:4b
+python3 -m red_queen.llm_trial --model qwen3.5:4b --think off --output results/m4_1_llm_trial.json
 ```
 
 The results will be recorded here as **user-environment results**, kept
@@ -90,15 +105,18 @@ separate from the build-environment results above.
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Test suite accepted, 2026-10-28** (Python 3.14). After `git pull` to commit `378f3bb`, the user ran:
 
 ```
-git pull
 python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
 ```
 
-M4.1 is accepted when the output shows `Ran 239 tests ... OK` and
-`124/124 validation checks passed`. These tests do **not** use Ollama.
+User-reported output: `Ran 239 tests in 52.628s ... OK` and `124/124 validation checks passed`.
+The log contained one `ResourceWarning` (see patch 0.12.1). `--list-models` reported
+one installed model: `qwen3.5:4b`.
+
+**Patch 0.12.1 is pending re-test.** Expected: `Ran 241 tests ... OK`, `124/124 validation checks passed`,
+and no `ResourceWarning`.
 
 ## 9. Next milestone
 

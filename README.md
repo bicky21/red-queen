@@ -80,7 +80,7 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 239 tests ... OK` and `124/124 validation checks passed`
+   Expected: `Ran 241 tests ... OK` and `124/124 validation checks passed`
    (takes about 1-3 minutes; does not need Ollama).
 3. Optional reports:
    ```
@@ -130,6 +130,7 @@ git --version
     python3 -m red_queen.llm_trial --list-models
     python3 -m red_queen.llm_trial --model llama3.2 --output results/m4_1_llm_trial.json
     ```
+    For "thinking" models such as `qwen3.5`, add `--think off`.
     If Ollama is not running, start it with `ollama serve` in another terminal.
     If no model is installed, get a small one with `ollama pull llama3.2`.
 
@@ -174,7 +175,7 @@ red_queen/
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
                    V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4,
                    V118-V124 M4.1)
-tests/             239 unittest tests
+tests/             241 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -205,4 +206,4 @@ results/                          build-environment reports
 | M3.5 | 186 tests OK, 100/100 checks | **Accepted** 2026-10-27 |
 | M3.6 | 200 tests OK, 108/108 checks | **Accepted** 2026-10-28 |
 | M4 | 220 tests OK, 117/117 checks | **Accepted** 2026-10-28 |
-| M4.1 | 239 tests OK, 124/124 checks (fake server) | Pending — run step 2, then the model trial |
+| M4.1 | 241 tests OK, 124/124 checks (fake server) | Tests accepted 2026-10-28 (239, before patch 0.12.1); model trial pending |

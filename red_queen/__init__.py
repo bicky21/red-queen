@@ -9,5 +9,5 @@ opt-in, loopback-only local-model adapter for Ollama (M4.1).
 Standard library only.
 """
 
-__version__ = "0.12.0"
+__version__ = "0.12.1"
 MILESTONE = "M4.1"

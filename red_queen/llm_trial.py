@@ -5,6 +5,7 @@ Requires a local Ollama server. Nothing runs without --model or --list-models.
   python3 -m red_queen.llm_trial --list-models
   python3 -m red_queen.llm_trial --model llama3.2
   python3 -m red_queen.llm_trial --model llama3.2 --policies all --output results/m4_1_llm_trial.json
+  python3 -m red_queen.llm_trial --model qwen3.5:4b --think off   # "thinking" models
 
 For each named scenario (and policy) it runs the planner alone and the
 planner with the model as proposer, then reports acceptance, rejection
@@ -109,6 +110,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT, help="Seconds per model call")
     parser.add_argument("--policies", choices=("default", "all"), default="default")
     parser.add_argument("--max-scenarios", type=int, default=len(ALL_SCENARIOS))
+    parser.add_argument("--think", choices=("auto", "on", "off"), default="auto",
+                        help="For thinking models (e.g. qwen3): 'off' skips hidden reasoning. "
+                             "'auto' sends nothing (server default).")
     parser.add_argument("--output", type=Path, help="Optional path for a JSON report")
     args = parser.parse_args(argv)
 
@@ -119,7 +123,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             return 0
         if not args.model:
             parser.error("--model is required (or use --list-models)")
-        proposer = OllamaProposer(args.model, args.url, args.timeout)
+        think = {"auto": None, "on": True, "off": False}[args.think]
+        proposer = OllamaProposer(args.model, args.url, args.timeout, think=think)
         installed = list_local_models(args.url)
         if args.model not in installed and f"{args.model}:latest" not in installed:
             print(f"error: model {args.model!r} not installed. Installed: {installed or 'none'}", file=sys.stderr)

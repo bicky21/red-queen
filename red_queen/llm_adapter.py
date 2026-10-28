@@ -102,6 +102,9 @@ def _request(base_url: str, path: str, payload: Optional[Dict[str, Any]], timeou
                 chunks.append(chunk)
     except LocalModelError:
         raise
+    except urllib.error.HTTPError as exc:  # non-2xx reply: close it (Python 3.14 warns otherwise)
+        exc.close()
+        raise LocalModelError(f"HTTP {exc.code}") from None
     except (urllib.error.URLError, socket.timeout, TimeoutError, ConnectionError, OSError) as exc:
         raise LocalModelError(f"request failed: {type(exc).__name__}") from None
     try:
@@ -125,7 +128,8 @@ class OllamaProposer:
     """M4 Proposer backed by a local Ollama server. Untrusted output."""
 
     def __init__(self, model: str, base_url: str = DEFAULT_URL, timeout: float = DEFAULT_TIMEOUT,
-                 seed: int = 0, max_response_bytes: int = MAX_RESPONSE_BYTES) -> None:
+                 seed: int = 0, max_response_bytes: int = MAX_RESPONSE_BYTES,
+                 think: Optional[bool] = None) -> None:
         if not isinstance(model, str) or not _MODEL_RE.match(model):
             raise LocalModelError("invalid model name")
         if not 0 < timeout <= MAX_TIMEOUT:
@@ -137,6 +141,9 @@ class OllamaProposer:
         self.timeout = float(timeout)
         self.seed = int(seed)
         self.max_response_bytes = max_response_bytes
+        if think not in (None, True, False):
+            raise LocalModelError("think must be None, True or False")
+        self.think = think  # None: do not send the field (server default)
         self.name = f"ollama:{model}"
         self.calls = 0
         self.errors = 0
@@ -152,6 +159,8 @@ class OllamaProposer:
             "format": "json",
             "options": {"temperature": 0, "seed": self.seed, "num_predict": MAX_PREDICT_TOKENS},
         }
+        if self.think is not None:  # for "thinking" models such as qwen3: think=False skips reasoning
+            payload["think"] = self.think
         start = time.monotonic()
         try:
             body = _request(self.base_url, "/api/generate", payload, self.timeout, self.max_response_bytes)
@@ -166,5 +175,5 @@ class OllamaProposer:
             self.seconds += time.monotonic() - start
 
     def stats(self) -> Dict[str, Any]:
-        return {"model": self.model, "calls": self.calls, "errors": self.errors,
+        return {"model": self.model, "think": self.think, "calls": self.calls, "errors": self.errors,
                 "mean_seconds": round(self.seconds / self.calls, 3) if self.calls else None}

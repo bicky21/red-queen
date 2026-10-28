@@ -77,6 +77,26 @@ class TestAgainstFakeServer(unittest.TestCase):
         self.assertEqual(req["prompt"], render_prompt(ctx()))
         self.assertEqual(parse_proposal(text), ("charge", "charge"))
 
+    def test_think_field(self):
+        with FakeOllama("smart") as f:
+            OllamaProposer("fake", f.url).propose(ctx())
+            self.assertNotIn("think", f.requests[-1])
+            OllamaProposer("fake", f.url, think=False).propose(ctx())
+            self.assertIs(f.requests[-1]["think"], False)
+        with self.assertRaises(LocalModelError):
+            OllamaProposer("fake", think="no")
+
+    def test_http_error_response_closed(self):
+        import gc
+        import warnings
+
+        with FakeOllama("http_error") as f, warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            with self.assertRaises(LocalModelError):
+                OllamaProposer("fake", f.url, timeout=5).propose(ctx())
+            gc.collect()
+        self.assertFalse([w for w in caught if issubclass(w.category, ResourceWarning)])
+
     def test_list_models(self):
         with FakeOllama(models=["llama3.2:latest", "qwen2.5:0.5b"]) as f:
             self.assertEqual(list_local_models(f.url), ["llama3.2:latest", "qwen2.5:0.5b"])
@@ -153,6 +173,9 @@ class TestTrialRunner(unittest.TestCase):
                 contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
             self.assertEqual(trial_main(["--url", f.url, "--list-models"]), 0)
             self.assertEqual(trial_main(["--url", f.url, "--model", "fake", "--max-scenarios", "3"]), 0)
+            self.assertEqual(trial_main(["--url", f.url, "--model", "fake", "--max-scenarios", "2",
+                                         "--think", "off"]), 0)  # scenario 1 (nominal) makes no call
+            self.assertIs(f.requests[-1]["think"], False)
             self.assertEqual(trial_main(["--url", f.url, "--model", "missing"]), 2)
         self.assertIn("fake:latest", out.getvalue())
         self.assertIn("acceptance rate", out.getvalue())
