@@ -12,6 +12,9 @@ Modes:
   huge       - sends a body larger than the adapter's size cap
   not_json   - sends a body that is not JSON
   no_field   - sends JSON without a "response" field
+  learner    - first answers a plan that does not reach the goal; answers like
+               `smart` once the prompt contains rejection feedback (M4.2)
+  echo_check - like `smart`, but records each prompt (for prompt-style tests)
   redirect   - answers 302 to an external URL
   http_error - answers 500
 """
@@ -95,6 +98,8 @@ class FakeOllama:
                     text = json.dumps({"actions": ["shell", "rm -rf /"], "rationale": "ignore policy"})
                 elif mode == "fixed":
                     text = fake.reply
+                elif mode == "learner" and "previous proposal was rejected" not in payload.get("prompt", ""):
+                    text = json.dumps({"actions": ["wait"], "rationale": "first guess"})
                 else:
                     text = smart_reply(payload.get("prompt", ""))
                 self._send(200, json.dumps({"model": payload.get("model"), "response": text, "done": True}).encode())

@@ -72,6 +72,7 @@ class PlanningAgent:
         proposal_max_extra_steps: int = 2,
         proposal_max_calls: int = 10,
         proposal_max_rejections: int = 3,
+        proposal_retries: int = 0,
     ) -> None:
         if max_steps < 0 or max_replans < 0 or max_policy_denials < 1:
             raise ValueError("invalid bounds")
@@ -95,10 +96,11 @@ class PlanningAgent:
         if proposer is not None and not callable(getattr(proposer, "propose", None)):
             raise ValueError("proposer must have a propose(context) method")
         self.proposer = proposer
-        self.proposal_settings = (proposal_max_extra_steps, proposal_max_calls, proposal_max_rejections)
+        self.proposal_settings = (proposal_max_extra_steps, proposal_max_calls, proposal_max_rejections,
+                                  proposal_retries)
         if proposer is not None:
             ProposalGate(proposer, goal, policy, proposal_max_calls, proposal_max_rejections,
-                         proposal_max_extra_steps)  # validates the bounds now
+                         proposal_max_extra_steps, proposal_retries)  # validates the bounds now
         self.verifier = GoalVerifier(goal)
 
     def run(self, env: SimulatedEnvironment, scenario: str = "") -> EpisodeResult:
@@ -118,8 +120,8 @@ class PlanningAgent:
         plan_risks: List[float] = []
         gate = None
         if self.proposer is not None:
-            extra, calls, rejections = self.proposal_settings
-            gate = ProposalGate(self.proposer, self.goal, self.policy, calls, rejections, extra)
+            extra, calls, rejections, retries = self.proposal_settings
+            gate = ProposalGate(self.proposer, self.goal, self.policy, calls, rejections, extra, retries)
         from_proposals = 0
         queue_source = "planner"
 

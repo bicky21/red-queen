@@ -27,7 +27,7 @@ import urllib.parse
 import urllib.request
 from typing import Any, Dict, List, Optional
 
-from .proposals import ProposalContext, render_prompt
+from .proposals import PROMPT_STYLES, ProposalContext, render_prompt
 
 DEFAULT_URL = "http://127.0.0.1:11434"
 LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1"})
@@ -129,7 +129,7 @@ class OllamaProposer:
 
     def __init__(self, model: str, base_url: str = DEFAULT_URL, timeout: float = DEFAULT_TIMEOUT,
                  seed: int = 0, max_response_bytes: int = MAX_RESPONSE_BYTES,
-                 think: Optional[bool] = None) -> None:
+                 think: Optional[bool] = None, prompt_style: str = "v1") -> None:
         if not isinstance(model, str) or not _MODEL_RE.match(model):
             raise LocalModelError("invalid model name")
         if not 0 < timeout <= MAX_TIMEOUT:
@@ -144,6 +144,9 @@ class OllamaProposer:
         if think not in (None, True, False):
             raise LocalModelError("think must be None, True or False")
         self.think = think  # None: do not send the field (server default)
+        if prompt_style not in PROMPT_STYLES:
+            raise LocalModelError(f"prompt_style must be one of {PROMPT_STYLES}")
+        self.prompt_style = prompt_style
         self.name = f"ollama:{model}"
         self.calls = 0
         self.errors = 0
@@ -154,7 +157,7 @@ class OllamaProposer:
         payload = {
             "model": self.model,
             "system": SYSTEM_INSTRUCTION,
-            "prompt": render_prompt(context),
+            "prompt": render_prompt(context, self.prompt_style),
             "stream": False,
             "format": "json",
             "options": {"temperature": 0, "seed": self.seed, "num_predict": MAX_PREDICT_TOKENS},
@@ -175,5 +178,6 @@ class OllamaProposer:
             self.seconds += time.monotonic() - start
 
     def stats(self) -> Dict[str, Any]:
-        return {"model": self.model, "think": self.think, "calls": self.calls, "errors": self.errors,
+        return {"model": self.model, "think": self.think, "prompt_style": self.prompt_style,
+                "calls": self.calls, "errors": self.errors,
                 "mean_seconds": round(self.seconds / self.calls, 3) if self.calls else None}

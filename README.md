@@ -1,4 +1,4 @@
-# RED QUEEN AI — Milestone M4.1
+# RED QUEEN AI — Milestone M4.2
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
@@ -49,6 +49,9 @@ execution, no real-world actions.
 15. Optionally (M4.1), a **local Ollama model** can be that proposer. It only
     talks to your own machine, has a time and size limit, and is off unless you
     pass `--model`. Its suggestions go through exactly the same checks.
+16. Experimental options (M4.2): other prompt styles (`--prompt`) and a retry
+    that tells the model why its plan was rejected (`--retries`), using only
+    the system's own trusted checks. Both are off by default.
 
 Allowed actions (the only ones that can ever run):
 
@@ -80,7 +83,7 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 241 tests ... OK` and `124/124 validation checks passed`
+   Expected: `Ran 256 tests ... OK` and `131/131 validation checks passed`
    (takes about 1-3 minutes; does not need Ollama).
 3. Optional reports:
    ```
@@ -131,6 +134,10 @@ git --version
     python3 -m red_queen.llm_trial --model llama3.2 --output results/m4_1_llm_trial.json
     ```
     For "thinking" models such as `qwen3.5`, add `--think off`.
+    Compare all prompt styles and retry settings in one run (M4.2, slow):
+    ```
+    python3 -m red_queen.llm_trial --model qwen3.5:4b --think off --compare --output results/m4_2_compare.json
+    ```
     If Ollama is not running, start it with `ollama serve` in another terminal.
     If no model is installed, get a small one with `ollama pull llama3.2`.
 
@@ -171,11 +178,11 @@ red_queen/
   llm_adapter.py   loopback-only Ollama proposer, timeout + size caps (M4.1)
   llm_trial.py     real local-model trial runner (M4.1, opt-in)
   fake_ollama.py   TEST ONLY: fake local Ollama server (M4.1)
-  validation.py    124 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+  validation.py    131 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
                    V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4,
-                   V118-V124 M4.1)
-tests/             241 unittest tests
+                   V118-V124 M4.1, V125-V131 M4.2)
+tests/             256 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -188,6 +195,7 @@ docs/ENGINEERING_RECORD_M3_5.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M3_6.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M4.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M4_1.md   (accepted on Linux; includes real-model trial)
+docs/ENGINEERING_RECORD_M4_2.md
 results/                          build-environment reports
 ```
 
@@ -207,3 +215,4 @@ results/                          build-environment reports
 | M3.6 | 200 tests OK, 108/108 checks | **Accepted** 2026-10-28 |
 | M4 | 220 tests OK, 117/117 checks | **Accepted** 2026-10-28 |
 | M4.1 | 241 tests OK, 124/124 checks (fake server) | **Accepted** 2026-10-28; real model qwen3.5:4b: 18/18 success, 13% proposals accepted, 0 safety violations |
+| M4.2 | 256 tests OK, 131/131 checks (fake server) | Pending — run step 2, then `--compare` |

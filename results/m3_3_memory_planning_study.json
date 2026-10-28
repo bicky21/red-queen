@@ -1,6 +1,6 @@
 {
-  "milestone": "M4.1",
-  "version": "0.12.0",
+  "milestone": "M4.2",
+  "version": "0.13.0",
   "agents": [
     "reactive",
     "reactive_memory",

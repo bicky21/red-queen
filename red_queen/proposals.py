@@ -18,6 +18,14 @@ Accepted text format (and nothing else):
     {"actions": ["cool", "charge", ...], "rationale": "optional, <= 500 chars"}
 The rationale is checked for type and size, then discarded. It never affects
 any decision and is not stored.
+
+M4.2 (experimental, both off by default):
+  * prompt styles: "v1" (M4 prompt, unchanged), "v2_rules" (goal conditions and
+    action effects spelled out), "v3_example" (v2 plus one worked example)
+  * feedback retries: after a rejection the gate may ask again at the same
+    planning point, adding TRUSTED feedback computed by the validator (reason,
+    the parsed allowlisted actions, the predicted final state). Raw proposer
+    text is never echoed back.
 """
 
 from __future__ import annotations
@@ -51,11 +59,23 @@ REASONS = (
 
 
 class ProposalRejected(ValueError):
-    def __init__(self, reason: str, detail: str = "") -> None:
+    def __init__(self, reason: str, detail: str = "", actions: Optional[Tuple[str, ...]] = None,
+                 final_state: Optional[SystemState] = None) -> None:
         if reason not in REASONS:
             raise ValueError(f"unknown rejection reason {reason!r}")
         super().__init__(f"{reason}: {detail}" if detail else reason)
         self.reason = reason
+        self.detail = detail
+        self.actions = actions            # M4.2: parsed, allowlisted names only
+        self.final_state = final_state    # M4.2: model-predicted end state, if simulated
+
+
+PROMPT_STYLES = ("v1", "v2_rules", "v3_example")
+MAX_RETRIES = 2
+MAX_FEEDBACK_CHARS = 400
+# Reasons whose `detail` is built only from numbers by the validator, so it may be fed back.
+# (e.g. unknown_action details contain proposer text and are NEVER fed back.)
+TRUSTED_DETAIL_REASONS = frozenset({"exceeds_step_budget", "longer_than_allowed", "passes_through_goal"})
 
 
 @dataclass(frozen=True)
@@ -69,10 +89,11 @@ class ProposalContext:
     step: int                                   # actions already taken this episode
     remaining_steps: int
     max_actions: int
+    feedback: str = ""                          # M4.2: trusted validator feedback ("" = none)
 
     @staticmethod
     def build(state: SystemState, goal: RecoveryGoal, policy: Policy, step: int,
-              remaining_steps: int) -> "ProposalContext":
+              remaining_steps: int, feedback: str = "") -> "ProposalContext":
         allowed = tuple(a for a in ACTION_NAMES if policy.check(a).allowed)
         return ProposalContext(
             state=tuple(sorted(state.to_dict().items())),
@@ -83,24 +104,68 @@ class ProposalContext:
             step=step,
             remaining_steps=remaining_steps,
             max_actions=min(MAX_PROPOSAL_ACTIONS, remaining_steps),
+            feedback=str(feedback)[:MAX_FEEDBACK_CHARS],
         )
 
     def state_dict(self) -> Dict[str, Any]:
         return dict(self.state)
 
 
-def render_prompt(context: ProposalContext) -> str:
-    """The text a future language model would receive. Deterministic."""
+def render_prompt(context: ProposalContext, style: str = "v1") -> str:
+    """The text a language model receives. Deterministic.
+
+    With style="v1" and no feedback this is exactly the M4 prompt.
+    """
+    if style not in PROMPT_STYLES:
+        raise ValueError(f"unknown prompt style {style!r}")
     lines = [
         "You propose recovery actions for a SIMULATED system. You cannot act; your text is checked.",
         "Current state: " + ", ".join(f"{k}={v}" for k, v in context.state),
         "Goal: " + ", ".join(f"{k}={v}" for k, v in context.goal),
         "Allowed actions:",
         *[f"  - {a}: {d}" for a, d in context.action_descriptions],
+    ]
+    if style in ("v2_rules", "v3_example"):
+        g = dict(context.goal)
+        lines += [
+            "Rules:",
+            f"  - The plan must END with battery >= {g['min_battery']}, temperature <= {g['max_temperature']}"
+            + (" and service_up = True." if g["require_service"] else "."),
+            "  - Apply the actions in order and track battery and temperature after EVERY action.",
+            "  - Values stay between 0 and 100. Do not stop before every goal condition is true.",
+            "  - Do not add actions after the goal is reached. Use as few actions as possible.",
+        ]
+    if style == "v3_example":
+        lines += [
+            "Example (different state): battery=30, service_up=False, temperature=70",
+            "  charge  -> battery=50, temperature=75",
+            "  cool    -> battery=50, temperature=55",
+            "  charge  -> battery=70, temperature=60",
+            "  cool    -> battery=70, temperature=40",
+            "  restart_service -> battery=60, temperature=40, service_up=True   (goal reached)",
+            '  Answer: {"actions": ["charge", "cool", "charge", "cool", "restart_service"]}',
+        ]
+    lines += [
         f"Propose at most {context.max_actions} actions.",
         'Reply with JSON only: {"actions": ["..."], "rationale": "short reason"}',
     ]
+    if context.feedback:
+        lines.append("Your previous proposal was rejected: " + context.feedback + " Propose a corrected plan.")
     return "\n".join(lines)
+
+
+def feedback_text(exc: "ProposalRejected") -> str:
+    """Trusted feedback for a retry: built only from validator data, never raw proposer text."""
+    parts = [f"reason={exc.reason}"]
+    if exc.reason in TRUSTED_DETAIL_REASONS and exc.detail:
+        parts.append(exc.detail)
+    if exc.actions:
+        parts.append("plan=" + json.dumps(list(exc.actions)))
+    if exc.final_state is not None:
+        s = exc.final_state
+        parts.append(f"predicted state at the end of that plan: battery={s.battery}, "
+                     f"temperature={s.temperature}, service_up={s.service_up}")
+    return ("; ".join(parts) + ".")[:MAX_FEEDBACK_CHARS]
 
 
 class Proposer(Protocol):
@@ -180,20 +245,25 @@ def validate_proposal(actions: Sequence[str], start: SystemState, goal: Recovery
     for a in actions:
         if not policy.check(a).allowed:
             raise ProposalRejected("denied_by_policy", a)
+    acts = tuple(actions)  # every name is allowlisted and allowed by policy at this point
     if len(actions) > remaining_steps:
-        raise ProposalRejected("exceeds_step_budget", f"{len(actions)} > {remaining_steps}")
+        raise ProposalRejected("exceeds_step_budget", f"{len(actions)} actions but only {remaining_steps} steps left",
+                               acts)
     if reference_length is None:
         raise ProposalRejected("no_reference_plan")
     if len(actions) > reference_length + max_extra_steps:
-        raise ProposalRejected("longer_than_allowed", f"{len(actions)} > {reference_length}+{max_extra_steps}")
+        raise ProposalRejected("longer_than_allowed",
+                               f"{len(actions)} actions but at most {reference_length + max_extra_steps} allowed",
+                               acts)
     state, predicted = start, []
     for i, a in enumerate(actions):
         state = apply_action(state, a)
         predicted.append(state)
         if goal.is_satisfied(state) and i < len(actions) - 1:
-            raise ProposalRejected("passes_through_goal", f"goal reached after {i + 1} actions")
+            raise ProposalRejected("passes_through_goal",
+                                   f"the goal is already reached after {i + 1} actions; stop there", acts, state)
     if not goal.is_satisfied(state):
-        raise ProposalRejected("does_not_reach_goal")
+        raise ProposalRejected("does_not_reach_goal", "", acts, state)
     return ValidatedPlan(tuple(actions), tuple(predicted))
 
 
@@ -210,13 +280,17 @@ class ProposalGate:
     max_calls: int = DEFAULT_MAX_CALLS
     max_rejections: int = DEFAULT_MAX_REJECTIONS
     max_extra_steps: int = DEFAULT_MAX_EXTRA_STEPS
+    retries: int = 0                    # M4.2: extra attempts with trusted feedback at one planning point
     calls: int = 0
+    retry_calls: int = 0
+    accepted_after_retry: int = 0
     accepted: int = 0
     rejections: Dict[str, int] = field(default_factory=dict)
     disabled_after_call: Optional[int] = None
 
     def __post_init__(self) -> None:
-        if self.max_calls < 0 or self.max_rejections < 1 or not 0 <= self.max_extra_steps <= 5:
+        if self.max_calls < 0 or self.max_rejections < 1 or not 0 <= self.max_extra_steps <= 5 \
+                or not 0 <= self.retries <= MAX_RETRIES:
             raise ValueError("invalid proposal gate bounds")
 
     @property
@@ -230,30 +304,39 @@ class ProposalGate:
 
     def try_propose(self, observed: SystemState, step: int, remaining: int,
                     reference_length: Optional[int]) -> Optional[ValidatedPlan]:
-        if not self.active:
-            return None
-        self.calls += 1
-        context = ProposalContext.build(observed, self.goal, self.policy, step, remaining)
-        try:
-            text = self.proposer.propose(context)
-        except Exception:  # a crashing proposer is just a rejected proposal
-            self._reject("proposer_error")
-            return None
-        try:
-            actions = parse_proposal(text)
-            plan = validate_proposal(actions, observed, self.goal, self.policy, remaining,
-                                     reference_length, self.max_extra_steps)
-        except ProposalRejected as exc:
-            self._reject(exc.reason)
-            return None
-        self.accepted += 1
-        return plan
+        feedback = ""
+        for attempt in range(1 + self.retries):
+            if not self.active:
+                return None
+            self.calls += 1
+            self.retry_calls += attempt > 0
+            context = ProposalContext.build(observed, self.goal, self.policy, step, remaining, feedback)
+            try:
+                text = self.proposer.propose(context)
+            except Exception:  # a crashing proposer is just a rejected proposal
+                self._reject("proposer_error")
+                feedback = "reason=proposer_error."
+                continue
+            try:
+                actions = parse_proposal(text)
+                plan = validate_proposal(actions, observed, self.goal, self.policy, remaining,
+                                         reference_length, self.max_extra_steps)
+            except ProposalRejected as exc:
+                self._reject(exc.reason)
+                feedback = feedback_text(exc)
+                continue
+            self.accepted += 1
+            self.accepted_after_retry += attempt > 0
+            return plan
+        return None
 
     def stats(self) -> Dict[str, Any]:
         return {"proposer": getattr(self.proposer, "name", type(self.proposer).__name__),
                 "proposal_calls": self.calls, "proposals_accepted": self.accepted,
                 "proposal_rejections": dict(sorted(self.rejections.items())),
-                "proposer_disabled_after_call": self.disabled_after_call}
+                "proposer_disabled_after_call": self.disabled_after_call,
+                **({"retry_calls": self.retry_calls, "accepted_after_retry": self.accepted_after_retry}
+                   if self.retries else {})}
 
 
 # ---------------------------------------------------- stub proposers (M4)

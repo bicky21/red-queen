@@ -1,6 +1,6 @@
 {
-  "milestone": "M4.1",
-  "version": "0.12.0",
+  "milestone": "M4.2",
+  "version": "0.13.0",
   "proposers": [
     "planner_reversed",
     "valid_plan_hostile_rationale",
