@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M4
 
-**Version:** 0.11.0 · **Date:** 2026-10-28 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.11.0 · **Date:** 2026-10-28 · **Status:** build-environment passed; **accepted on Linux (user's laptop), 2026-10-28**
 **Outcome:** an untrusted, text-based proposal interface (LLM-ready) with strict parsing, validation, bounding and planner fallback. Tested with stub proposers only. **No language model is connected.**
 
 ## 1. Review of M3.6
@@ -124,21 +124,15 @@ Data: `results/m4_proposal_study.json`.
 
 ## 7. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Accepted, 2026-10-28.** After `git pull` to commit `13b8a9c`, the user ran:
 
 ```
-git pull
 python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
 ```
 
-M4 is accepted when the output shows `Ran 220 tests ... OK` and
-`117/117 validation checks passed`. The full run takes about 1–3 minutes.
-
-Optional (a few seconds):
-
-```
-python3 -m red_queen.proposal_study
-```
+User-reported output: `Ran 220 tests in 38.908s ... OK` and `117/117 validation checks passed`,
+including V113 (safety totals all zero over 1,974 runs). The `ResourceWarning` seen in the
+M3.6 acceptance log no longer appears.
 
 ## 8. Next milestone
 
