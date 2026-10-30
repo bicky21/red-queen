@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M5
 
-**Version:** 0.14.0 · **Date:** 2026-10-30 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.14.0 · **Date:** 2026-10-30 · **Status:** build-environment passed; **Linux acceptance passed 2026-10-30**
 **Outcome:** noisy sensors added. Treating noisy readings as truth causes **false stops**: the agent stops believing it has recovered, and the verifier says it has not. Interval ("belief box") agents with a sound stopping rule had **0 false stops in 2,196 runs**. This costs up to 28% more actions at the highest noise. That guarantee holds **only if the agent knows the true noise bound**.
 
 ## 1. Review of M4.2
@@ -95,17 +95,12 @@ I wrote these down before the full study. They are honest, but self-registered, 
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Passed 2026-10-30.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 273 tests in 79.748s, OK**;
+`python3 -m red_queen.validation` → **141/141 validation checks passed**;
+`python3 -m red_queen.sensor_study` printed a table **identical** to the build-environment table in §5, including the wrong-assumption rows. This confirms the study is deterministic across machines and Python versions (3.13 and 3.14).
 
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.sensor_study
-```
-
-M5 is accepted when the output shows `Ran 273 tests ... OK` and `141/141 validation checks passed`. The study should print the table above, because it is deterministic.
-
-## 9. Next milestone (candidates)
+## 9. Next milestone (candidates) — M5.1 chosen
 
 1. **M5.1: robustness to bad sensor assumptions.** Detect when readings are inconsistent with the assumed bound (for example, a jump no action can explain) and widen the bound or stop safely. Add sensor outliers and bias to the study.
 2. **M5.2: information gathering.** Let the agent re-read (`wait`) when the box is too wide to decide, and measure whether this lowers the extra actions that sound stopping costs.

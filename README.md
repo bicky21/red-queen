@@ -228,4 +228,4 @@ results/                          build-environment reports
 | M4 | 220 tests OK, 117/117 checks | **Accepted** 2026-10-28 |
 | M4.1 | 241 tests OK, 124/124 checks (fake server) | **Accepted** 2026-10-28; real model qwen3.5:4b: 18/18 success, 13% proposals accepted, 0 safety violations |
 | M4.2 | 256 tests OK, 131/131 checks (fake server) | **Accepted** 2026-10-30; real-model `--compare`: no prompt/retry setting beat the planner (82–84 vs 79 actions), 0 safety violations — negative result |
-| M5 | 273 tests OK, 141/141 checks | Pending — run step 2 and step 14 |
+| M5 | 273 tests OK, 141/141 checks | **Accepted** 2026-10-30; sensor study table identical to build environment |
