@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M5.2
 
-**Version:** 0.16.0 · **Date:** 2026-10-30 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.16.0 · **Date:** 2026-10-30 · **Status:** build-environment passed; **Linux acceptance passed 2026-10-30**
 **Outcome:** a second, independent sensor closes the bias gap found in M5.1 **when only one sensor is faulty**. The "hull" fusion had **0 false stops in 1,800 runs** across no fault and four single-sensor bias conditions. The single-sensor agent had up to 152 false stops in 360 runs. It costs 1.3% more actions than the single-sensor agent with no fault (2036 vs 2009), and 6–18% more under bias. There, the single sensor's lower count comes partly from stopping too early. A bias shared by **both** sensors (common mode) is still undetected: hull 16, single 27, and intersect 60 false stops in 360 runs.
 
 ## 1. Review of M5.1
@@ -71,17 +71,12 @@ Self-registered before the study was run:
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Passed 2026-10-30.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 297 tests in 114.075s, OK**;
+`python3 -m red_queen.validation` → **155/155 validation checks passed**;
+`python3 -m red_queen.redundancy_study` printed a table **identical** to §5.
 
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.redundancy_study
-```
-
-M5.2 is accepted when the output shows `Ran 297 tests ... OK` and `155/155 validation checks passed`. The study table should match §5.
-
-## 9. Next milestone (candidates)
+## 9. Next milestone (candidates) — M5.3 chosen
 
 1. **M5.3: consolidate the safety layer.** One `SafeEstimator` that combines adaptation (M5.1) and hull fusion (M5.2), with a defined **safe halt**: a named stop and an operator report when the evidence is contradictory. Re-run all sensor studies against it as a regression baseline.
 2. **M5.4: information gathering.** Re-read before stopping, and measure whether it removes the remaining false stops of the latch and adaptive agents at a small action cost.

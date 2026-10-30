@@ -226,7 +226,7 @@ docs/ENGINEERING_RECORD_M4_1.md   (accepted on Linux; includes real-model trial)
 docs/ENGINEERING_RECORD_M4_2.md   (accepted on Linux; real-model comparison, negative result)
 docs/ENGINEERING_RECORD_M5.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M5_1.md   (accepted on Linux)
-docs/ENGINEERING_RECORD_M5_2.md
+docs/ENGINEERING_RECORD_M5_2.md   (accepted on Linux)
 results/                          build-environment reports
 ```
 
@@ -249,4 +249,4 @@ results/                          build-environment reports
 | M4.2 | 256 tests OK, 131/131 checks (fake server) | **Accepted** 2026-10-30; real-model `--compare`: no prompt/retry setting beat the planner (82–84 vs 79 actions), 0 safety violations — negative result |
 | M5 | 273 tests OK, 141/141 checks | **Accepted** 2026-10-30; sensor study table identical to build environment |
 | M5.1 | 285 tests OK, 148/148 checks | **Accepted** 2026-10-30; study tables identical to build environment |
-| M5.2 | 297 tests OK, 155/155 checks | Pending — run step 2 and step 16 |
+| M5.2 | 297 tests OK, 155/155 checks | **Accepted** 2026-10-30; study table identical to build environment |
