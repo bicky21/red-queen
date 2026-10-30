@@ -1960,6 +1960,209 @@ def check_compare_runner() -> CheckResult:
     return ok, f"--compare ran {len(reports)} configurations {configs}; safety totals 0={safe}"
 
 
+# ---------------------------------------------------------------- M5 checks
+# Noisy sensors and belief agents. Imports are local so earlier checks are
+# unaffected by this module.
+
+M5_FROZEN = {  # (agent, noise): (success, false_stops, actions) over the full study
+    ("naive", 0): (18, 0, 79), ("naive", 5): (360, 0, 1834), ("naive", 10): (353, 7, 1883),
+    ("naive", 15): (344, 16, 1942),
+    ("interval", 0): (18, 0, 79), ("interval", 5): (360, 0, 2009), ("interval", 10): (360, 0, 2204),
+    ("interval", 15): (360, 0, 2487),
+    ("filter", 0): (18, 0, 79), ("filter", 5): (360, 0, 1817), ("filter", 10): (360, 0, 1901),
+    ("filter", 15): (359, 1, 1959),
+    ("filter_verified", 0): (18, 0, 79), ("filter_verified", 5): (360, 0, 1990),
+    ("filter_verified", 10): (360, 0, 2171), ("filter_verified", 15): (360, 0, 2382),
+}
+_M5_CACHE: dict = {}
+
+
+def _m5_study():
+    from .sensor_study import run_study
+    if "study" not in _M5_CACHE:
+        _M5_CACHE["study"] = run_study()
+    return _M5_CACHE["study"]
+
+
+def check_sensor_bounded_deterministic() -> CheckResult:
+    from .scenarios import ALL_SCENARIOS
+    from .sensors import NOISE_LEVELS, NoisySensor
+    worst, reads = 0, 0
+    for s in ALL_SCENARIOS:
+        for noise in NOISE_LEVELS:
+            a, b = NoisySensor(noise, 7), NoisySensor(noise, 7)
+            for step in range(50):
+                r1, r2 = a.read(s.initial, step), b.read(s.initial, step)
+                if r1 != r2 or r1.service_up != s.initial.service_up:
+                    return False, f"not deterministic or service changed at {s.name} step {step}"
+                if noise == 0 and r1 != s.initial:
+                    return False, "noise 0 is not the identity"
+                worst = max(worst, abs(r1.battery - s.initial.battery) - noise,
+                            abs(r1.temperature - s.initial.temperature) - noise)
+                reads += 1
+    refused = 0
+    for bad in (-1, 26, True, 2.5):
+        try:
+            NoisySensor(bad)
+        except ValueError:
+            refused += 1
+    ok = worst <= 0 and refused == 4
+    return ok, f"{reads} readings: max excess over bound={max(worst, 0)}; deterministic; invalid noise refused={refused}/4"
+
+
+def check_belief_boxes_sound() -> CheckResult:
+    from .actions import ACTION_NAMES, apply_action
+    from .belief_agent import predict_box
+    from .sensors import NOISE_LEVELS, Box, NoisySensor, observation_box
+    obs_checked = pred_checked = 0
+    for noise in NOISE_LEVELS:
+        sensor = NoisySensor(noise, 3)
+        for b in range(0, 101, 5):
+            for t in range(0, 101, 5):
+                truth = SystemState(b, t, b % 10 == 0)
+                for step in range(5):
+                    if not observation_box(sensor.read(truth, step), noise).contains(truth):
+                        return False, f"observation box misses truth {truth} at noise {noise}"
+                    obs_checked += 1
+    for b_lo in range(0, 101, 10):
+        for t_lo in range(0, 101, 10):
+            for w in (0, 10, 30):
+                box = Box(b_lo, min(100, b_lo + w), t_lo, min(100, t_lo + w), False)
+                for action in ACTION_NAMES:
+                    pred = predict_box(box, action)
+                    for b in range(box.b_lo, box.b_hi + 1, 5):
+                        for t in range(box.t_lo, box.t_hi + 1, 5):
+                            after = apply_action(SystemState(b, t, False), action)
+                            if not (pred.b_lo <= after.battery <= pred.b_hi and pred.t_lo <= after.temperature <= pred.t_hi):
+                                return False, f"prediction of {box} after {action} misses {after}"
+                            pred_checked += 1
+    return True, f"observation boxes contain the truth in {obs_checked}/{obs_checked} readings; predicted boxes contain {pred_checked}/{pred_checked} successor states"
+
+
+def check_worst_corner_plan_covers_box() -> CheckResult:
+    from .actions import apply_action
+    from .planner import BoundedPlanner
+    from .sensors import Box
+    goal = RecoveryGoal()
+    planner = BoundedPlanner(goal)
+    boxes = states = 0
+    for b_lo in range(0, 101, 10):
+        for t_lo in range(0, 101, 10):
+            for w in (0, 10, 20, 30):
+                for svc in (False, True):
+                    box = Box(b_lo, min(100, b_lo + w), t_lo, min(100, t_lo + w), svc)
+                    plan = planner.plan(box.worst(), frozenset(("charge", "cool", "restart_service", "wait")))
+                    if not plan.reaches_goal:
+                        continue
+                    boxes += 1
+                    for b in range(box.b_lo, box.b_hi + 1, 5):
+                        for t in range(box.t_lo, box.t_hi + 1, 5):
+                            s = SystemState(b, t, svc)
+                            for a in plan.actions:
+                                s = apply_action(s, a)
+                            if not goal.is_satisfied(s):
+                                return False, f"plan {plan.actions} from worst corner of {box} fails from {(b, t, svc)}"
+                            states += 1
+    return boxes > 0, f"{boxes} boxes: worst-corner plan reaches the goal from all {states} states inside"
+
+
+def check_noise_zero_matches_m3() -> CheckResult:
+    from .planning_agent import PlanningAgent
+    from .scenarios import ALL_SCENARIOS
+    from .sensor_study import AGENTS, run_one
+    same = 0
+    totals = {a: 0 for a in AGENTS}
+    for s in ALL_SCENARIOS:
+        m3 = PlanningAgent(RecoveryGoal(), max_steps=s.max_steps).run(s.make_env(), s.name)
+        for a in AGENTS:
+            row = run_one(a, s, 0, 0)
+            if not row["success"]:
+                return False, f"{a} failed {s.name} at noise 0"
+            totals[a] += row["actions"]
+            if a == "naive":
+                same += row["actions"] == len(m3.actions)
+    ok = same == len(ALL_SCENARIOS) and all(v == 79 for v in totals.values())
+    return ok, f"noise 0: all agents 18/18; naive equals M3 planner on {same}/18; action totals={totals}"
+
+
+def check_decisions_use_sensor_only() -> CheckResult:
+    from .belief_agent import BeliefAgent
+    from .planning_agent import PlanningAgent
+    from .scenarios import get_scenario
+    from .sensors import SensedEnvironment
+
+    class LyingSensor:  # always reports a healthy system
+        noise = 0
+
+        def read(self, truth, step):
+            return SystemState(80, 30, True)
+
+    s = get_scenario("compound_failure")
+    env = s.make_env()
+    belief = BeliefAgent(RecoveryGoal(), 0, "interval").run(env, LyingSensor(), s.name)
+    env2 = s.make_env()
+    naive = PlanningAgent(RecoveryGoal()).run(SensedEnvironment(env2, LyingSensor()), s.name)
+    true_naive = GoalVerifier(RecoveryGoal()).verify(env2).satisfied
+    ok = (len(belief.actions) == 0 and not belief.success and len(naive.actions) == 0 and not true_naive)
+    return ok, (f"lying sensor: belief agent actions={len(belief.actions)} verifier success={belief.success}; "
+                f"naive actions={len(naive.actions)} true success={true_naive}")
+
+
+def check_sound_stopping_no_false_stops() -> CheckResult:
+    rows = _m5_study()["rows"]
+    sound = [r for r in rows if r["agent"] in ("interval", "filter_verified")]
+    false = sum(r["false_stop"] for r in sound)
+    fails = sum(not r["success"] for r in sound)
+    return false == 0 and fails == 0, f"interval + filter_verified: {len(sound)} runs, false stops={false}, failures={fails}"
+
+
+def check_sensor_study_frozen() -> CheckResult:
+    from .sensor_study import run_study
+    first = _m5_study()
+    got = {(r["agent"], r["noise"]): (r["success"], r["false_stops"], r["actions"]) for r in first["summary"]}
+    second = run_study()
+    same = second["summary"] == first["summary"] and second["misspecified"] == first["misspecified"]
+    outside = sum(r["outside_policy"] for r in first["summary"])
+    ok = got == M5_FROZEN and same and outside == 0
+    return ok, f"{len(first['rows'])} runs: totals match frozen={got == M5_FROZEN}; deterministic={same}; outside policy={outside}"
+
+
+def check_noise_policy_and_bounds() -> CheckResult:
+    from .belief_agent import BELIEF_MODES, BeliefAgent
+    from .policy import ALL_POLICIES
+    from .scenarios import ALL_SCENARIOS
+    from .sensors import NoisySensor
+    runs = outside = over = bad_wait = 0
+    for policy in ALL_POLICIES.values():
+        for mode in BELIEF_MODES:
+            for s in ALL_SCENARIOS:
+                for seed in range(3):
+                    r = BeliefAgent(RecoveryGoal(), 10, mode, policy=policy).run(s.make_env(), NoisySensor(10, seed))
+                    runs += 1
+                    outside += sum(1 for a in r.actions if not policy.check(a).allowed)
+                    over += len(r.actions) > 20
+                    if policy.name == "wait_only" and r.stop_reason not in ("no_plan_found", "goal_believed_satisfied"):
+                        bad_wait += 1
+    ok = outside == 0 and over == 0 and bad_wait == 0
+    return ok, f"{runs} runs over 4 policies: outside policy={outside}; over budget={over}; wait_only not stopped early={bad_wait}"
+
+
+def check_noise_assumption_matters() -> CheckResult:
+    mis = {m["assumed_noise"]: m["false_stops"] for m in _m5_study()["misspecified"]}
+    ok = mis == {15: 0, 10: 0, 5: 10, 0: 16}
+    return ok, f"interval agent under true noise 15, false stops by assumed bound: {mis} (expected {{15: 0, 10: 0, 5: 10, 0: 16}})"
+
+
+def check_filter_violations_need_model_error() -> CheckResult:
+    from .scenarios import ALL_SCENARIOS
+    clean = {s.name for s in ALL_SCENARIOS if not s.disturbances and not s.blocked}
+    rows = _m5_study()["rows"]
+    in_clean = sum(r["belief_violation_steps"] > 0 for r in rows if r["scenario"] in clean)
+    in_faulty = sum(r["belief_violation_steps"] > 0 for r in rows if r["scenario"] not in clean)
+    return in_clean == 0 and in_faulty > 0, (f"runs with belief violations: {in_clean} in {len(clean)} model-exact scenarios, "
+                                             f"{in_faulty} in fault/disturbance scenarios")
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -2147,6 +2350,21 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("retry_bounds_enforced", check_retry_bounds),
         ("feedback_reaches_learner_fake", check_feedback_reaches_learner),
         ("compare_runner_works", check_compare_runner),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M5 (V132 onward)
+    for name, fn in (
+        ("sensor_bounded_deterministic", check_sensor_bounded_deterministic),
+        ("belief_boxes_sound", check_belief_boxes_sound),
+        ("worst_corner_plan_covers_box", check_worst_corner_plan_covers_box),
+        ("noise_zero_matches_m3", check_noise_zero_matches_m3),
+        ("decisions_use_sensor_verifier_uses_truth", check_decisions_use_sensor_only),
+        ("sound_stopping_no_false_stops", check_sound_stopping_no_false_stops),
+        ("sensor_study_totals_frozen", check_sensor_study_frozen),
+        ("noise_policy_compliance_and_bounds", check_noise_policy_and_bounds),
+        ("noise_assumption_matters", check_noise_assumption_matters),
+        ("filter_violations_need_model_error", check_filter_violations_need_model_error),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1
