@@ -21,6 +21,11 @@ planning and execution, and adds two things:
                                    left (always, with a single sensor).
     "isolate" was added after the first study run showed "halt" stopping
     even though the second sensor was healthy (post-hoc; see the M5.3 record).
+  * M5.4 `cross_isolate=True` (pre-registered in docs/PREREG_M5_4.md): when
+    both sensors are trusted, their boxes do not overlap, and exactly one of
+    them has needed its noise bound widened, that one is isolated
+    (alert sensor_isolated, reason "cross_sensor"). Off by default unless the
+    pre-registered decision rule adopts it.
 
 Configurations reproduce the earlier agents exactly (checked per run in V156):
   SafeAgent(sensors=1, adapt=False) == BeliefAgent "interval"            (M5)
@@ -75,7 +80,8 @@ class Estimate:
 class SafeEstimator:
     """State estimation only: readings in, belief box (or halt) out. Never acts."""
 
-    def __init__(self, noise: int, sensors: int = 2, adapt: bool = True, on_unexplainable: str = "isolate") -> None:
+    def __init__(self, noise: int, sensors: int = 2, adapt: bool = True, on_unexplainable: str = "isolate",
+                 cross_isolate: bool = False) -> None:
         if sensors not in (1, 2):
             raise ValueError("sensors must be 1 or 2")
         if on_unexplainable not in ON_UNEXPLAINABLE:
@@ -84,6 +90,10 @@ class SafeEstimator:
         self.sensors = sensors
         self.adapt = bool(adapt)
         self.on_unexplainable = on_unexplainable
+        if cross_isolate and sensors != 2:
+            raise ValueError("cross_isolate needs two sensors")
+        self.cross_isolate = bool(cross_isolate)
+        self.initial_noise = noise
         self.noise = [noise] * sensors
         self.trusted = [True] * sensors
         self.alerts: List[Alert] = []
@@ -109,7 +119,8 @@ class SafeEstimator:
                     others = any(self.trusted[j] for j in range(self.sensors) if j != i)
                     if self.on_unexplainable == "isolate" and others:
                         self.trusted[i] = False
-                        new.append(Alert(step, "sensor_isolated", names[i], {"remaining": self.sensors - 1}))
+                        new.append(Alert(step, "sensor_isolated", names[i],
+                                         {"remaining": self.sensors - 1, "reason": "unexplainable"}))
                         continue
                     halt = True
                 if need > self.noise[i]:
@@ -119,6 +130,11 @@ class SafeEstimator:
         if self.sensors == 2 and all(self.trusted) and intersect(boxes[0], boxes[1]) is None:
             new.append(Alert(step, "sensors_disagree", "A+B",
                              {"A": boxes[0].to_dict(), "B": boxes[1].to_dict()}))
+            grown = [n > self.initial_noise for n in self.noise]
+            if self.cross_isolate and grown.count(True) == 1:
+                i = grown.index(True)
+                self.trusted[i] = False
+                new.append(Alert(step, "sensor_isolated", names[i], {"remaining": 1, "reason": "cross_sensor"}))
         self.alerts.extend(new)
         if halt:
             return Estimate(None, True, new)
@@ -144,6 +160,7 @@ class SafeAgent:
         sensors: int = 2,
         adapt: bool = True,
         on_unexplainable: str = "isolate",
+        cross_isolate: bool = False,
         planner: Optional[BoundedPlanner] = None,
         policy: Policy = DEFAULT_POLICY,
         max_steps: int = 20,
@@ -151,12 +168,13 @@ class SafeAgent:
     ) -> None:
         if max_steps < 0 or max_policy_denials < 1:
             raise ValueError("invalid bounds")
-        SafeEstimator(noise, sensors, adapt, on_unexplainable)  # validates the configuration now
+        SafeEstimator(noise, sensors, adapt, on_unexplainable, cross_isolate)  # validates the configuration now
         self.goal = goal
         self.noise = noise
         self.sensors = sensors
         self.adapt = bool(adapt)
         self.on_unexplainable = on_unexplainable
+        self.cross_isolate = bool(cross_isolate)
         self.planner = planner if planner is not None else BoundedPlanner(goal)
         self.policy = policy
         self.max_steps = max_steps
@@ -170,7 +188,8 @@ class SafeAgent:
         if self.sensors == 2 and sensors[0] is sensors[1]:
             raise ValueError("redundancy needs two separate sensors")
         sensed = [SensedEnvironment(env, s) for s in sensors]  # decisions use readings only
-        estimator = SafeEstimator(self.noise, self.sensors, self.adapt, self.on_unexplainable)
+        estimator = SafeEstimator(self.noise, self.sensors, self.adapt, self.on_unexplainable,
+                                  self.cross_isolate)
         executor = PolicyExecutor(sensed[0], self.policy, self.max_steps)
         actions: List[str] = []
         records: List[StepRecord] = []
@@ -225,6 +244,7 @@ class SafeAgent:
             stats={
                 "agent": f"safe_{self.sensors}s_{'adapt' if self.adapt else 'fixed'}",
                 "on_unexplainable": self.on_unexplainable,
+                "cross_isolate": self.cross_isolate,
                 "policy": self.policy.name,
                 "noise": self.noise,
                 "plans": plans,

@@ -2551,6 +2551,99 @@ def check_safety_layer_policy_compliance() -> CheckResult:
     return outside == 0 and over == 0, f"{runs} safe-agent runs over 4 policies x 2 combined-fault conditions: outside policy={outside}; over budget={over}"
 
 
+# --------------------------------------------------------------- M5.4 checks
+
+M54_FROZEN = {('none', 'safe'): (360, 0, 0, 2036), ('none', 'safe_x'): (360, 0, 0, 2036), ('wrong_bound', 'safe'): (360, 0, 0, 2452), ('wrong_bound', 'safe_x'): (357, 3, 116, 2385), ('A_drift', 'safe'): (360, 0, 0, 2036), ('A_drift', 'safe_x'): (360, 0, 0, 2023), ('A_stuck_mid', 'safe'): (142, 0, 0, 5285), ('A_stuck_mid', 'safe_x'): (318, 0, 0, 2650), ('B_stuck_low', 'safe'): (56, 0, 0, 6188), ('B_stuck_low', 'safe_x'): (282, 0, 0, 2930), ('wrong_bound+B_stuck_low', 'safe'): (38, 0, 0, 6504), ('wrong_bound+B_stuck_low', 'safe_x'): (121, 3, 99, 5330), ('A_dead_low', 'safe'): (101, 0, 0, 5520), ('A_dead_low', 'safe_x'): (299, 0, 0, 2702), ('A_dead', 'safe'): (360, 0, 0, 2005), ('A_dead', 'safe_x'): (360, 0, 0, 2005)}  # (condition, agent): (success, false_stops, wrongful_isolations, actions)
+
+
+def _m54_study():
+    from .cross_isolation_study import run_study
+    if "cross" not in _M5_CACHE:
+        _M5_CACHE["cross"] = run_study()
+    return _M5_CACHE["cross"]
+
+
+def check_cross_isolate_off_is_m5_3() -> CheckResult:
+    from .safe_agent import SafeAgent
+    from .safety_layer_study import CONDITIONS, sensors_for
+    from .scenarios import ALL_SCENARIOS
+    runs = diff = 0
+    for cond in CONDITIONS:
+        for sc in ALL_SCENARIOS:
+            for seed in range(3):
+                a = SafeAgent(RecoveryGoal(), 5, 2, True).run(sc.make_env(), sensors_for(cond, seed))
+                b = SafeAgent(RecoveryGoal(), 5, 2, True, cross_isolate=False).run(sc.make_env(), sensors_for(cond, seed))
+                runs += 1
+                diff += a.actions != b.actions or a.stop_reason != b.stop_reason
+    default_off = SafeAgent(RecoveryGoal(), 5).cross_isolate is False
+    return diff == 0 and default_off, f"default cross_isolate=False={default_off}; {runs} runs identical to M5.3 safe (differences={diff})"
+
+
+def check_drift_sensor_and_cross_config() -> CheckResult:
+    from .safe_agent import SafeEstimator
+    from .sensors import DriftSensor, NoisySensor
+    d = DriftSensor(NoisySensor(0), 0, -2)
+    truth = SystemState(50, 50, True)
+    exact = [d.read(truth, k).temperature for k in (0, 1, 5, 30)] == [50, 48, 40, 0]
+    refused = 0
+    for make in (lambda: DriftSensor(NoisySensor(0), 0, 11), lambda: SafeEstimator(5, 1, cross_isolate=True)):
+        try:
+            make()
+        except ValueError:
+            refused += 1
+    return exact and refused == 2, f"drift readings exact and clamped={exact}; invalid configs refused={refused}/2"
+
+
+def check_cross_rule_unit() -> CheckResult:
+    from .safe_agent import SafeEstimator
+    est = SafeEstimator(5, 2, True, "isolate", cross_isolate=True)
+    first = [SystemState(50, 50, True), SystemState(50, 50, True)]
+    est.update(first, 0, None)
+    est.action_taken(first)
+    # A jumps by 16 on a wait (needs widening to 8); B stays; boxes disjoint -> isolate A
+    e = est.update([SystemState(66, 50, True), SystemState(50, 50, True)], 1, "wait")
+    rep = est.report()
+    ok = rep["trusted"] == [False, True] and e.belief.b_hi == 55 and any(
+        a["detail"].get("reason") == "cross_sensor" for a in rep["alerts"])
+    return ok, f"one sensor widened + disjoint boxes: trusted={rep['trusted']}; belief battery={[e.belief.b_lo, e.belief.b_hi]}"
+
+
+def check_cross_study_frozen() -> CheckResult:
+    from .cross_isolation_study import run_study
+    got = {(r["condition"], r["agent"]): (r["success"], r["false_stops"], r["wrongful_isolations"], r["actions"])
+           for r in _m54_study()["summary"]}
+    a, b = run_study(seeds=1), run_study(seeds=1)
+    return got == M54_FROZEN and a == b, f"16 rows x 360 runs: totals match frozen={got == M54_FROZEN}; 1-seed reruns identical={a == b}"
+
+
+def check_prereg_decision_applied() -> CheckResult:
+    from .cross_isolation_study import decide
+    d = _m54_study()["decision"]
+    again = decide(_m54_study()["summary"])
+    ok = d == again and d["adopt_as_default"] is False and not d["C1_no_false_stops"] and not d["C3_few_wrongful_isolations"]
+    return ok, f"pre-registered rule: C1={d['C1_no_false_stops']} C2={d['C2_no_regression_and_gain']} C3={d['C3_few_wrongful_isolations']} -> adopt={d['adopt_as_default']} (kept off by default)"
+
+
+def check_cross_gains_on_stuck_faults() -> CheckResult:
+    get = {(r["condition"], r["agent"]): r for r in _m54_study()["summary"]}
+    conds = ("A_stuck_mid", "B_stuck_low", "A_dead_low")
+    gains = {c: (get[(c, "safe")]["success"], get[(c, "safe_x")]["success"]) for c in conds}
+    safe_fs = {c: get[(c, "safe_x")]["false_stops"] for c in conds}
+    ok = all(b > a for a, b in gains.values()) and all(v == 0 for v in safe_fs.values())
+    return ok, f"successes safe -> safe_x on stuck faults (correct bound): {gains}; safe_x false stops={safe_fs}"
+
+
+def check_prereg_file_present() -> CheckResult:
+    import os
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M5_4.md")
+    if not os.path.exists(path):
+        return False, "docs/PREREG_M5_4.md missing"
+    text = open(path, encoding="utf-8").read()
+    keys = ("C1", "C2", "C3", "A_stuck_mid", "B_stuck_low", "wrong_bound", "18 of 360")
+    missing = [k for k in keys if k not in text]
+    return not missing, f"pre-registration file present; required terms missing={missing}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -2789,6 +2882,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("halt_and_isolate_behaviour", check_halt_and_isolate_behaviour),
         ("operator_report_numeric_only", check_operator_report_numeric_only),
         ("safety_layer_policy_compliance", check_safety_layer_policy_compliance),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M5.4 (V163 onward)
+    for name, fn in (
+        ("cross_isolate_off_is_m5_3", check_cross_isolate_off_is_m5_3),
+        ("drift_sensor_and_cross_config", check_drift_sensor_and_cross_config),
+        ("cross_rule_unit", check_cross_rule_unit),
+        ("cross_study_totals_frozen", check_cross_study_frozen),
+        ("prereg_decision_applied", check_prereg_decision_applied),
+        ("cross_gains_on_stuck_faults", check_cross_gains_on_stuck_faults),
+        ("prereg_file_present", check_prereg_file_present),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

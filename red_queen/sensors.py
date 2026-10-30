@@ -148,3 +148,20 @@ class StuckSensor:
         if step >= self.fail_from_step:
             return SystemState(self.stuck[0], self.stuck[1], truth.service_up)
         return self.base.read(truth, step)
+
+
+class DriftSensor:
+    """M5.4 test fault: a reading offset that grows linearly with the step
+    (step k adds k * per_step), on top of a base sensor. Clamped to 0..100."""
+
+    def __init__(self, base: NoisySensor, battery_per_step: int = 0, temperature_per_step: int = 0) -> None:
+        for v in (battery_per_step, temperature_per_step):
+            if isinstance(v, bool) or not isinstance(v, int) or abs(v) > 10:
+                raise ValueError("drift per step must be an int in [-10, 10]")
+        self.base = base
+        self.per_step = (battery_per_step, temperature_per_step)
+
+    def read(self, truth: SystemState, step: int) -> SystemState:
+        r = self.base.read(truth, step)
+        return SystemState(clamp_level(r.battery + self.per_step[0] * step),
+                           clamp_level(r.temperature + self.per_step[1] * step), r.service_up)
