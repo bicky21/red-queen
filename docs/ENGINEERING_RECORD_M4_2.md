@@ -1,7 +1,7 @@
 # RED QUEEN AI — Engineering Record, Milestone M4.2
 
-**Version:** 0.13.0 · **Date:** 2026-10-28 · **Status:** build-environment passed (fake server only); Linux acceptance pending; **real-model comparison pending on the user's laptop**
-**Outcome so far:** two experimental levers (prompt style, trusted-feedback retries) are implemented and safety-tested. The decision rule below was written **before** any real-model data.
+**Version:** 0.13.0 · **Date:** 2026-10-28 · **Status:** build-environment passed; **Linux acceptance passed 2026-10-30**; real-model comparison done on the user's laptop
+**Outcome:** **negative result.** No prompt style or retry setting met the pre-registered rule (fewer than 79 actions). Safety held in every configuration. With `qwen3.5:4b`, feedback did not improve acceptance, so the model became neither more compliant nor more useful. The decision rule was written **before** the real-model data.
 
 ## 1. Review of M4.1
 
@@ -58,17 +58,29 @@ The same 18 named scenarios and default policy as M4.1, with the same model (`qw
 - **Secondary measures:** acceptance rate, actions taken from proposals, and time.
 - **Expectation, stated in advance:** higher acceptance is plausible, especially with feedback. Beating the planner is **not** expected. The validator only accepts plans at most 2 steps longer than the planner's shortest plan, so with an exact model a proposal can only tie or lose, except by tie-break luck against faults, as seen in M3.2. If acceptance rises but actions do not drop below 79, the conclusion is: **the model became more compliant, not more useful**.
 
-## 7. Real-model comparison (user's laptop) — pending
+## 7. Real-model comparison (user's laptop, 2026-10-30) — user-environment results
 
-```
-cd ~/red-queen
-git pull
-python3 -m red_queen.llm_trial --model qwen3.5:4b --think off --compare --output results/m4_2_compare.json
-```
+Command: `python3 -m red_queen.llm_trial --model qwen3.5:4b --think off --compare --output results/m4_2_compare.json`
+These are 18 named scenarios with the default policy. The planner alone succeeded 18/18 with **79 actions**.
 
-That is 6 configurations × 18 scenarios. At about 4 s per model call this
-is expected to take roughly 15–30 minutes. The results will be recorded
-here as **user-environment results**.
+| prompt | retries | accepted | rate | actions | success | outside policy | regressions | time (s) |
+|---|---|---|---|---|---|---|---|---|
+| v1 | 0 | 4/30 | 0.133 | 82 | 18 | 0 | 0 | 115 |
+| v1 | 1 | 4/56 | 0.071 | 82 | 18 | 0 | 0 | 324 |
+| v2_rules | 0 | 4/30 | 0.133 | 83 | 18 | 0 | 0 | 286 |
+| v2_rules | 1 | 4/56 | 0.071 | 83 | 18 | 0 | 0 | 590 |
+| v3_example | 0 | 4/30 | 0.133 | 84 | 18 | 0 | 0 | 139 |
+| v3_example | 1 | 6/56 | 0.107 | 84 | 18 | 0 | 0 | 338 |
+
+**Applying the pre-registered rule:**
+- **Primary measure:** no configuration used fewer than 79 actions. Every one used 82–84, which is **3–5 more than the planner alone**. → **No configuration adds value.**
+- **Safety:** 0 actions outside policy and 0 success regressions in all 6 configurations (108 episodes).
+- **Acceptance:** the prompt style did not change acceptance (4/30 for each). Feedback retries added 26 model calls per configuration but only 0–2 extra acceptances. One retry also costs about 2–3× the time.
+- **Comparison with the expectation:** I expected higher acceptance with feedback. That did not happen. In the fake-server test, feedback reached the model (V130), but this model did not use it to correct its plan. The more precise conclusion is therefore: **the model became neither more compliant nor more useful.**
+- **Repeatability:** v1/retries=0 reproduced M4.1 exactly (4/30 accepted, 82 actions). That is consistent with deterministic decoding (fixed seed) on this setup.
+- **Unexplained detail:** v2 and v3 used slightly more actions (83, 84) than v1 at the same acceptance count. Accepted plans may be up to 2 steps longer than the shortest plan, so this is allowed. Which plans were accepted is in `results/m4_2_compare.json`. It was not analysed further.
+
+**Interpretation, with limits:** in this domain the planner is exact and optimal, so a proposer can only tie it or lose to it. A 4B model produced mostly plans that do not reach the goal, and telling it why did not help. This is evidence about one small model in one easy domain. It does **not** show that language models cannot help a planner in general.
 
 ## 8. Limitations
 
@@ -79,21 +91,24 @@ here as **user-environment results**.
 
 ## 9. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
-
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-```
-
-M4.2 is accepted when the output shows `Ran 256 tests ... OK` and
-`131/131 validation checks passed`. These tests do not use Ollama.
+**Passed 2026-10-30.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 256 tests in 66.718s, OK**;
+`python3 -m red_queen.validation` → **131/131 validation checks passed**.
 
 ## 10. Next milestone
 
-Decided by the comparison. If no configuration adds value (the expected
-outcome), the model's role should be reconsidered. For example, it could
-**explain** the planner's plans to a human instead of proposing them, which
-never affects execution. Alternatively the project could move to a
-harder domain where the planner is *not* optimal (for example, partial
-observability), where a model might have room to help.
+Decided by the comparison: **no configuration added value**, so the
+model's role as a plan proposer in this domain is not pursued further.
+The proposal interface stays in the code (off by default) as tested
+infrastructure. The candidates for M5:
+
+1. **A harder domain where the planner is not optimal**: partial or
+   noisy observations, where the agent must act under uncertainty about the
+   true state. This is a real limitation of the current system, which
+   assumes perfect state knowledge. It also gives any future model a place
+   where it could help.
+2. **Model as explainer**: the model explains the planner's plans to a human.
+   It never affects execution, and the explanations are checked against the
+   trace.
+
+The user chooses.
