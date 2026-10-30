@@ -33,6 +33,16 @@ Configurations reproduce the earlier agents exactly (checked per run in V156):
   SafeAgent(sensors=2, adapt=False) == RedundantBeliefAgent "hull"       (M5.2)
   SafeAgent(sensors=2, adapt=True)  -> new: hull of per-sensor adapted boxes
 
+M6 (pre-registered in docs/PREREG_M6.md): optional untrusted disturbance
+memory. With `advisor` (anything offering remembered_disturbances(), e.g.
+the M3.5 MemoryAdvisor) and `predict_disturbances=True`, each plan from the
+belief's worst corner also predicts remembered disturbances at future steps
+(the M3.5 planner mode, with its fallback). Memory never reaches the
+estimator or the stopping rule. `disturbance_guard="on_mismatch"`: if the new
+belief does not overlap the box predicted from the previous belief (action
+worked + remembered disturbance), disturbance prediction is switched off
+for the rest of the episode.
+
 Stated assumptions: at most one sensor is biased; the KINDS of events are
 known (blocked actions, the two level disturbances). Success is decided by
 the independent GoalVerifier on the true state.
@@ -44,7 +54,8 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence
 
 from .agent import STOP_GOAL, STOP_MAX_STEPS, STOP_POLICY, EpisodeResult, StepRecord
-from .belief_agent import intersect, needed_noise, unexplained_gap
+from .belief_agent import _apply_to_box, intersect, needed_noise, predict_box, unexplained_gap
+from .environment import DISTURBANCES
 from .goal import RecoveryGoal
 from .planner import BoundedPlanner
 from .planning_agent import STOP_NO_PLAN
@@ -55,6 +66,7 @@ from .state import SystemState
 from .verification import GoalVerifier
 
 STOP_SAFE_HALT = "safe_halt"
+MEMORY_GUARDS = (None, "on_mismatch")  # M6
 ALERT_KINDS = ("bound_widened", "sensors_disagree", "reading_unexplainable", "sensor_isolated")
 ON_UNEXPLAINABLE = ("halt", "isolate")
 
@@ -165,10 +177,22 @@ class SafeAgent:
         policy: Policy = DEFAULT_POLICY,
         max_steps: int = 20,
         max_policy_denials: int = 3,
+        advisor=None,
+        predict_disturbances: bool = False,
+        disturbance_guard: Optional[str] = None,
     ) -> None:
         if max_steps < 0 or max_policy_denials < 1:
             raise ValueError("invalid bounds")
         SafeEstimator(noise, sensors, adapt, on_unexplainable, cross_isolate)  # validates the configuration now
+        if predict_disturbances and not callable(getattr(advisor, "remembered_disturbances", None)):
+            raise ValueError("predict_disturbances needs an advisor with remembered_disturbances()")
+        if disturbance_guard not in MEMORY_GUARDS:
+            raise ValueError(f"disturbance_guard must be one of {MEMORY_GUARDS}")
+        if disturbance_guard is not None and not predict_disturbances:
+            raise ValueError("disturbance_guard needs predict_disturbances=True")
+        self.advisor = advisor
+        self.predict_disturbances = bool(predict_disturbances)
+        self.disturbance_guard = disturbance_guard
         self.goal = goal
         self.noise = noise
         self.sensors = sensors
@@ -196,6 +220,14 @@ class SafeAgent:
         last_action: Optional[str] = None
         plans = nodes = 0
         stop_reason: Optional[str] = None
+        remembered: Dict[int, str] = {}
+        if self.predict_disturbances:  # untrusted: keep only known disturbance names at positive int steps
+            raw = self.advisor.remembered_disturbances()
+            remembered = {k: v for k, v in dict(raw).items()
+                          if isinstance(k, int) and not isinstance(k, bool) and k >= 1 and v in DISTURBANCES}
+        remembered_at_start = dict(remembered)
+        guard_tripped_at: Optional[int] = None
+        acted_from: Optional[Box] = None  # belief the last action was planned from
 
         while True:
             readings = [s.observe() for s in sensed]
@@ -203,13 +235,26 @@ class SafeAgent:
             if est.halt:
                 stop_reason = STOP_SAFE_HALT
                 break
+            if self.disturbance_guard and remembered and acted_from is not None and last_action is not None:
+                expected = predict_box(acted_from, last_action)
+                d = remembered.get(len(actions))
+                if d is not None:
+                    expected = _apply_to_box(expected, DISTURBANCES[d])
+                if intersect(expected, est.belief) is None:
+                    guard_tripped_at = len(actions)
+                    remembered.clear()  # memory (or the model) proved wrong: stop predicting
             if est.belief.satisfies(self.goal):
                 stop_reason = STOP_GOAL
                 break
             if len(actions) >= self.max_steps:
                 stop_reason = STOP_MAX_STEPS
                 break
-            plan = self.planner.plan(est.belief.worst(), self.policy.allowed)
+            if remembered:
+                offset = len(actions)
+                plan = self.planner.plan(est.belief.worst(), self.policy.allowed,
+                                         disturbances=lambda depth, offset=offset: remembered.get(offset + depth + 1))
+            else:
+                plan = self.planner.plan(est.belief.worst(), self.policy.allowed)
             plans += 1
             nodes += plan.nodes_expanded
             if not plan.reaches_goal or not plan.actions:
@@ -225,6 +270,7 @@ class SafeAgent:
                 continue
             actions.append(action)
             last_action = action
+            acted_from = est.belief
             estimator.action_taken(readings)
             records.append(StepRecord(step=len(actions), observed={n: r.to_dict() for n, r in zip("AB", readings)},
                                       chosen=action, score=0.0, ranking=(), affect={}))
@@ -251,5 +297,8 @@ class SafeAgent:
                 "nodes_expanded": nodes,
                 "policy_denials": len(executor.denials),
                 "operator_report": estimator.report(),
+                **({"remembered_disturbances": {str(k): v for k, v in sorted(remembered_at_start.items())}}
+                   if self.predict_disturbances else {}),
+                **({"guard_tripped_at": guard_tripped_at} if self.disturbance_guard else {}),
             },
         )

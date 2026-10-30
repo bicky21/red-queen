@@ -2644,6 +2644,100 @@ def check_prereg_file_present() -> CheckResult:
     return not missing, f"pre-registration file present; required terms missing={missing}"
 
 
+# ----------------------------------------------------------------- M6 checks
+
+M6_FROZEN = {('0.0', 'noise5', 'safe'): (336, 0, 1945, 0, 0), ('0.0', 'noise5', 'safe_mem'): (336, 0, 1916, 12, 2), ('0.0', 'noise5', 'safe_mem_guard'): (336, 0, 1916, 10, 1), ('0.0', 'wrong_bound', 'safe'): (336, 0, 2464, 0, 0), ('0.0', 'wrong_bound', 'safe_mem'): (336, 0, 2411, 10, 2), ('0.0', 'wrong_bound', 'safe_mem_guard'): (336, 0, 2413, 11, 2), ('0.5', 'noise5', 'safe'): (336, 0, 1945, 0, 0), ('0.5', 'noise5', 'safe_mem'): (336, 0, 1946, 29, 2), ('0.5', 'noise5', 'safe_mem_guard'): (336, 0, 1946, 25, 2), ('0.5', 'wrong_bound', 'safe'): (336, 0, 2464, 0, 0), ('0.5', 'wrong_bound', 'safe_mem'): (336, 0, 2444, 17, 2), ('0.5', 'wrong_bound', 'safe_mem_guard'): (336, 0, 2447, 16, 2), ('1.0', 'noise5', 'safe'): (336, 0, 1945, 0, 0), ('1.0', 'noise5', 'safe_mem'): (336, 0, 1974, 43, 4), ('1.0', 'noise5', 'safe_mem_guard'): (336, 0, 1972, 37, 4), ('1.0', 'wrong_bound', 'safe'): (336, 0, 2464, 0, 0), ('1.0', 'wrong_bound', 'safe_mem'): (336, 0, 2451, 23, 2), ('1.0', 'wrong_bound', 'safe_mem_guard'): (336, 0, 2451, 20, 2), ('unrelated', 'noise5', 'safe'): (336, 0, 1945, 0, 0), ('unrelated', 'noise5', 'safe_mem'): (336, 0, 1985, 53, 4), ('unrelated', 'noise5', 'safe_mem_guard'): (336, 0, 1976, 44, 4), ('unrelated', 'wrong_bound', 'safe'): (336, 0, 2464, 0, 0), ('unrelated', 'wrong_bound', 'safe_mem'): (336, 0, 2463, 23, 2), ('unrelated', 'wrong_bound', 'safe_mem_guard'): (336, 0, 2462, 23, 2)}  # (level, sensors, agent): (success, false_stops, actions, regret, worst_regret)
+
+
+def _m6_study():
+    from .memory_sensor_study import run_study
+    if "m6" not in _M5_CACHE:
+        _M5_CACHE["m6"] = run_study()
+    return _M5_CACHE["m6"]
+
+
+def check_memory_off_is_m5_3() -> CheckResult:
+    from .safe_agent import SafeAgent
+    from .safety_layer_study import CONDITIONS, sensors_for
+    from .scenarios import ALL_SCENARIOS
+    runs = diff = 0
+    for cond in CONDITIONS:
+        for sc in ALL_SCENARIOS:
+            a = SafeAgent(RecoveryGoal(), 5).run(sc.make_env(), sensors_for(cond, 0))
+            b = SafeAgent(RecoveryGoal(), 5, advisor=None, predict_disturbances=False).run(sc.make_env(), sensors_for(cond, 0))
+            runs += 1
+            diff += a.actions != b.actions or a.stop_reason != b.stop_reason
+    return diff == 0, f"{runs} runs: memory options off identical to M5.3 safe (differences={diff})"
+
+
+def check_memory_config_and_sanitising() -> CheckResult:
+    from .safe_agent import SafeAgent
+    from .scenarios import get_scenario
+    from .sensors import NoisySensor
+
+    class Junk:
+        def remembered_disturbances(self):
+            return {0: "heat_spike", -3: "battery_drain", True: "heat_spike", "2": "heat_spike",
+                    4: "rm -rf /", 5: None, 2: "service_crash"}
+
+    refused = 0
+    for make in (lambda: SafeAgent(RecoveryGoal(), 5, predict_disturbances=True),
+                 lambda: SafeAgent(RecoveryGoal(), 5, disturbance_guard="on_mismatch"),
+                 lambda: SafeAgent(RecoveryGoal(), 5, advisor=Junk(), predict_disturbances=True, disturbance_guard="x")):
+        try:
+            make()
+        except ValueError:
+            refused += 1
+    r = SafeAgent(RecoveryGoal(), 5, advisor=Junk(), predict_disturbances=True).run(
+        get_scenario("low_battery").make_env(), [NoisySensor(5, 0), NoisySensor(5, 1000)])
+    kept = r.stats["remembered_disturbances"]
+    ok = refused == 3 and kept == {"2": "service_crash"} and r.success
+    return ok, f"invalid configs refused={refused}/3; junk memory sanitised to {kept}; episode success={r.success}"
+
+
+def check_memory_never_reaches_stopping() -> CheckResult:
+    import inspect
+    from .safe_agent import SafeAgent, SafeEstimator
+    est_src = inspect.getsource(SafeEstimator)
+    run_src = inspect.getsource(SafeAgent.run)
+    stop_line = [l for l in run_src.splitlines() if "satisfies(self.goal)" in l]
+    ok = "remembered" not in est_src and "advisor" not in est_src and stop_line == ["            if est.belief.satisfies(self.goal):"]
+    return ok, f"estimator has no memory access={'remembered' not in est_src}; stop rule uses the estimator belief only={stop_line == ['            if est.belief.satisfies(self.goal):']}"
+
+
+def check_m6_no_false_stops() -> CheckResult:
+    rows = _m6_study()["summary"]
+    fs = sum(r["false_stops"] for r in rows)
+    runs = sum(r["runs"] for r in rows)
+    return fs == 0 and all(r["success"] == r["runs"] for r in rows), f"{runs} runs over 4 memory levels x 2 sensor conditions x 3 agents: false stops={fs}"
+
+
+def check_m6_study_frozen() -> CheckResult:
+    from .memory_sensor_study import run_study
+    got = {(r["level"], r["sensors"], r["agent"]): (r["success"], r["false_stops"], r["actions"], r["regret"], r["worst_regret"])
+           for r in _m6_study()["summary"]}
+    a, b = run_study(stride=84, seeds=(0,)), run_study(stride=84, seeds=(0,))
+    return got == M6_FROZEN and a == b, f"24 rows: totals match frozen={got == M6_FROZEN}; small reruns identical={a == b}"
+
+
+def check_m6_decision_applied() -> CheckResult:
+    from .memory_sensor_study import decide
+    d = _m6_study()["decision"]
+    ok = d == decide(_m6_study()["summary"]) and d["recommend_memory"] is False and d["D1_no_false_stops"]
+    return ok, (f"pre-registered rule: D1={d['D1_no_false_stops']}, D4 guard useful={d['D4_guard_useful']}, "
+                f"candidate={d['candidate']}, recommend memory={d['recommend_memory']}")
+
+
+def check_prereg_m6_present() -> CheckResult:
+    import os
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M6.md")
+    if not os.path.exists(path):
+        return False, "docs/PREREG_M6.md missing"
+    text = open(path, encoding="utf-8").read()
+    missing = [k for k in ("D1", "D2", "D3", "D4", "on_mismatch", "168 cases", "unrelated") if k not in text]
+    return not missing, f"pre-registration file present; required terms missing={missing}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -2894,6 +2988,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("prereg_decision_applied", check_prereg_decision_applied),
         ("cross_gains_on_stuck_faults", check_cross_gains_on_stuck_faults),
         ("prereg_file_present", check_prereg_file_present),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M6 (V170 onward)
+    for name, fn in (
+        ("memory_off_is_m5_3", check_memory_off_is_m5_3),
+        ("memory_config_and_sanitising", check_memory_config_and_sanitising),
+        ("memory_never_reaches_stopping", check_memory_never_reaches_stopping),
+        ("m6_no_false_stops", check_m6_no_false_stops),
+        ("m6_study_totals_frozen", check_m6_study_frozen),
+        ("m6_prereg_decision_applied", check_m6_decision_applied),
+        ("m6_prereg_file_present", check_prereg_m6_present),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

@@ -1,4 +1,4 @@
-# RED QUEEN AI — Milestone M5.4
+# RED QUEEN AI — Milestone M6
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
@@ -70,6 +70,10 @@ execution, no real-world actions.
     `docs/PREREG_M5_4.md`): drop the sensor that alone needed a wider noise
     range when the two disagree. It helps a lot with stuck sensors, but it is
     unsafe when the noise range is guessed wrong, so it is **off by default**.
+22. Optional disturbance memory for the safe agent (M6, pre-registered in
+    `docs/PREREG_M6.md`). It cannot cause false stops, because memory never
+    reaches the state estimate or the stopping rule. It saves only about 2% of
+    actions, so it is **off by default**.
 
 Allowed actions (the only ones that can ever run):
 
@@ -101,8 +105,8 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 321 tests ... OK` and `169/169 validation checks passed`
-   (takes about 6-10 minutes; does not need Ollama).
+   Expected: `Ran 329 tests ... OK` and `176/176 validation checks passed`
+   (takes about 7-12 minutes; does not need Ollama).
 3. Optional reports:
    ```
    python3 -m red_queen.experiments --output results/m1_affect_comparison.json
@@ -178,6 +182,10 @@ git --version
     ```
     python3 -m red_queen.cross_isolation_study --output results/m5_4_cross_isolation_study.json
     ```
+19. Memory under noisy sensors study (M6, about 1 minute):
+    ```
+    python3 -m red_queen.memory_sensor_study --output results/m6_memory_sensor_study.json
+    ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 
@@ -225,11 +233,12 @@ red_queen/
   safe_agent.py    SafeEstimator (state estimation + alerts) and SafeAgent (M5.3)
   safety_layer_study.py 7 fault conditions x 5 agents (M5.3)
   cross_isolation_study.py pre-registered cross-sensor isolation study (M5.4)
-  validation.py    169 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+  memory_sensor_study.py pre-registered memory-under-noisy-sensors study (M6)
+  validation.py    176 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
                    V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4,
-                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4)
-tests/             321 unittest tests
+                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6)
+tests/             329 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -249,6 +258,8 @@ docs/ENGINEERING_RECORD_M5_2.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M5_3.md   (accepted on Linux)
 docs/PREREG_M5_4.md               (committed before M5.4 code)
 docs/ENGINEERING_RECORD_M5_4.md   (accepted on Linux)
+docs/PREREG_M6.md                 (committed before M6 code)
+docs/ENGINEERING_RECORD_M6.md
 results/                          build-environment reports
 ```
 
@@ -274,3 +285,4 @@ results/                          build-environment reports
 | M5.2 | 297 tests OK, 155/155 checks | **Accepted** 2026-10-30; study table identical to build environment |
 | M5.3 | 311 tests OK, 162/162 checks | **Accepted** 2026-10-30; study output identical (diff) |
 | M5.4 | 321 tests OK, 169/169 checks | **Accepted** 2026-10-30; study output identical (diff); rule not adopted (pre-registered) |
+| M6 | 329 tests OK, 176/176 checks | Pending — run step 2 and step 19 |
