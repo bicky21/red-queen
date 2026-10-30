@@ -2163,6 +2163,136 @@ def check_filter_violations_need_model_error() -> CheckResult:
                                              f"{in_faulty} in fault/disturbance scenarios")
 
 
+# --------------------------------------------------------------- M5.1 checks
+
+M51_FROZEN_WRONG = {  # (mode, assumed, adapt): (success, false_stops, actions), true noise 15
+    ("interval", 15, False): (360, 0, 2487), ("interval", 15, True): (360, 0, 2487),
+    ("interval", 10, False): (360, 0, 2300), ("interval", 10, True): (360, 0, 2344),
+    ("interval", 5, False): (350, 10, 2088), ("interval", 5, True): (356, 4, 2296),
+    ("interval", 0, False): (344, 16, 1942), ("interval", 0, True): (357, 3, 2299),
+    ("filter_verified", 15, False): (360, 0, 2382), ("filter_verified", 15, True): (360, 0, 2382),
+    ("filter_verified", 10, False): (360, 0, 2246), ("filter_verified", 10, True): (360, 0, 2280),
+    ("filter_verified", 5, False): (349, 11, 2079), ("filter_verified", 5, True): (355, 5, 2266),
+    ("filter_verified", 0, False): (344, 16, 1942), ("filter_verified", 0, True): (356, 4, 2260),
+}
+M51_FROZEN_BIAS = {  # (mode, bias, adapt): (success, false_stops, actions)
+    ("interval", "battery_+10", False): (360, 0, 1710), ("interval", "battery_+10", True): (360, 0, 1708),
+    ("interval", "temperature_-10", False): (333, 27, 1914), ("interval", "temperature_-10", True): (333, 27, 1915),
+    ("filter_verified", "battery_+10", False): (357, 3, 1686),
+    ("filter_verified", "battery_+10", True): (357, 3, 1683),
+    ("filter_verified", "temperature_-10", False): (315, 45, 1892),
+    ("filter_verified", "temperature_-10", True): (315, 45, 1893),
+}
+
+
+def _m51_study():
+    from .sensor_adapt_study import run_study
+    if "adapt" not in _M5_CACHE:
+        _M5_CACHE["adapt"] = run_study()
+    return _M5_CACHE["adapt"]
+
+
+def check_sensor_bias_validated() -> CheckResult:
+    from .sensors import NoisySensor
+    truth = SystemState(50, 50, True)
+    exact = NoisySensor(0, 0, 10, -10).read(truth, 3) == SystemState(60, 40, True)
+    bounded = all(abs(NoisySensor(5, 1, 10, 0).read(truth, k).battery - 60) <= 5 for k in range(200))
+    unchanged = all(NoisySensor(10, 4).read(truth, k) == NoisySensor(10, 4, 0, 0).read(truth, k) for k in range(50))
+    refused = 0
+    for bad in (26, -26, True, 1.5):
+        try:
+            NoisySensor(5, 0, bad, 0)
+        except ValueError:
+            refused += 1
+    ok = exact and bounded and unchanged and refused == 4
+    return ok, f"bias exact with noise 0={exact}; bias+noise bounded={bounded}; bias 0 unchanged={unchanged}; invalid refused={refused}/4"
+
+
+def check_explanations_cover_known_events() -> CheckResult:
+    from .actions import ACTION_NAMES, apply_action
+    from .belief_agent import LEVEL_DISTURBANCES, unexplained_gap
+    from .environment import DISTURBANCES
+    from .sensors import NoisySensor, observation_box
+    checked = 0
+    for noise in (0, 5, 15):
+        sensor = NoisySensor(noise, 11)
+        for b in range(0, 101, 10):
+            for t in range(0, 101, 10):
+                before = SystemState(b, t, True)
+                for action in ACTION_NAMES:
+                    for worked in (True, False):
+                        mid = apply_action(before, action) if worked else before
+                        for d in (None,) + LEVEL_DISTURBANCES:
+                            after = mid if d is None else DISTURBANCES[d](mid)
+                            for k in range(3):
+                                r0, r1 = sensor.read(before, 2 * k), sensor.read(after, 2 * k + 1)
+                                gap = unexplained_gap(observation_box(r0, noise), observation_box(r1, noise), action)
+                                if gap:
+                                    return False, f"known event unexplained: {before}->{action}/{worked}/{d}, noise {noise}"
+                                checked += 1
+    return True, f"{checked} reading pairs from known events (worked/blocked x disturbances) with a correct bound: all explained"
+
+
+def check_adaptation_identical_when_bound_correct() -> CheckResult:
+    from .belief_agent import BeliefAgent
+    from .scenarios import ALL_SCENARIOS
+    from .sensors import NoisySensor
+    runs = diff = widened = 0
+    for mode in ("interval", "filter_verified"):
+        for noise in (5, 10, 15):
+            for s in ALL_SCENARIOS:
+                for seed in range(20):
+                    a = BeliefAgent(RecoveryGoal(), noise, mode).run(s.make_env(), NoisySensor(noise, seed))
+                    b = BeliefAgent(RecoveryGoal(), noise, mode, adapt_noise=True).run(s.make_env(), NoisySensor(noise, seed))
+                    runs += 1
+                    diff += a.actions != b.actions or a.success != b.success
+                    widened += bool(b.stats["widenings"])
+    return diff == 0 and widened == 0, f"{runs} paired runs with a correct bound: action sequences differ={diff}; runs widened={widened}"
+
+
+def check_widening_bounded_monotone() -> CheckResult:
+    from .belief_agent import BeliefAgent, needed_noise
+    from .scenarios import ALL_SCENARIOS
+    from .sensors import MAX_NOISE, NoisySensor
+    runs = bad = 0
+    for assumed in (0, 5):
+        for s in ALL_SCENARIOS:
+            for seed in range(10):
+                r = BeliefAgent(RecoveryGoal(), assumed, adapt_noise=True).run(s.make_env(), NoisySensor(25, seed))
+                runs += 1
+                prev = assumed
+                for w in r.stats["widenings"]:
+                    bad += not (w["from"] == prev < w["to"] <= MAX_NOISE)
+                    prev = w["to"]
+                bad += len(r.actions) > s.max_steps
+    capped = needed_noise(SystemState(0, 0, True), SystemState(100, 100, True), "wait", 0) == MAX_NOISE
+    return bad == 0 and capped, f"{runs} runs under true noise 25: widenings increasing and <= {MAX_NOISE}, budget kept (violations={bad}); cap enforced={capped}"
+
+
+def check_adaptation_reduces_false_stops() -> CheckResult:
+    rows = _m51_study()["wrong_bound"]
+    got = {(r["mode"], r["assumed_noise"], r["adapt"]): (r["success"], r["false_stops"], r["actions"]) for r in rows}
+    fewer = all(got[(m, n, True)][1] < got[(m, n, False)][1] for m in ("interval", "filter_verified") for n in (5, 0))
+    left = {f"{m}/{n}": got[(m, n, True)][1] for m in ("interval", "filter_verified") for n in (5, 0)}
+    return got == M51_FROZEN_WRONG and fewer, f"totals frozen={got == M51_FROZEN_WRONG}; adaptation lowers false stops={fewer}; remaining with adaptation={left}"
+
+
+def check_bias_not_detected() -> CheckResult:
+    rows = _m51_study()["bias"]
+    got = {(r["mode"], r["bias"], r["adapt"]): (r["success"], r["false_stops"], r["actions"]) for r in rows}
+    temp = {m: (got[(m, "temperature_-10", False)][1], got[(m, "temperature_-10", True)][1])
+            for m in ("interval", "filter_verified")}
+    ok = got == M51_FROZEN_BIAS and all(a == b > 0 for a, b in temp.values())
+    return ok, f"totals frozen={got == M51_FROZEN_BIAS}; temperature -10 bias false stops (plain, adaptive)={temp}: not fixed by adaptation"
+
+
+def check_adapt_study_deterministic() -> CheckResult:
+    from .sensor_adapt_study import format_report, run_study
+    a, b = run_study(seeds=3), run_study(seeds=3)
+    text = format_report(a)
+    return a == b and "C. Sensor bias" in text, f"two 3-seed study runs identical={a == b}; report sections present={'C. Sensor bias' in text}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -2365,6 +2495,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("noise_policy_compliance_and_bounds", check_noise_policy_and_bounds),
         ("noise_assumption_matters", check_noise_assumption_matters),
         ("filter_violations_need_model_error", check_filter_violations_need_model_error),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M5.1 (V142 onward)
+    for name, fn in (
+        ("sensor_bias_validated", check_sensor_bias_validated),
+        ("explanations_cover_known_events", check_explanations_cover_known_events),
+        ("adaptation_identical_when_bound_correct", check_adaptation_identical_when_bound_correct),
+        ("widening_bounded_monotone", check_widening_bounded_monotone),
+        ("adaptation_reduces_false_stops", check_adaptation_reduces_false_stops),
+        ("bias_not_detected", check_bias_not_detected),
+        ("adapt_study_deterministic", check_adapt_study_deterministic),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

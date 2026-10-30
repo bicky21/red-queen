@@ -35,19 +35,28 @@ def _check_noise(noise: int) -> int:
 class NoisySensor:
     """Bounded, deterministic, seeded measurement noise."""
 
-    def __init__(self, noise: int, seed: int = 0) -> None:
+    def __init__(self, noise: int, seed: int = 0, bias_battery: int = 0, bias_temperature: int = 0) -> None:
         self.noise = _check_noise(noise)
         if isinstance(seed, bool) or not isinstance(seed, int):
             raise ValueError("seed must be an int")
+        for bias in (bias_battery, bias_temperature):  # M5.1: constant sensor offset (a sensor fault)
+            if isinstance(bias, bool) or not isinstance(bias, int) or abs(bias) > MAX_NOISE:
+                raise ValueError(f"bias must be an int in [-{MAX_NOISE}, {MAX_NOISE}]")
         self.seed = seed
+        self.bias_battery = bias_battery
+        self.bias_temperature = bias_temperature
 
     def read(self, truth: SystemState, step: int) -> SystemState:
-        if self.noise == 0:
+        if self.noise == 0 and self.bias_battery == 0 and self.bias_temperature == 0:
             return truth
-        rng = random.Random(f"red-queen-sensor:{self.seed}:{step}")
+        if self.noise == 0:
+            eb = et = 0
+        else:
+            rng = random.Random(f"red-queen-sensor:{self.seed}:{step}")
+            eb, et = rng.randint(-self.noise, self.noise), rng.randint(-self.noise, self.noise)
         return SystemState(
-            clamp_level(truth.battery + rng.randint(-self.noise, self.noise)),
-            clamp_level(truth.temperature + rng.randint(-self.noise, self.noise)),
+            clamp_level(truth.battery + self.bias_battery + eb),
+            clamp_level(truth.temperature + self.bias_temperature + et),
             truth.service_up,
         )
 
