@@ -1,0 +1,235 @@
+"""M5.3 consolidated safety layer: SafeEstimator + SafeAgent.
+
+M5 to M5.2 added three separate protections in three separate agents:
+  M5   interval belief, stop only when every state in the box meets the goal
+  M5.1 widen a sensor's noise bound when its readings cannot be explained
+  M5.2 read two sensors and use the hull of their boxes
+
+SafeEstimator combines them in ONE state-estimation component, separate from
+planning and execution, and adds two things:
+
+  * an operator report: a list of alerts (bound widened, sensors disagree,
+    reading unexplainable) with step numbers and numeric evidence only;
+  * a defined response when a sensor's consecutive readings cannot be
+    explained by any known event even at the maximum noise bound:
+      on_unexplainable="halt"    - the estimate is declared untrustworthy and
+                                   the agent stops with reason "safe_halt",
+                                   claiming nothing;
+      on_unexplainable="isolate" - that sensor is excluded for the rest of the
+                                   episode and the other sensor is used; the
+                                   agent halts only when no trusted sensor is
+                                   left (always, with a single sensor).
+    "isolate" was added after the first study run showed "halt" stopping
+    even though the second sensor was healthy (post-hoc; see the M5.3 record).
+
+Configurations reproduce the earlier agents exactly (checked per run in V156):
+  SafeAgent(sensors=1, adapt=False) == BeliefAgent "interval"            (M5)
+  SafeAgent(sensors=1, adapt=True)  == BeliefAgent "interval", adapt     (M5.1)
+  SafeAgent(sensors=2, adapt=False) == RedundantBeliefAgent "hull"       (M5.2)
+  SafeAgent(sensors=2, adapt=True)  -> new: hull of per-sensor adapted boxes
+
+Stated assumptions: at most one sensor is biased; the KINDS of events are
+known (blocked actions, the two level disturbances). Success is decided by
+the independent GoalVerifier on the true state.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Sequence
+
+from .agent import STOP_GOAL, STOP_MAX_STEPS, STOP_POLICY, EpisodeResult, StepRecord
+from .belief_agent import intersect, needed_noise, unexplained_gap
+from .goal import RecoveryGoal
+from .planner import BoundedPlanner
+from .planning_agent import STOP_NO_PLAN
+from .policy import DEFAULT_POLICY, Policy, PolicyDenied, PolicyExecutor
+from .redundant_agent import hull
+from .sensors import MAX_NOISE, Box, SensedEnvironment, observation_box
+from .state import SystemState
+from .verification import GoalVerifier
+
+STOP_SAFE_HALT = "safe_halt"
+ALERT_KINDS = ("bound_widened", "sensors_disagree", "reading_unexplainable", "sensor_isolated")
+ON_UNEXPLAINABLE = ("halt", "isolate")
+
+
+@dataclass(frozen=True)
+class Alert:
+    step: int
+    kind: str
+    sensor: str  # "A", "B" or "A+B"
+    detail: Dict[str, Any]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {"step": self.step, "kind": self.kind, "sensor": self.sensor, "detail": dict(self.detail)}
+
+
+@dataclass
+class Estimate:
+    belief: Optional[Box]          # None only when the estimate is untrustworthy (halt)
+    halt: bool
+    new_alerts: List[Alert] = field(default_factory=list)
+
+
+class SafeEstimator:
+    """State estimation only: readings in, belief box (or halt) out. Never acts."""
+
+    def __init__(self, noise: int, sensors: int = 2, adapt: bool = True, on_unexplainable: str = "isolate") -> None:
+        if sensors not in (1, 2):
+            raise ValueError("sensors must be 1 or 2")
+        if on_unexplainable not in ON_UNEXPLAINABLE:
+            raise ValueError(f"on_unexplainable must be one of {ON_UNEXPLAINABLE}")
+        observation_box(SystemState(50, 50, True), noise)  # validates the noise bound
+        self.sensors = sensors
+        self.adapt = bool(adapt)
+        self.on_unexplainable = on_unexplainable
+        self.noise = [noise] * sensors
+        self.trusted = [True] * sensors
+        self.alerts: List[Alert] = []
+        self._prev: Optional[List[SystemState]] = None
+        self._checked_step = 0
+
+    def update(self, readings: Sequence[SystemState], step: int, last_action: Optional[str]) -> Estimate:
+        if len(readings) != self.sensors:
+            raise ValueError(f"expected {self.sensors} readings")
+        new: List[Alert] = []
+        halt = False
+        names = ("A", "B")
+        if self.adapt and self._prev is not None and last_action is not None and step != self._checked_step:
+            self._checked_step = step
+            for i, (prev, cur) in enumerate(zip(self._prev, readings)):
+                if not self.trusted[i]:
+                    continue
+                need = needed_noise(prev, cur, last_action, self.noise[i])
+                if need == MAX_NOISE and unexplained_gap(observation_box(prev, need),
+                                                         observation_box(cur, need), last_action) > 0:
+                    new.append(Alert(step, "reading_unexplainable", names[i],
+                                     {"previous": prev.to_dict(), "reading": cur.to_dict(), "action": last_action}))
+                    others = any(self.trusted[j] for j in range(self.sensors) if j != i)
+                    if self.on_unexplainable == "isolate" and others:
+                        self.trusted[i] = False
+                        new.append(Alert(step, "sensor_isolated", names[i], {"remaining": self.sensors - 1}))
+                        continue
+                    halt = True
+                if need > self.noise[i]:
+                    new.append(Alert(step, "bound_widened", names[i], {"from": self.noise[i], "to": need}))
+                    self.noise[i] = need
+        boxes = [observation_box(r, n) for r, n in zip(readings, self.noise)]
+        if self.sensors == 2 and all(self.trusted) and intersect(boxes[0], boxes[1]) is None:
+            new.append(Alert(step, "sensors_disagree", "A+B",
+                             {"A": boxes[0].to_dict(), "B": boxes[1].to_dict()}))
+        self.alerts.extend(new)
+        if halt:
+            return Estimate(None, True, new)
+        use = [b for b, ok in zip(boxes, self.trusted) if ok]
+        belief = use[0] if len(use) == 1 else hull(use[0], use[1])
+        return Estimate(belief, False, new)
+
+    def action_taken(self, readings: Sequence[SystemState]) -> None:
+        """Remember the readings taken just before an executed action."""
+        self._prev = list(readings)
+
+    def report(self) -> Dict[str, Any]:
+        counts = {k: sum(a.kind == k for a in self.alerts) for k in ALERT_KINDS}
+        return {"noise_bounds": list(self.noise), "trusted": list(self.trusted), "alert_counts": counts,
+                "alerts": [a.to_dict() for a in self.alerts]}
+
+
+class SafeAgent:
+    def __init__(
+        self,
+        goal: RecoveryGoal,
+        noise: int,
+        sensors: int = 2,
+        adapt: bool = True,
+        on_unexplainable: str = "isolate",
+        planner: Optional[BoundedPlanner] = None,
+        policy: Policy = DEFAULT_POLICY,
+        max_steps: int = 20,
+        max_policy_denials: int = 3,
+    ) -> None:
+        if max_steps < 0 or max_policy_denials < 1:
+            raise ValueError("invalid bounds")
+        SafeEstimator(noise, sensors, adapt, on_unexplainable)  # validates the configuration now
+        self.goal = goal
+        self.noise = noise
+        self.sensors = sensors
+        self.adapt = bool(adapt)
+        self.on_unexplainable = on_unexplainable
+        self.planner = planner if planner is not None else BoundedPlanner(goal)
+        self.policy = policy
+        self.max_steps = max_steps
+        self.max_policy_denials = max_policy_denials
+        self.verifier = GoalVerifier(goal)
+
+    def run(self, env, sensors: Sequence, scenario: str = "") -> EpisodeResult:
+        sensors = list(sensors)
+        if len(sensors) != self.sensors:
+            raise ValueError(f"expected {self.sensors} sensor(s)")
+        if self.sensors == 2 and sensors[0] is sensors[1]:
+            raise ValueError("redundancy needs two separate sensors")
+        sensed = [SensedEnvironment(env, s) for s in sensors]  # decisions use readings only
+        estimator = SafeEstimator(self.noise, self.sensors, self.adapt, self.on_unexplainable)
+        executor = PolicyExecutor(sensed[0], self.policy, self.max_steps)
+        actions: List[str] = []
+        records: List[StepRecord] = []
+        last_action: Optional[str] = None
+        plans = nodes = 0
+        stop_reason: Optional[str] = None
+
+        while True:
+            readings = [s.observe() for s in sensed]
+            est = estimator.update(readings, sensed[0].step, last_action)
+            if est.halt:
+                stop_reason = STOP_SAFE_HALT
+                break
+            if est.belief.satisfies(self.goal):
+                stop_reason = STOP_GOAL
+                break
+            if len(actions) >= self.max_steps:
+                stop_reason = STOP_MAX_STEPS
+                break
+            plan = self.planner.plan(est.belief.worst(), self.policy.allowed)
+            plans += 1
+            nodes += plan.nodes_expanded
+            if not plan.reaches_goal or not plan.actions:
+                stop_reason = STOP_NO_PLAN
+                break
+            action = plan.actions[0]
+            try:
+                executor.execute(action)
+            except PolicyDenied:
+                if len(executor.denials) >= self.max_policy_denials:
+                    stop_reason = STOP_POLICY
+                    break
+                continue
+            actions.append(action)
+            last_action = action
+            estimator.action_taken(readings)
+            records.append(StepRecord(step=len(actions), observed={n: r.to_dict() for n, r in zip("AB", readings)},
+                                      chosen=action, score=0.0, ranking=(), affect={}))
+
+        verification = self.verifier.verify(env)  # truth, after the episode
+        return EpisodeResult(
+            scenario=scenario,
+            affect_enabled=False,
+            success=verification.satisfied,
+            stop_reason=stop_reason,
+            actions=tuple(actions),
+            steps=tuple(records),
+            final_state=env.observe(),
+            verification=verification,
+            event_count=len(env.events),
+            events=tuple(e.to_dict() for e in env.events),
+            stats={
+                "agent": f"safe_{self.sensors}s_{'adapt' if self.adapt else 'fixed'}",
+                "on_unexplainable": self.on_unexplainable,
+                "policy": self.policy.name,
+                "noise": self.noise,
+                "plans": plans,
+                "nodes_expanded": nodes,
+                "policy_denials": len(executor.denials),
+                "operator_report": estimator.report(),
+            },
+        )

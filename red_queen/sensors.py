@@ -130,3 +130,21 @@ def observation_box(reading: SystemState, noise: int) -> Box:
     return Box(clamp_level(reading.battery - n), clamp_level(reading.battery + n),
                clamp_level(reading.temperature - n), clamp_level(reading.temperature + n),
                reading.service_up)
+
+
+class StuckSensor:
+    """M5.3 test fault: a sensor that works normally until `fail_from_step`,
+    then reports fixed battery/temperature values (a dead or stuck sensor).
+    The service status is still read exactly."""
+
+    def __init__(self, base: NoisySensor, fail_from_step: int, battery: int = 100, temperature: int = 0) -> None:
+        if isinstance(fail_from_step, bool) or not isinstance(fail_from_step, int) or fail_from_step < 0:
+            raise ValueError("fail_from_step must be an int >= 0")
+        self.base = base
+        self.fail_from_step = fail_from_step
+        self.stuck = (clamp_level(battery), clamp_level(temperature))
+
+    def read(self, truth: SystemState, step: int) -> SystemState:
+        if step >= self.fail_from_step:
+            return SystemState(self.stuck[0], self.stuck[1], truth.service_up)
+        return self.base.read(truth, step)

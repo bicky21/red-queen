@@ -1,0 +1,476 @@
+{
+  "assumed_noise": 5,
+  "milestone": "M5.3",
+  "scenarios": [
+    "nominal",
+    "low_battery",
+    "overheating",
+    "service_down",
+    "overheated_service_down",
+    "compound_failure",
+    "disturbance_mid_recovery",
+    "flaky_restart",
+    "flaky_restart_low_battery",
+    "charger_outage",
+    "battery_empty",
+    "max_heat_service_down",
+    "deep_battery_flaky_restart",
+    "flaky_restart_then_crash",
+    "flaky_restart_heat_spike",
+    "cool_outage_battery_drain",
+    "charger_outage_overheating",
+    "double_disturbance"
+  ],
+  "seeds": 20,
+  "summary": [
+    {
+      "actions": 2009,
+      "agent": "single",
+      "alert_totals": {},
+      "condition": "none",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 0,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 2009,
+      "agent": "single_adapt",
+      "alert_totals": {},
+      "condition": "none",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 0,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 2036,
+      "agent": "hull",
+      "alert_totals": {},
+      "condition": "none",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 0,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 2036,
+      "agent": "safe_halt",
+      "alert_totals": {},
+      "condition": "none",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 0,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 2036,
+      "agent": "safe",
+      "alert_totals": {},
+      "condition": "none",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 0,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 2088,
+      "agent": "single",
+      "alert_totals": {},
+      "condition": "wrong_bound",
+      "false_stops": 10,
+      "runs": 360,
+      "runs_with_alerts": 0,
+      "safe_halts": 0,
+      "success": 350
+    },
+    {
+      "actions": 2296,
+      "agent": "single_adapt",
+      "alert_totals": {
+        "bound_widened": 585
+      },
+      "condition": "wrong_bound",
+      "false_stops": 4,
+      "runs": 360,
+      "runs_with_alerts": 326,
+      "safe_halts": 0,
+      "success": 356
+    },
+    {
+      "actions": 2197,
+      "agent": "hull",
+      "alert_totals": {
+        "sensors_disagree": 1690
+      },
+      "condition": "wrong_bound",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 353,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 2452,
+      "agent": "safe_halt",
+      "alert_totals": {
+        "bound_widened": 1172,
+        "sensors_disagree": 861
+      },
+      "condition": "wrong_bound",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 354,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 2452,
+      "agent": "safe",
+      "alert_totals": {
+        "bound_widened": 1172,
+        "sensors_disagree": 861
+      },
+      "condition": "wrong_bound",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 354,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 1914,
+      "agent": "single",
+      "alert_totals": {},
+      "condition": "A_temp_-10",
+      "false_stops": 27,
+      "runs": 360,
+      "runs_with_alerts": 0,
+      "safe_halts": 0,
+      "success": 333
+    },
+    {
+      "actions": 1915,
+      "agent": "single_adapt",
+      "alert_totals": {
+        "bound_widened": 6
+      },
+      "condition": "A_temp_-10",
+      "false_stops": 27,
+      "runs": 360,
+      "runs_with_alerts": 6,
+      "safe_halts": 0,
+      "success": 333
+    },
+    {
+      "actions": 2024,
+      "agent": "hull",
+      "alert_totals": {
+        "sensors_disagree": 1099
+      },
+      "condition": "A_temp_-10",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 330,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 2025,
+      "agent": "safe_halt",
+      "alert_totals": {
+        "bound_widened": 7,
+        "sensors_disagree": 1096
+      },
+      "condition": "A_temp_-10",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 331,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 2025,
+      "agent": "safe",
+      "alert_totals": {
+        "bound_widened": 7,
+        "sensors_disagree": 1096
+      },
+      "condition": "A_temp_-10",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 331,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 1956,
+      "agent": "single",
+      "alert_totals": {},
+      "condition": "wrong_bound+A_temp",
+      "false_stops": 43,
+      "runs": 360,
+      "runs_with_alerts": 0,
+      "safe_halts": 0,
+      "success": 317
+    },
+    {
+      "actions": 2147,
+      "agent": "single_adapt",
+      "alert_totals": {
+        "bound_widened": 557
+      },
+      "condition": "wrong_bound+A_temp",
+      "false_stops": 25,
+      "runs": 360,
+      "runs_with_alerts": 322,
+      "safe_halts": 0,
+      "success": 335
+    },
+    {
+      "actions": 2146,
+      "agent": "hull",
+      "alert_totals": {
+        "sensors_disagree": 1791
+      },
+      "condition": "wrong_bound+A_temp",
+      "false_stops": 2,
+      "runs": 360,
+      "runs_with_alerts": 354,
+      "safe_halts": 0,
+      "success": 358
+    },
+    {
+      "actions": 2404,
+      "agent": "safe_halt",
+      "alert_totals": {
+        "bound_widened": 1148,
+        "sensors_disagree": 1057
+      },
+      "condition": "wrong_bound+A_temp",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 355,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 2404,
+      "agent": "safe",
+      "alert_totals": {
+        "bound_widened": 1148,
+        "sensors_disagree": 1057
+      },
+      "condition": "wrong_bound+A_temp",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 355,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 1470,
+      "agent": "single",
+      "alert_totals": {},
+      "condition": "A_dead",
+      "false_stops": 210,
+      "runs": 360,
+      "runs_with_alerts": 0,
+      "safe_halts": 0,
+      "success": 120
+    },
+    {
+      "actions": 1120,
+      "agent": "single_adapt",
+      "alert_totals": {
+        "bound_widened": 340,
+        "reading_unexplainable": 228
+      },
+      "condition": "A_dead",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 340,
+      "safe_halts": 228,
+      "success": 120
+    },
+    {
+      "actions": 2005,
+      "agent": "hull",
+      "alert_totals": {
+        "sensors_disagree": 1665
+      },
+      "condition": "A_dead",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 340,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 928,
+      "agent": "safe_halt",
+      "alert_totals": {
+        "bound_widened": 340,
+        "reading_unexplainable": 228,
+        "sensors_disagree": 567
+      },
+      "condition": "A_dead",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 340,
+      "safe_halts": 228,
+      "success": 140
+    },
+    {
+      "actions": 2005,
+      "agent": "safe",
+      "alert_totals": {
+        "bound_widened": 112,
+        "reading_unexplainable": 228,
+        "sensor_isolated": 228,
+        "sensors_disagree": 339
+      },
+      "condition": "A_dead",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 340,
+      "safe_halts": 0,
+      "success": 360
+    },
+    {
+      "actions": 6800,
+      "agent": "single",
+      "alert_totals": {},
+      "condition": "A_dead_low",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 0,
+      "safe_halts": 0,
+      "success": 20
+    },
+    {
+      "actions": 5342,
+      "agent": "single_adapt",
+      "alert_totals": {
+        "bound_widened": 278,
+        "reading_unexplainable": 81
+      },
+      "condition": "A_dead_low",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 278,
+      "safe_halts": 81,
+      "success": 40
+    },
+    {
+      "actions": 6800,
+      "agent": "hull",
+      "alert_totals": {
+        "sensors_disagree": 6460
+      },
+      "condition": "A_dead_low",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 340,
+      "safe_halts": 0,
+      "success": 20
+    },
+    {
+      "actions": 5342,
+      "agent": "safe_halt",
+      "alert_totals": {
+        "bound_widened": 279,
+        "reading_unexplainable": 81,
+        "sensors_disagree": 5002
+      },
+      "condition": "A_dead_low",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 340,
+      "safe_halts": 81,
+      "success": 40
+    },
+    {
+      "actions": 5520,
+      "agent": "safe",
+      "alert_totals": {
+        "bound_widened": 198,
+        "reading_unexplainable": 81,
+        "sensor_isolated": 81,
+        "sensors_disagree": 4921
+      },
+      "condition": "A_dead_low",
+      "false_stops": 0,
+      "runs": 360,
+      "runs_with_alerts": 340,
+      "safe_halts": 0,
+      "success": 101
+    },
+    {
+      "actions": 1914,
+      "agent": "single",
+      "alert_totals": {},
+      "condition": "both_temp_-10",
+      "false_stops": 27,
+      "runs": 360,
+      "runs_with_alerts": 0,
+      "safe_halts": 0,
+      "success": 333
+    },
+    {
+      "actions": 1915,
+      "agent": "single_adapt",
+      "alert_totals": {
+        "bound_widened": 6
+      },
+      "condition": "both_temp_-10",
+      "false_stops": 27,
+      "runs": 360,
+      "runs_with_alerts": 6,
+      "safe_halts": 0,
+      "success": 333
+    },
+    {
+      "actions": 1939,
+      "agent": "hull",
+      "alert_totals": {},
+      "condition": "both_temp_-10",
+      "false_stops": 16,
+      "runs": 360,
+      "runs_with_alerts": 0,
+      "safe_halts": 0,
+      "success": 344
+    },
+    {
+      "actions": 1941,
+      "agent": "safe_halt",
+      "alert_totals": {
+        "bound_widened": 12
+      },
+      "condition": "both_temp_-10",
+      "false_stops": 16,
+      "runs": 360,
+      "runs_with_alerts": 11,
+      "safe_halts": 0,
+      "success": 344
+    },
+    {
+      "actions": 1941,
+      "agent": "safe",
+      "alert_totals": {
+        "bound_widened": 12
+      },
+      "condition": "both_temp_-10",
+      "false_stops": 16,
+      "runs": 360,
+      "runs_with_alerts": 11,
+      "safe_halts": 0,
+      "success": 344
+    }
+  ]
+}

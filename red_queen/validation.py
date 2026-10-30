@@ -2420,6 +2420,137 @@ def check_redundant_policy_compliance() -> CheckResult:
     return outside == 0 and over == 0, f"{runs} runs over 4 policies x 3 fusions (one biased sensor): outside policy={outside}; over budget={over}"
 
 
+# --------------------------------------------------------------- M5.3 checks
+
+M53_FROZEN = {('none', 'single'): (360, 0, 0, 2009), ('none', 'single_adapt'): (360, 0, 0, 2009), ('none', 'hull'): (360, 0, 0, 2036), ('none', 'safe_halt'): (360, 0, 0, 2036), ('none', 'safe'): (360, 0, 0, 2036), ('wrong_bound', 'single'): (350, 10, 0, 2088), ('wrong_bound', 'single_adapt'): (356, 4, 0, 2296), ('wrong_bound', 'hull'): (360, 0, 0, 2197), ('wrong_bound', 'safe_halt'): (360, 0, 0, 2452), ('wrong_bound', 'safe'): (360, 0, 0, 2452), ('A_temp_-10', 'single'): (333, 27, 0, 1914), ('A_temp_-10', 'single_adapt'): (333, 27, 0, 1915), ('A_temp_-10', 'hull'): (360, 0, 0, 2024), ('A_temp_-10', 'safe_halt'): (360, 0, 0, 2025), ('A_temp_-10', 'safe'): (360, 0, 0, 2025), ('wrong_bound+A_temp', 'single'): (317, 43, 0, 1956), ('wrong_bound+A_temp', 'single_adapt'): (335, 25, 0, 2147), ('wrong_bound+A_temp', 'hull'): (358, 2, 0, 2146), ('wrong_bound+A_temp', 'safe_halt'): (360, 0, 0, 2404), ('wrong_bound+A_temp', 'safe'): (360, 0, 0, 2404), ('A_dead', 'single'): (120, 210, 0, 1470), ('A_dead', 'single_adapt'): (120, 0, 228, 1120), ('A_dead', 'hull'): (360, 0, 0, 2005), ('A_dead', 'safe_halt'): (140, 0, 228, 928), ('A_dead', 'safe'): (360, 0, 0, 2005), ('A_dead_low', 'single'): (20, 0, 0, 6800), ('A_dead_low', 'single_adapt'): (40, 0, 81, 5342), ('A_dead_low', 'hull'): (20, 0, 0, 6800), ('A_dead_low', 'safe_halt'): (40, 0, 81, 5342), ('A_dead_low', 'safe'): (101, 0, 0, 5520), ('both_temp_-10', 'single'): (333, 27, 0, 1914), ('both_temp_-10', 'single_adapt'): (333, 27, 0, 1915), ('both_temp_-10', 'hull'): (344, 16, 0, 1939), ('both_temp_-10', 'safe_halt'): (344, 16, 0, 1941), ('both_temp_-10', 'safe'): (344, 16, 0, 1941)}
+
+
+def _m53_study():
+    from .safety_layer_study import run_study
+    if "safety" not in _M5_CACHE:
+        _M5_CACHE["safety"] = run_study()
+    return _M5_CACHE["safety"]
+
+
+def check_safe_agent_reproduces_earlier_agents() -> CheckResult:
+    from .belief_agent import BeliefAgent
+    from .redundant_agent import RedundantBeliefAgent
+    from .safe_agent import SafeAgent
+    from .scenarios import ALL_SCENARIOS
+    from .sensors import NoisySensor
+    g = RecoveryGoal()
+    diffs = {"M5": 0, "M5.1": 0, "M5.2": 0}
+    runs = 0
+    for s in ALL_SCENARIOS:
+        for seed in range(10):
+            for tn, an in ((5, 5), (15, 5), (10, 10)):
+                pairs = (
+                    ("M5", BeliefAgent(g, an, "interval").run(s.make_env(), NoisySensor(tn, seed)),
+                     SafeAgent(g, an, 1, False).run(s.make_env(), [NoisySensor(tn, seed)])),
+                    ("M5.1", BeliefAgent(g, an, "interval", adapt_noise=True).run(s.make_env(), NoisySensor(tn, seed)),
+                     SafeAgent(g, an, 1, True).run(s.make_env(), [NoisySensor(tn, seed)])),
+                    ("M5.2", RedundantBeliefAgent(g, an, "hull").run(s.make_env(), NoisySensor(tn, seed, 0, -10),
+                                                                      NoisySensor(tn, seed + 1000)),
+                     SafeAgent(g, an, 2, False).run(s.make_env(), [NoisySensor(tn, seed, 0, -10),
+                                                                    NoisySensor(tn, seed + 1000)])),
+                )
+                for name, old, new in pairs:
+                    diffs[name] += old.actions != new.actions or old.stop_reason != new.stop_reason
+                runs += 1
+    return all(v == 0 for v in diffs.values()), f"{runs} episodes x 3 configurations: differences from the earlier agents={diffs}"
+
+
+def check_estimator_separate_and_validated() -> CheckResult:
+    import inspect
+    from . import safe_agent
+    from .safe_agent import SafeAgent, SafeEstimator
+    src = inspect.getsource(SafeEstimator)
+    no_exec = "execute(" not in src and "PolicyExecutor" not in src and "env" not in src.replace("Estimate", "")
+    refused = 0
+    for make in (lambda: SafeEstimator(5, 3), lambda: SafeEstimator(5, 2, True, "ignore"), lambda: SafeEstimator(30),
+                 lambda: SafeAgent(RecoveryGoal(), 5).run(None, [object()])):
+        try:
+            make()
+        except ValueError:
+            refused += 1
+    est = SafeEstimator(5, 2)
+    try:
+        est.update([SystemState(50, 50, True)], 0, None)
+        wrong_count = False
+    except ValueError:
+        wrong_count = True
+    ok = no_exec and refused == 4 and wrong_count and hasattr(safe_agent, "STOP_SAFE_HALT")
+    return ok, f"estimator never executes or reads the environment={no_exec}; invalid configs refused={refused}/4; wrong reading count refused={wrong_count}"
+
+
+def check_safe_no_false_stops_single_fault() -> CheckResult:
+    rows = [r for r in _m53_study()["summary"] if r["agent"] in ("safe", "safe_halt") and r["condition"] != "both_temp_-10"]
+    fs = sum(r["false_stops"] for r in rows)
+    return fs == 0, f"safe and safe_halt over {len(rows)} conditions x 360 runs without a common-mode fault: false stops={fs}"
+
+
+def check_safety_layer_study_frozen() -> CheckResult:
+    from .safety_layer_study import run_study
+    got = {(r["condition"], r["agent"]): (r["success"], r["false_stops"], r["safe_halts"], r["actions"])
+           for r in _m53_study()["summary"]}
+    a, b = run_study(seeds=2), run_study(seeds=2)
+    return got == M53_FROZEN and a == b, f"35 rows x 360 runs: totals match frozen={got == M53_FROZEN}; 2-seed reruns identical={a == b}"
+
+
+def check_halt_and_isolate_behaviour() -> CheckResult:
+    from .safe_agent import STOP_SAFE_HALT, SafeAgent
+    from .scenarios import get_scenario
+    from .sensors import NoisySensor, StuckSensor
+    s = get_scenario("compound_failure")
+    dead = lambda: StuckSensor(NoisySensor(5, 0), 2, battery=100, temperature=0)
+    single = SafeAgent(RecoveryGoal(), 5, 1, True, "halt").run(s.make_env(), [dead()])
+    iso = SafeAgent(RecoveryGoal(), 5, 2, True, "isolate").run(s.make_env(), [dead(), NoisySensor(5, 1000)])
+    rep = iso.stats["operator_report"]
+    ok = (single.stop_reason == STOP_SAFE_HALT and not single.success
+          and iso.success and rep["trusted"] == [False, True] and rep["alert_counts"]["sensor_isolated"] == 1)
+    return ok, (f"dead single sensor: stop={single.stop_reason}, success={single.success}; "
+                f"dead A + healthy B with isolate: success={iso.success}, trusted={rep['trusted']}, isolated={rep['alert_counts']['sensor_isolated']}")
+
+
+def check_operator_report_numeric_only() -> CheckResult:
+    from .safety_layer_study import CONDITIONS, sensors_for
+    from .safe_agent import ALERT_KINDS, SafeAgent
+    from .scenarios import ALL_SCENARIOS
+
+    def plain(x):
+        if isinstance(x, dict):
+            return all(isinstance(k, str) and plain(v) for k, v in x.items())
+        if isinstance(x, list):
+            return all(plain(v) for v in x)
+        return isinstance(x, (int, bool, str)) and (not isinstance(x, str) or len(x) <= 32)
+
+    alerts = bad = 0
+    for cond in CONDITIONS:
+        for sc in ALL_SCENARIOS:
+            r = SafeAgent(RecoveryGoal(), 5, 2, True).run(sc.make_env(), sensors_for(cond, 0))
+            for a in r.stats["operator_report"]["alerts"]:
+                alerts += 1
+                bad += a["kind"] not in ALERT_KINDS or not plain(a)
+    return bad == 0 and alerts > 0, f"{alerts} alerts over 7 conditions: all of a known kind with plain numeric/short-label evidence (bad={bad})"
+
+
+def check_safety_layer_policy_compliance() -> CheckResult:
+    from .policy import ALL_POLICIES
+    from .safety_layer_study import sensors_for
+    from .safe_agent import SafeAgent
+    from .scenarios import ALL_SCENARIOS
+    runs = outside = over = 0
+    for policy in ALL_POLICIES.values():
+        for cond in ("wrong_bound+A_temp", "A_dead_low"):
+            for sc in ALL_SCENARIOS:
+                for seed in range(2):
+                    r = SafeAgent(RecoveryGoal(), 5, 2, True, policy=policy).run(sc.make_env(), sensors_for(cond, seed))
+                    runs += 1
+                    outside += sum(1 for a in r.actions if not policy.check(a).allowed)
+                    over += len(r.actions) > 20
+    return outside == 0 and over == 0, f"{runs} safe-agent runs over 4 policies x 2 combined-fault conditions: outside policy={outside}; over budget={over}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -2646,6 +2777,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("common_mode_bias_not_detected", check_common_mode_not_detected),
         ("fault_halt_claims_no_success", check_fault_halt_claims_nothing),
         ("redundant_policy_compliance", check_redundant_policy_compliance),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M5.3 (V156 onward)
+    for name, fn in (
+        ("safe_agent_reproduces_m5_m5_1_m5_2", check_safe_agent_reproduces_earlier_agents),
+        ("estimator_separate_and_validated", check_estimator_separate_and_validated),
+        ("safe_no_false_stops_without_common_mode", check_safe_no_false_stops_single_fault),
+        ("safety_layer_study_totals_frozen", check_safety_layer_study_frozen),
+        ("halt_and_isolate_behaviour", check_halt_and_isolate_behaviour),
+        ("operator_report_numeric_only", check_operator_report_numeric_only),
+        ("safety_layer_policy_compliance", check_safety_layer_policy_compliance),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1
