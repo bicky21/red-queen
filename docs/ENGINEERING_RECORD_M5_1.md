@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M5.1
 
-**Version:** 0.15.0 · **Date:** 2026-10-30 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.15.0 · **Date:** 2026-10-30 · **Status:** build-environment passed; **Linux acceptance passed 2026-10-30**
 **Outcome:** the belief agent can now notice that its noise bound is too small and widen it. Under a wrong bound this cuts false stops by 55–81%, but **not to zero**. With a correct bound it changes nothing (2,160 paired runs identical). A constant **sensor bias is not detected at all**, and it causes up to 45 false stops in 360 runs. This is now the main open safety gap.
 
 ## 1. Review of M5
@@ -80,17 +80,12 @@ Self-registered before the study was run:
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Passed 2026-10-30.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 285 tests in 107.434s, OK**;
+`python3 -m red_queen.validation` → **148/148 validation checks passed**;
+`python3 -m red_queen.sensor_adapt_study` printed tables A, B and C **identical** to §5.
 
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.sensor_adapt_study
-```
-
-M5.1 is accepted when the output shows `Ran 285 tests ... OK` and `148/148 validation checks passed`. The study tables should match §5.
-
-## 9. Next milestone (candidates)
+## 9. Next milestone (candidates) — M5.2 chosen
 
 1. **M5.2: redundant sensors against bias.** Use two independent sensors, and stop only when both agree that every state in their boxes meets the goal. Treat disagreement beyond the bounds as a detected sensor fault and stop safely. This is the natural answer to the gap found here.
 2. **M5.3: information gathering.** Re-read (`wait`) before stopping, to catch early false stops and tighten the bound.
