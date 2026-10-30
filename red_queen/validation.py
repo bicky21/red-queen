@@ -2293,6 +2293,133 @@ def check_adapt_study_deterministic() -> CheckResult:
     return a == b and "C. Sensor bias" in text, f"two 3-seed study runs identical={a == b}; report sections present={'C. Sensor bias' in text}"
 
 
+# --------------------------------------------------------------- M5.2 checks
+
+M52_FROZEN = {  # (condition, agent): (success, false_stops, fault_halts, actions)
+    ('none', 'single'): (360, 0, 0, 2009), ('none', 'intersect'): (360, 0, 0, 1954),
+    ('none', 'hull'): (360, 0, 0, 2036), ('none', 'latch'): (360, 0, 0, 1954),
+    ('A_temp_-10', 'single'): (333, 27, 0, 1914), ('A_temp_-10', 'intersect'): (62, 1, 325, 427),
+    ('A_temp_-10', 'hull'): (360, 0, 0, 2024), ('A_temp_-10', 'latch'): (359, 1, 0, 2019),
+    ('B_temp_-10', 'single'): (360, 0, 0, 2009), ('B_temp_-10', 'intersect'): (64, 2, 326, 467),
+    ('B_temp_-10', 'hull'): (360, 0, 0, 2024), ('B_temp_-10', 'latch'): (358, 2, 0, 2012),
+    ('A_temp_-20', 'single'): (208, 152, 0, 1790), ('A_temp_-20', 'intersect'): (20, 0, 360, 0),
+    ('A_temp_-20', 'hull'): (360, 0, 0, 2024), ('A_temp_-20', 'latch'): (360, 0, 0, 2024),
+    ('A_batt_+10', 'single'): (360, 0, 0, 1710), ('A_batt_+10', 'intersect'): (69, 0, 322, 441),
+    ('A_batt_+10', 'hull'): (360, 0, 0, 2017), ('A_batt_+10', 'latch'): (360, 0, 0, 1985),
+    ('both_temp_-10', 'single'): (333, 27, 0, 1914), ('both_temp_-10', 'intersect'): (300, 60, 0, 1846),
+    ('both_temp_-10', 'hull'): (344, 16, 0, 1939), ('both_temp_-10', 'latch'): (300, 60, 0, 1846),
+}
+
+
+def _m52_study():
+    from .redundancy_study import run_study
+    if "redundancy" not in _M5_CACHE:
+        _M5_CACHE["redundancy"] = run_study()
+    return _M5_CACHE["redundancy"]
+
+
+def check_fusion_rules_sound() -> CheckResult:
+    from .belief_agent import intersect
+    from .redundant_agent import hull
+    from .sensors import Box
+    cases = 0
+    for a_lo in range(0, 91, 15):
+        for b_lo in range(0, 91, 15):
+            for w in (0, 10, 20):
+                a = Box(a_lo, min(100, a_lo + w), a_lo, min(100, a_lo + w), True)
+                b = Box(b_lo, min(100, b_lo + w), 50, 60, True)
+                h, i = hull(a, b), intersect(a, b)
+                for x in range(0, 101, 5):
+                    for y in range(0, 101, 5):
+                        s = SystemState(x, y, True)
+                        if (a.contains(s) or b.contains(s)) and not h.contains(s):
+                            return False, f"hull {h} misses {s} that is in {a} or {b}"
+                        if a.contains(s) and b.contains(s) and (i is None or not i.contains(s)):
+                            return False, f"intersection misses {s} that is in both boxes"
+                        cases += 1
+    return True, f"{cases} (box pair, state) cases: hull contains every state in either box; intersection every state in both"
+
+
+def check_redundant_noise_zero() -> CheckResult:
+    from .redundant_agent import FUSIONS, RedundantBeliefAgent
+    from .scenarios import ALL_SCENARIOS
+    from .sensors import NoisySensor
+    totals = {}
+    for f in FUSIONS:
+        rs = [RedundantBeliefAgent(RecoveryGoal(), 0, f).run(s.make_env(), NoisySensor(0, 0), NoisySensor(0, 1))
+              for s in ALL_SCENARIOS]
+        if not all(r.success for r in rs):
+            return False, f"{f} failed at noise 0"
+        totals[f] = sum(len(r.actions) for r in rs)
+    return all(v == 79 for v in totals.values()), f"noise 0, two exact sensors: all fusions 18/18; action totals={totals}"
+
+
+def check_hull_no_false_stops_single_fault() -> CheckResult:
+    rows = [r for r in _m52_study()["summary"] if r["agent"] == "hull" and r["condition"] != "both_temp_-10"]
+    fs = {r["condition"]: r["false_stops"] for r in rows}
+    ok = all(v == 0 for v in fs.values()) and all(r["success"] == r["runs"] for r in rows)
+    return ok, f"hull with at most one biased sensor: false stops={fs}; all {sum(r['runs'] for r in rows)} runs succeeded={ok}"
+
+
+def check_redundancy_study_frozen() -> CheckResult:
+    from .redundancy_study import run_study
+    got = {(r["condition"], r["agent"]): (r["success"], r["false_stops"], r["fault_halts"], r["actions"])
+           for r in _m52_study()["summary"]}
+    a, b = run_study(seeds=2), run_study(seeds=2)
+    return got == M52_FROZEN and a == b, f"24 rows x 360 runs: totals match frozen={got == M52_FROZEN}; 2-seed reruns identical={a == b}"
+
+
+def check_common_mode_not_detected() -> CheckResult:
+    rows = {r["agent"]: r for r in _m52_study()["summary"] if r["condition"] == "both_temp_-10"}
+    disagreed = sum(r["runs_disagreed"] for r in rows.values())
+    fs = {a: r["false_stops"] for a, r in rows.items()}
+    ok = disagreed == 0 and all(v > 0 for v in fs.values())
+    return ok, f"bias shared by both sensors: disagreements={disagreed}; false stops={fs} (not detectable by redundancy)"
+
+
+def check_fault_halt_claims_nothing() -> CheckResult:
+    from .redundancy_study import CONDITIONS, run_one
+    from .redundant_agent import RedundantBeliefAgent
+    from .scenarios import ALL_SCENARIOS
+    from .sensors import NoisySensor
+    halts = bad = 0
+    for cond in CONDITIONS:
+        for s in ALL_SCENARIOS:
+            for seed in range(3):
+                r = run_one("intersect", s, cond, seed)
+                if r["fault_halt"]:
+                    halts += 1
+                    bad += r["stop_reason"] == "goal_believed_satisfied" or r["actions"] > s.max_steps
+    refused = 0
+    sensor = NoisySensor(5, 0)
+    for make in (lambda: RedundantBeliefAgent(RecoveryGoal(), 5, "average"),
+                 lambda: RedundantBeliefAgent(RecoveryGoal(), 99),
+                 lambda: RedundantBeliefAgent(RecoveryGoal(), 5).run(ALL_SCENARIOS[1].make_env(), sensor, sensor)):
+        try:
+            make()
+        except ValueError:
+            refused += 1
+    return bad == 0 and halts > 0 and refused == 3, f"{halts} fault halts: none claimed success or exceeded budget (bad={bad}); invalid configs refused={refused}/3"
+
+
+def check_redundant_policy_compliance() -> CheckResult:
+    from .policy import ALL_POLICIES
+    from .redundancy_study import sensors_for
+    from .redundant_agent import FUSIONS, RedundantBeliefAgent
+    from .scenarios import ALL_SCENARIOS
+    runs = outside = over = 0
+    for policy in ALL_POLICIES.values():
+        for f in FUSIONS:
+            for s in ALL_SCENARIOS:
+                for seed in range(3):
+                    sa, sb = sensors_for("A_temp_-10", seed)
+                    r = RedundantBeliefAgent(RecoveryGoal(), 5, f, policy=policy).run(s.make_env(), sa, sb)
+                    runs += 1
+                    outside += sum(1 for a in r.actions if not policy.check(a).allowed)
+                    over += len(r.actions) > 20
+    return outside == 0 and over == 0, f"{runs} runs over 4 policies x 3 fusions (one biased sensor): outside policy={outside}; over budget={over}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -2507,6 +2634,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("adaptation_reduces_false_stops", check_adaptation_reduces_false_stops),
         ("bias_not_detected", check_bias_not_detected),
         ("adapt_study_deterministic", check_adapt_study_deterministic),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M5.2 (V149 onward)
+    for name, fn in (
+        ("fusion_rules_sound", check_fusion_rules_sound),
+        ("redundant_noise_zero_matches_m3", check_redundant_noise_zero),
+        ("hull_no_false_stops_single_fault", check_hull_no_false_stops_single_fault),
+        ("redundancy_study_totals_frozen", check_redundancy_study_frozen),
+        ("common_mode_bias_not_detected", check_common_mode_not_detected),
+        ("fault_halt_claims_no_success", check_fault_halt_claims_nothing),
+        ("redundant_policy_compliance", check_redundant_policy_compliance),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

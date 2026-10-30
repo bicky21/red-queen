@@ -1,4 +1,4 @@
-"""RED QUEEN AI - Milestone M5.1.
+"""RED QUEEN AI - Milestone M5.2.
 
 Deterministic simulated recovery with explicit action scoring, affect
 experiments (M1-M1.1), persistent and advisory SQLite memory (M2-M2.1),
@@ -8,9 +8,9 @@ independent verification (M3), memory-informed planning studies
 opt-in, loopback-only local-model adapter for Ollama (M4.1), and
 experimental prompt styles and trusted-feedback retries (M4.2),
 and noisy sensors with belief-box agents (M5) that can detect a too-small
-noise bound (M5.1).
+noise bound (M5.1), and redundant-sensor fusion against sensor bias (M5.2).
 Standard library only.
 """
 
-__version__ = "0.15.0"
-MILESTONE = "M5.1"
+__version__ = "0.16.0"
+MILESTONE = "M5.2"

@@ -1,0 +1,267 @@
+{
+  "milestone": "M5.2",
+  "noise": 5,
+  "scenarios": [
+    "nominal",
+    "low_battery",
+    "overheating",
+    "service_down",
+    "overheated_service_down",
+    "compound_failure",
+    "disturbance_mid_recovery",
+    "flaky_restart",
+    "flaky_restart_low_battery",
+    "charger_outage",
+    "battery_empty",
+    "max_heat_service_down",
+    "deep_battery_flaky_restart",
+    "flaky_restart_then_crash",
+    "flaky_restart_heat_spike",
+    "cool_outage_battery_drain",
+    "charger_outage_overheating",
+    "double_disturbance"
+  ],
+  "seeds": 20,
+  "summary": [
+    {
+      "actions": 2009,
+      "agent": "single",
+      "condition": "none",
+      "false_stops": 0,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 0,
+      "success": 360
+    },
+    {
+      "actions": 1954,
+      "agent": "intersect",
+      "condition": "none",
+      "false_stops": 0,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 0,
+      "success": 360
+    },
+    {
+      "actions": 2036,
+      "agent": "hull",
+      "condition": "none",
+      "false_stops": 0,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 0,
+      "success": 360
+    },
+    {
+      "actions": 1954,
+      "agent": "latch",
+      "condition": "none",
+      "false_stops": 0,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 0,
+      "success": 360
+    },
+    {
+      "actions": 1914,
+      "agent": "single",
+      "condition": "A_temp_-10",
+      "false_stops": 27,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 0,
+      "success": 333
+    },
+    {
+      "actions": 427,
+      "agent": "intersect",
+      "condition": "A_temp_-10",
+      "false_stops": 1,
+      "fault_halts": 325,
+      "runs": 360,
+      "runs_disagreed": 325,
+      "success": 62
+    },
+    {
+      "actions": 2024,
+      "agent": "hull",
+      "condition": "A_temp_-10",
+      "false_stops": 0,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 330,
+      "success": 360
+    },
+    {
+      "actions": 2019,
+      "agent": "latch",
+      "condition": "A_temp_-10",
+      "false_stops": 1,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 325,
+      "success": 359
+    },
+    {
+      "actions": 2009,
+      "agent": "single",
+      "condition": "B_temp_-10",
+      "false_stops": 0,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 0,
+      "success": 360
+    },
+    {
+      "actions": 467,
+      "agent": "intersect",
+      "condition": "B_temp_-10",
+      "false_stops": 2,
+      "fault_halts": 326,
+      "runs": 360,
+      "runs_disagreed": 326,
+      "success": 64
+    },
+    {
+      "actions": 2024,
+      "agent": "hull",
+      "condition": "B_temp_-10",
+      "false_stops": 0,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 327,
+      "success": 360
+    },
+    {
+      "actions": 2012,
+      "agent": "latch",
+      "condition": "B_temp_-10",
+      "false_stops": 2,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 326,
+      "success": 358
+    },
+    {
+      "actions": 1790,
+      "agent": "single",
+      "condition": "A_temp_-20",
+      "false_stops": 152,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 0,
+      "success": 208
+    },
+    {
+      "actions": 0,
+      "agent": "intersect",
+      "condition": "A_temp_-20",
+      "false_stops": 0,
+      "fault_halts": 360,
+      "runs": 360,
+      "runs_disagreed": 360,
+      "success": 20
+    },
+    {
+      "actions": 2024,
+      "agent": "hull",
+      "condition": "A_temp_-20",
+      "false_stops": 0,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 360,
+      "success": 360
+    },
+    {
+      "actions": 2024,
+      "agent": "latch",
+      "condition": "A_temp_-20",
+      "false_stops": 0,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 360,
+      "success": 360
+    },
+    {
+      "actions": 1710,
+      "agent": "single",
+      "condition": "A_batt_+10",
+      "false_stops": 0,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 0,
+      "success": 360
+    },
+    {
+      "actions": 441,
+      "agent": "intersect",
+      "condition": "A_batt_+10",
+      "false_stops": 0,
+      "fault_halts": 322,
+      "runs": 360,
+      "runs_disagreed": 322,
+      "success": 69
+    },
+    {
+      "actions": 2017,
+      "agent": "hull",
+      "condition": "A_batt_+10",
+      "false_stops": 0,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 329,
+      "success": 360
+    },
+    {
+      "actions": 1985,
+      "agent": "latch",
+      "condition": "A_batt_+10",
+      "false_stops": 0,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 322,
+      "success": 360
+    },
+    {
+      "actions": 1914,
+      "agent": "single",
+      "condition": "both_temp_-10",
+      "false_stops": 27,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 0,
+      "success": 333
+    },
+    {
+      "actions": 1846,
+      "agent": "intersect",
+      "condition": "both_temp_-10",
+      "false_stops": 60,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 0,
+      "success": 300
+    },
+    {
+      "actions": 1939,
+      "agent": "hull",
+      "condition": "both_temp_-10",
+      "false_stops": 16,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 0,
+      "success": 344
+    },
+    {
+      "actions": 1846,
+      "agent": "latch",
+      "condition": "both_temp_-10",
+      "false_stops": 60,
+      "fault_halts": 0,
+      "runs": 360,
+      "runs_disagreed": 0,
+      "success": 300
+    }
+  ]
+}

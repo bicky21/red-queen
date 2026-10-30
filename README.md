@@ -1,4 +1,4 @@
-# RED QUEEN AI — Milestone M5.1
+# RED QUEEN AI — Milestone M5.2
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
@@ -59,6 +59,9 @@ execution, no real-world actions.
 18. Optionally (M5.1), the belief agent checks whether its readings can be
     explained with its assumed noise size. If not, it enlarges the assumption.
     A constant sensor offset (bias) cannot be detected this way.
+19. Redundant sensors (M5.2): an agent can read two independent sensors and
+    combine their ranges. The "hull" rule stays safe if one sensor is biased.
+    A bias shared by both sensors is still not detected.
 
 Allowed actions (the only ones that can ever run):
 
@@ -90,7 +93,7 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 285 tests ... OK` and `148/148 validation checks passed`
+   Expected: `Ran 297 tests ... OK` and `155/155 validation checks passed`
    (takes about 3-5 minutes; does not need Ollama).
 3. Optional reports:
    ```
@@ -155,6 +158,10 @@ git --version
     ```
     python3 -m red_queen.sensor_adapt_study --output results/m5_1_adapt_study.json
     ```
+16. Redundant sensor study (M5.2, about 10 seconds):
+    ```
+    python3 -m red_queen.redundancy_study --output results/m5_2_redundancy_study.json
+    ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 
@@ -197,11 +204,13 @@ red_queen/
   belief_agent.py  worst-case belief agent: interval / filter / filter_verified (M5)
   sensor_study.py  4 agents x 4 noise levels x 18 scenarios x 20 seeds (M5)
   sensor_adapt_study.py wrong noise bound, correct bound, sensor bias (M5.1)
-  validation.py    148 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+  redundant_agent.py two-sensor belief agent: intersect / hull / latch (M5.2)
+  redundancy_study.py 6 fault conditions x 4 agents (M5.2)
+  validation.py    155 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
                    V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4,
-                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1)
-tests/             285 unittest tests
+                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2)
+tests/             297 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -217,6 +226,7 @@ docs/ENGINEERING_RECORD_M4_1.md   (accepted on Linux; includes real-model trial)
 docs/ENGINEERING_RECORD_M4_2.md   (accepted on Linux; real-model comparison, negative result)
 docs/ENGINEERING_RECORD_M5.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M5_1.md   (accepted on Linux)
+docs/ENGINEERING_RECORD_M5_2.md
 results/                          build-environment reports
 ```
 
@@ -239,3 +249,4 @@ results/                          build-environment reports
 | M4.2 | 256 tests OK, 131/131 checks (fake server) | **Accepted** 2026-10-30; real-model `--compare`: no prompt/retry setting beat the planner (82–84 vs 79 actions), 0 safety violations — negative result |
 | M5 | 273 tests OK, 141/141 checks | **Accepted** 2026-10-30; sensor study table identical to build environment |
 | M5.1 | 285 tests OK, 148/148 checks | **Accepted** 2026-10-30; study tables identical to build environment |
+| M5.2 | 297 tests OK, 155/155 checks | Pending — run step 2 and step 16 |
