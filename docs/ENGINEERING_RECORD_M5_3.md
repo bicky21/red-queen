@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M5.3
 
-**Version:** 0.17.0 · **Date:** 2026-10-30 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.17.0 · **Date:** 2026-10-30 · **Status:** build-environment passed; **Linux acceptance passed 2026-10-30**
 **Outcome:** the three sensor protections from M5 to M5.2 are now one state-estimation component, `SafeEstimator`, with operator alerts and a defined response to an unexplainable sensor. The combined agent had **0 false stops in all 2,160 runs without a common-mode fault**, including the combined fault "wrong noise bound + biased sensor", where every single protection alone still failed. It costs more actions, and two limitations are confirmed: a **common-mode bias** (16/360 false stops) and a **pessimistically stuck sensor** that the detector explains away instead of isolating (only 101/360 recovered, failing safely).
 
 ## 1. Review of M5.2
@@ -89,17 +89,12 @@ Before running `A_dead_low` (post-hoc condition), I expected hull to fail safely
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Passed 2026-10-30.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 311 tests in 167.814s, OK**;
+`python3 -m red_queen.validation` → **162/162 validation checks passed**;
+`python3 -m red_queen.safety_layer_study`: compared with `diff` against the build-environment output, the two are **identical**.
 
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.safety_layer_study
-```
-
-M5.3 is accepted when the output shows `Ran 311 tests ... OK` and `162/162 validation checks passed`. The study table should match §5.
-
-## 9. Next milestone (candidates)
+## 9. Next milestone (candidates) — M5.4 chosen
 
 1. **M5.4: cross-sensor fault isolation.** When two sensors disagree and only one of them needed its bound widened, isolate that one. Test it on *new*, pre-registered stuck and drift faults, so it is not tuned on `A_dead_low`.
 2. **M5.5: information gathering.** Re-read before stopping, to measure whether it reduces the extra actions the safe agent costs.

@@ -237,7 +237,7 @@ docs/ENGINEERING_RECORD_M4_2.md   (accepted on Linux; real-model comparison, neg
 docs/ENGINEERING_RECORD_M5.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M5_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M5_2.md   (accepted on Linux)
-docs/ENGINEERING_RECORD_M5_3.md
+docs/ENGINEERING_RECORD_M5_3.md   (accepted on Linux)
 results/                          build-environment reports
 ```
 
@@ -261,4 +261,4 @@ results/                          build-environment reports
 | M5 | 273 tests OK, 141/141 checks | **Accepted** 2026-10-30; sensor study table identical to build environment |
 | M5.1 | 285 tests OK, 148/148 checks | **Accepted** 2026-10-30; study tables identical to build environment |
 | M5.2 | 297 tests OK, 155/155 checks | **Accepted** 2026-10-30; study table identical to build environment |
-| M5.3 | 311 tests OK, 162/162 checks | Pending — run step 2 and step 17 |
+| M5.3 | 311 tests OK, 162/162 checks | **Accepted** 2026-10-30; study output identical (diff) |
