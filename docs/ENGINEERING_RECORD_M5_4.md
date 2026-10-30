@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M5.4
 
-**Version:** 0.18.0 · **Date:** 2026-10-30 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.18.0 · **Date:** 2026-10-30 · **Status:** build-environment passed; **Linux acceptance passed 2026-10-30**
 **Outcome: pre-registered result, mixed.** The cross-sensor isolation rule greatly improves recovery from stuck sensors: 142→318, 56→282 and 101→299 successes out of 360, with 0 false stops. But under a wrong noise bound it isolates **healthy** sensors (116/360 runs) and causes 3 false stops. By the decision rule committed *before* any code, the rule is **not adopted as default**. It stays available as an option (`cross_isolate=True`).
 
 ## 1. Review of M5.3
@@ -77,17 +77,12 @@ Actions on the stuck faults roughly halve. For example, B_stuck_low drops from 6
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Passed 2026-10-30.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 321 tests in 211.481s, OK**;
+`python3 -m red_queen.validation` → **169/169 validation checks passed**;
+`python3 -m red_queen.cross_isolation_study`: the output, including the pre-registered decision, was compared with `diff` against the build environment and is **identical**.
 
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.cross_isolation_study
-```
-
-M5.4 is accepted when the output shows `Ran 321 tests ... OK` and `169/169 validation checks passed`. The study table and decision should match §6.
-
-## 9. Next milestone (candidates)
+## 9. Next milestone (candidates) — M6 chosen
 
 1. **M5.5: pre-registered persistence variant.** Isolate only after the same sensor has been singled out on k consecutive disagreeing steps, and test whether this removes the wrongful isolations under a wrong bound while keeping most of the gain.
 2. **M6: combine the sensor layer with memory and the planner**, meaning the disturbance memory (M3.5/M3.6) under noisy sensors. The sensor work is now well characterised; this would move the project forward instead of refining one component further.
