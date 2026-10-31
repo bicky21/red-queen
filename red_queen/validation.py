@@ -2839,6 +2839,121 @@ def check_train_test_separation() -> CheckResult:
     return disjoint and not missing, f"train/test seeds disjoint={disjoint}; pre-registration present, missing terms={missing}"
 
 
+# ---------------------------------------------------------------- M7.1 checks
+
+
+def _m71_study():
+    from .warning_study import run_study
+    if "m71" not in _M5_CACHE:
+        _M5_CACHE["m71"] = run_study()
+    return _M5_CACHE["m71"]
+
+
+def _m71_model():
+    from .self_model import SelfModel
+    from .self_model_study import TRAIN_SEEDS
+    from .warning_study import collect_episodes
+    if "m71_model" not in _M5_CACHE:
+        train = collect_episodes(TRAIN_SEEDS)
+        _M5_CACHE["m71_model"] = SelfModel().fit((k, ep["success"]) for ep in train for k in ep["keys"])
+    return _M5_CACHE["m71_model"]
+
+
+def check_monitor_config_and_single_alert() -> CheckResult:
+    from .self_model import ConfidenceMonitor, SelfModel
+    refused = 0
+    for make in (lambda: ConfidenceMonitor(SelfModel(), 0.3), lambda: ConfidenceMonitor(_m71_model(), 1.0),
+                 lambda: ConfidenceMonitor(_m71_model(), True)):
+        try:
+            make()
+        except ValueError:
+            refused += 1
+    mon = ConfidenceMonitor(_m71_model(), 0.99)
+    for step in range(5):
+        mon({"step": step, "stopping": False, "plan_len": None, "steps_left": 1, "alert_counts": {}, "width": 50})
+    ok = refused == 3 and len(mon.alerts) == 1 and mon.alerts[0]["step"] == 0
+    return ok, f"invalid configs refused={refused}/3; five low-confidence snapshots -> alerts={len(mon.alerts)} (first at step {mon.alerts[0]['step']})"
+
+
+def check_monitor_does_not_change_behaviour() -> CheckResult:
+    from .safe_agent import SafeAgent
+    from .safety_layer_study import CONDITIONS, sensors_for
+    from .scenarios import ALL_SCENARIOS
+    from .self_model import ConfidenceMonitor
+    runs = diff = reported = 0
+    for cond in CONDITIONS:
+        for sc in ALL_SCENARIOS:
+            a = SafeAgent(RecoveryGoal(), 5).run(sc.make_env(), sensors_for(cond, 12))
+            b = SafeAgent(RecoveryGoal(), 5).run(sc.make_env(), sensors_for(cond, 12),
+                                                 observer=ConfidenceMonitor(_m71_model(), _m71_study()["threshold"]))
+            runs += 1
+            diff += a.actions != b.actions or a.stop_reason != b.stop_reason
+            reported += "observer_report" in b.stats
+    return diff == 0 and reported == runs, f"{runs} runs with the live monitor: behaviour differences={diff}; report attached in {reported}/{runs}"
+
+
+def check_live_monitor_matches_study() -> CheckResult:
+    from .safe_agent import SafeAgent
+    from .safety_layer_study import CONDITIONS, sensors_for
+    from .scenarios import ALL_SCENARIOS
+    from .self_model import ConfidenceMonitor
+    from .warning_study import collect_episodes, first_alert
+    model, tau = _m71_model(), _m71_study()["threshold"]
+    eps = collect_episodes((13,))
+    mismatch = 0
+    by = {(e["condition"], e["scenario"]): e for e in eps}
+    for cond in CONDITIONS:
+        for sc in ALL_SCENARIOS:
+            mon = ConfidenceMonitor(model, tau)
+            SafeAgent(RecoveryGoal(), 5, max_steps=sc.max_steps).run(sc.make_env(), sensors_for(cond, 13), observer=mon)
+            e = by[(cond, sc.name)]
+            i = first_alert(e, lambda k: model.predict(k) < tau)
+            offline = None if i is None else e["steps"][i]
+            live = mon.alerts[0]["step"] if mon.alerts else None
+            mismatch += offline != live
+    return mismatch == 0, f"{len(eps)} episodes: live monitor alert step equals the study's offline computation (mismatches={mismatch})"
+
+
+def check_threshold_chosen_on_train_only() -> CheckResult:
+    from .self_model_study import TRAIN_SEEDS
+    from .warning_study import THRESHOLDS, choose_threshold, collect_episodes
+    again = choose_threshold(_m71_model(), collect_episodes(TRAIN_SEEDS))
+    rep = _m71_study()
+    ok = again == rep["threshold_selection"] and rep["threshold"] in THRESHOLDS and rep["threshold"] == 0.3
+    return ok, f"threshold re-derived from training seeds only: {again['chosen']} (study used {rep['threshold']}); train F1={again['train_f1']}"
+
+
+def check_warning_study_frozen() -> CheckResult:
+    m, b = _m71_study()["test_monitor"], _m71_study()["test_baseline"]
+    got = (m["warned_failures"], m["false_alarms"], m["missed_failures"], m["quiet_successes"], m["median_lead_steps"],
+           b["warned_failures"], b["false_alarms"], b["missed_failures"], b["median_lead_steps"])
+    expected = (124, 0, 7, 1129, 10.0, 124, 0, 7, 7.0)
+    return got == expected, f"test counts (monitor tp/fp/fn/tn/lead, baseline tp/fp/fn/lead)={got}; frozen={got == expected}"
+
+
+def check_m71_decision_and_blind_spot() -> CheckResult:
+    from .warning_study import decide
+    rep = _m71_study()
+    d = rep["decision"]
+    m = rep["test_monitor"]
+    ok = (d == decide(m, rep["test_baseline"]) and d["warning_useful"] is True
+          and m["recall_false_stop_failures"] == 0.0 and m["recall_other_failures"] == 1.0)
+    return ok, (f"pre-registered rule: W1-W4 all True={d['warning_useful']}; recall on false-stop failures="
+                f"{m['recall_false_stop_failures']} (blind spot, as predicted), on other failures={m['recall_other_failures']}")
+
+
+def check_prereg_m7_1_present() -> CheckResult:
+    import os
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M7_1.md")
+    if not os.path.exists(path):
+        return False, "docs/PREREG_M7_1.md missing"
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    missing = [k for k in ("W1", "W2", "W3", "W4", "{0.3, 0.4, 0.5, 0.6, 0.7}", "never changes what the agent does")
+               if k not in text]
+    return not missing, f"pre-registration file present; required terms missing={missing}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -3113,6 +3228,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("m7_prereg_decision_applied", check_m7_decision_applied),
         ("self_model_blind_spot_reported", check_blind_spot_reported),
         ("m7_train_test_separated", check_train_test_separation),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M7.1 (V184 onward)
+    for name, fn in (
+        ("monitor_config_and_single_alert", check_monitor_config_and_single_alert),
+        ("monitor_does_not_change_behaviour", check_monitor_does_not_change_behaviour),
+        ("live_monitor_matches_study", check_live_monitor_matches_study),
+        ("threshold_chosen_on_train_only", check_threshold_chosen_on_train_only),
+        ("warning_study_frozen", check_warning_study_frozen),
+        ("m7_1_decision_and_blind_spot", check_m71_decision_and_blind_spot),
+        ("m7_1_prereg_file_present", check_prereg_m7_1_present),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

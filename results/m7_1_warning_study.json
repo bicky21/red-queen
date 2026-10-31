@@ -1,0 +1,97 @@
+{
+  "decision": {
+    "W1_recall_at_least_0.80": true,
+    "W2_precision_at_least_0.80": true,
+    "W3_median_lead_at_least_3_steps": true,
+    "W4_f1_not_below_baseline": true,
+    "warning_useful": true
+  },
+  "milestone": "M7.1",
+  "per_condition": {
+    "A_dead": {
+      "false_alarms": 0,
+      "missed_failures": 0,
+      "quiet_successes": 180,
+      "warned_failures": 0
+    },
+    "A_dead_low": {
+      "false_alarms": 0,
+      "missed_failures": 0,
+      "quiet_successes": 56,
+      "warned_failures": 124
+    },
+    "A_temp_-10": {
+      "false_alarms": 0,
+      "missed_failures": 0,
+      "quiet_successes": 180,
+      "warned_failures": 0
+    },
+    "both_temp_-10": {
+      "false_alarms": 0,
+      "missed_failures": 7,
+      "quiet_successes": 173,
+      "warned_failures": 0
+    },
+    "none": {
+      "false_alarms": 0,
+      "missed_failures": 0,
+      "quiet_successes": 180,
+      "warned_failures": 0
+    },
+    "wrong_bound": {
+      "false_alarms": 0,
+      "missed_failures": 0,
+      "quiet_successes": 180,
+      "warned_failures": 0
+    },
+    "wrong_bound+A_temp": {
+      "false_alarms": 0,
+      "missed_failures": 0,
+      "quiet_successes": 180,
+      "warned_failures": 0
+    }
+  },
+  "test_baseline": {
+    "episodes": 1260,
+    "f1": 0.9725,
+    "false_alarm_rate": 0.0,
+    "false_alarms": 0,
+    "false_stop_failures": 7,
+    "median_lead_steps": 7.0,
+    "missed_failures": 7,
+    "other_failures": 124,
+    "precision": 1.0,
+    "quiet_successes": 1129,
+    "recall": 0.9466,
+    "recall_false_stop_failures": 0.0,
+    "recall_other_failures": 1.0,
+    "warned_failures": 124
+  },
+  "test_monitor": {
+    "episodes": 1260,
+    "f1": 0.9725,
+    "false_alarm_rate": 0.0,
+    "false_alarms": 0,
+    "false_stop_failures": 7,
+    "median_lead_steps": 10.0,
+    "missed_failures": 7,
+    "other_failures": 124,
+    "precision": 1.0,
+    "quiet_successes": 1129,
+    "recall": 0.9466,
+    "recall_false_stop_failures": 0.0,
+    "recall_other_failures": 1.0,
+    "warned_failures": 124
+  },
+  "threshold": 0.3,
+  "threshold_selection": {
+    "chosen": 0.3,
+    "train_f1": {
+      "0.3": 0.9677,
+      "0.4": 0.9677,
+      "0.5": 0.5637,
+      "0.6": 0.5637,
+      "0.7": 0.3689
+    }
+  }
+}

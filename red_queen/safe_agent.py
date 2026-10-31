@@ -173,6 +173,14 @@ class SafeEstimator:
                 "alerts": [a.to_dict() for a in self.alerts]}
 
 
+def _observer_report(observer) -> Any:
+    """M7.1: an observer may offer report(); a failing report is recorded, never raised."""
+    try:
+        return observer.report()
+    except Exception:
+        return {"error": "observer report failed"}
+
+
 class SafeAgent:
     def __init__(
         self,
@@ -327,5 +335,7 @@ class SafeAgent:
                    if self.predict_disturbances else {}),
                 **({"guard_tripped_at": guard_tripped_at} if self.disturbance_guard else {}),
                 **({"observer_errors": observer_errors} if observer is not None else {}),
+                **({"observer_report": _observer_report(observer)}
+                   if observer is not None and callable(getattr(observer, "report", None)) else {}),
             },
         )

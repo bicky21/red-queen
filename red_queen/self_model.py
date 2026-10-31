@@ -104,3 +104,32 @@ def separation(preds: Sequence[float], labels: Sequence[bool]) -> float:
     if not pos or not neg:
         return 0.0
     return sum(pos) / len(pos) - sum(neg) / len(neg)
+
+
+class ConfidenceMonitor:
+    """M7.1 (pre-registered in docs/PREREG_M7_1.md): an observer for SafeAgent that
+    raises ONE 'expect_failure' alert per episode, the first time the self-model's
+    confidence drops below `threshold`. Information for a human only: it never
+    changes what the agent does. Create a new monitor for each episode."""
+
+    def __init__(self, model: "SelfModel", threshold: float) -> None:
+        if not model.fitted:
+            raise ValueError("self-model is not fitted")
+        if isinstance(threshold, bool) or not isinstance(threshold, (int, float)) or not 0.0 < threshold < 1.0:
+            raise ValueError("threshold must be a number in (0, 1)")
+        self.model = model
+        self.threshold = float(threshold)
+        self.alerts: List[Dict[str, Any]] = []
+        self.confidences: List[float] = []
+
+    def __call__(self, snapshot: Mapping[str, Any]) -> None:
+        key = features(snapshot)
+        p = self.model.predict(key)
+        self.confidences.append(p)
+        if not self.alerts and p < self.threshold:
+            self.alerts.append({"step": int(snapshot["step"]), "kind": "expect_failure",
+                                "confidence": round(p, 4), "features": list(key)})
+
+    def report(self) -> Dict[str, Any]:
+        return {"threshold": self.threshold, "alerts": [dict(a) for a in self.alerts],
+                "min_confidence": round(min(self.confidences), 4) if self.confidences else None}
