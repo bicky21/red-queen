@@ -293,7 +293,7 @@ docs/ENGINEERING_RECORD_M7.md     (accepted on Linux)
 docs/PREREG_M7_1.md               (committed before M7.1 code)
 docs/ENGINEERING_RECORD_M7_1.md   (accepted on Linux)
 docs/PREREG_M7_2.md               (committed before M7.2 code)
-docs/ENGINEERING_RECORD_M7_2.md
+docs/ENGINEERING_RECORD_M7_2.md   (accepted on Linux)
 results/                          build-environment reports
 ```
 
@@ -323,4 +323,4 @@ results/                          build-environment reports
 | 0.19.1 patch | 330 tests OK, 176/176 checks | **Accepted** 2026-10-31; no ResourceWarning on Python 3.14 |
 | M7 | 342 tests OK, 183/183 checks | **Accepted** 2026-10-31; study output identical (diff); indicator present in measured sense (pre-registered) |
 | M7.1 | 352 tests OK, 190/190 checks | **Accepted** 2026-10-31; study output identical (diff); warning useful (pre-registered) |
-| M7.2 | 359 tests OK, 197/197 checks | Pending — run step 2 and step 22 |
+| M7.2 | 359 tests OK, 197/197 checks | **Accepted** 2026-10-31; study output identical (diff); does not fully generalise (pre-registered) |

@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M7.2
 
-**Version:** 0.22.0 · **Date:** 2026-10-31 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.22.0 · **Date:** 2026-10-31 · **Status:** build-environment passed; **Linux acceptance passed 2026-10-31**
 **Outcome: pre-registered result, mixed. RED QUEEN's self-knowledge partly generalises.** On four fault types it had never seen, with nothing re-fitted:
 - **The warning carried over perfectly:** 420/420 failures warned, 0 false alarms in 300 successes, median lead 9 steps.
 - **The self-model still ranks situations well:** separation 0.573, and Brier 56% below the base rate.
@@ -92,17 +92,12 @@ No agent, estimator or self-model code changed.
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Passed 2026-10-31.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 359 tests in 292.494s, OK**;
+`python3 -m red_queen.validation` → **197/197 validation checks passed**;
+`python3 -m red_queen.generalisation_study`: compared with `diff` against the build environment, it is **identical**.
 
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.generalisation_study
-```
-
-M7.2 is accepted when the output shows `Ran 359 tests ... OK` and `197/197 validation checks passed`. The study output should match §6.
-
-## 9. Next milestone (candidates)
+## 9. Next milestone (candidates) — M7.3 chosen
 
 1. **M7.3: knowing what it doesn't know (pre-registered).** The self-model reports *how familiar* the current situation is, from how often its feature combination appeared in training. In unfamiliar situations it pulls its confidence towards 0.5 and flags "unfamiliar". This would test whether calibration on new faults improves without hurting familiar ones. It is a second, deeper metacognitive indicator.
 2. **M8: global workspace**, the second indicator family.
