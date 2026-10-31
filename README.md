@@ -1,4 +1,4 @@
-# RED QUEEN AI — Milestone M6
+# RED QUEEN AI — Milestone M7
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
@@ -74,6 +74,11 @@ execution, no real-world actions.
     `docs/PREREG_M6.md`). It cannot cause false stops, because memory never
     reaches the state estimate or the stopping rule. It saves only about 2% of
     actions, so it is **off by default**.
+23. Self-model (M7, pre-registered in `docs/PREREG_M7.md`): RED QUEEN predicts
+    whether it will succeed, using only its own internal state, and we measure
+    whether those predictions are right. This is the first "consciousness
+    indicator" from the 2023 *Consciousness in AI* report. It is measured, and
+    it is **not** a claim of consciousness.
 
 Allowed actions (the only ones that can ever run):
 
@@ -105,7 +110,7 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 330 tests ... OK` and `176/176 validation checks passed`
+   Expected: `Ran 342 tests ... OK` and `183/183 validation checks passed`
    (takes about 7-12 minutes; does not need Ollama).
 3. Optional reports:
    ```
@@ -186,6 +191,10 @@ git --version
     ```
     python3 -m red_queen.memory_sensor_study --output results/m6_memory_sensor_study.json
     ```
+20. Self-model study (M7, about 10 seconds):
+    ```
+    python3 -m red_queen.self_model_study --output results/m7_self_model_study.json
+    ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 
@@ -234,11 +243,13 @@ red_queen/
   safety_layer_study.py 7 fault conditions x 5 agents (M5.3)
   cross_isolation_study.py pre-registered cross-sensor isolation study (M5.4)
   memory_sensor_study.py pre-registered memory-under-noisy-sensors study (M6)
-  validation.py    176 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+  self_model.py    self-model: features, fitted confidence, Brier/ECE metrics (M7)
+  self_model_study.py pre-registered self-model study, train/test by seed (M7)
+  validation.py    183 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
                    V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4,
-                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6)
-tests/             330 unittest tests
+                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6, V177-V183 M7)
+tests/             342 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -260,6 +271,8 @@ docs/PREREG_M5_4.md               (committed before M5.4 code)
 docs/ENGINEERING_RECORD_M5_4.md   (accepted on Linux)
 docs/PREREG_M6.md                 (committed before M6 code)
 docs/ENGINEERING_RECORD_M6.md     (accepted on Linux)
+docs/PREREG_M7.md                 (committed before M7 code)
+docs/ENGINEERING_RECORD_M7.md
 results/                          build-environment reports
 ```
 
@@ -287,3 +300,4 @@ results/                          build-environment reports
 | M5.4 | 321 tests OK, 169/169 checks | **Accepted** 2026-10-30; study output identical (diff); rule not adopted (pre-registered) |
 | M6 | 329 tests OK, 176/176 checks | **Accepted** 2026-10-31; study output identical (diff); memory not recommended (pre-registered) |
 | 0.19.1 patch | 330 tests OK, 176/176 checks | **Accepted** 2026-10-31; no ResourceWarning on Python 3.14 |
+| M7 | 342 tests OK, 183/183 checks | Pending — run step 2 and step 20 |

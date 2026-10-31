@@ -43,6 +43,15 @@ belief does not overlap the box predicted from the previous belief (action
 worked + remembered disturbance), disturbance prediction is switched off
 for the rest of the episode.
 
+M7 (pre-registered in docs/PREREG_M7.md): `run(..., observer=None)`. A
+read-only introspection hook, called at each decision point (after the plan
+is computed, and at the moment the agent decides to stop) with a snapshot of
+the agent's OWN state only: belief box and width, alert counts, trusted
+sensors, noise bounds, worst-corner plan length (None if no plan reaches the
+goal), steps left, and whether it is stopping. Never the true state. The
+observer's return value is ignored and its exceptions are caught and
+counted, so it cannot change behaviour.
+
 Stated assumptions: at most one sensor is biased; the KINDS of events are
 known (blocked actions, the two level disturbances). Success is decided by
 the independent GoalVerifier on the true state.
@@ -205,7 +214,7 @@ class SafeAgent:
         self.max_policy_denials = max_policy_denials
         self.verifier = GoalVerifier(goal)
 
-    def run(self, env, sensors: Sequence, scenario: str = "") -> EpisodeResult:
+    def run(self, env, sensors: Sequence, scenario: str = "", observer=None) -> EpisodeResult:
         sensors = list(sensors)
         if len(sensors) != self.sensors:
             raise ValueError(f"expected {self.sensors} sensor(s)")
@@ -228,6 +237,21 @@ class SafeAgent:
         remembered_at_start = dict(remembered)
         guard_tripped_at: Optional[int] = None
         acted_from: Optional[Box] = None  # belief the last action was planned from
+        observer_errors = 0
+
+        def introspect(belief: Box, plan_len: Optional[int], stopping: bool) -> None:
+            nonlocal observer_errors
+            if observer is None:
+                return
+            report = estimator.report()
+            snapshot = {"step": len(actions), "belief": belief.to_dict(), "width": belief.width(),
+                        "alert_counts": dict(report["alert_counts"]), "trusted": list(report["trusted"]),
+                        "noise_bounds": list(report["noise_bounds"]), "plan_len": plan_len,
+                        "steps_left": self.max_steps - len(actions), "stopping": stopping}
+            try:
+                observer(snapshot)
+            except Exception:  # an observer can never affect the agent
+                observer_errors += 1
 
         while True:
             readings = [s.observe() for s in sensed]
@@ -244,6 +268,7 @@ class SafeAgent:
                     guard_tripped_at = len(actions)
                     remembered.clear()  # memory (or the model) proved wrong: stop predicting
             if est.belief.satisfies(self.goal):
+                introspect(est.belief, 0, True)
                 stop_reason = STOP_GOAL
                 break
             if len(actions) >= self.max_steps:
@@ -257,6 +282,7 @@ class SafeAgent:
                 plan = self.planner.plan(est.belief.worst(), self.policy.allowed)
             plans += 1
             nodes += plan.nodes_expanded
+            introspect(est.belief, len(plan.actions) if plan.reaches_goal else None, False)
             if not plan.reaches_goal or not plan.actions:
                 stop_reason = STOP_NO_PLAN
                 break
@@ -300,5 +326,6 @@ class SafeAgent:
                 **({"remembered_disturbances": {str(k): v for k, v in sorted(remembered_at_start.items())}}
                    if self.predict_disturbances else {}),
                 **({"guard_tripped_at": guard_tripped_at} if self.disturbance_guard else {}),
+                **({"observer_errors": observer_errors} if observer is not None else {}),
             },
         )

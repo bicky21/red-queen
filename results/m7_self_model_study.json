@@ -1,0 +1,309 @@
+{
+  "blind_spot": {
+    "conditions": {
+      "both_temp_-10": 7
+    },
+    "false_stop_moments": 7,
+    "mean_self_confidence": 0.9758
+  },
+  "decision": {
+    "S1_brier_20pct_below_base_rate": true,
+    "S2_ece_at_most_0.05": true,
+    "S3_not_worse_than_heuristic": true,
+    "indicator_present_measured_sense": true
+  },
+  "milestone": "M7",
+  "per_condition": [
+    {
+      "condition": "none",
+      "mean_self_confidence": 0.9025,
+      "self_model_brier": 0.010604,
+      "snapshots": 1200,
+      "success_rate": 1.0
+    },
+    {
+      "condition": "wrong_bound",
+      "mean_self_confidence": 0.7864,
+      "self_model_brier": 0.083091,
+      "snapshots": 1404,
+      "success_rate": 1.0
+    },
+    {
+      "condition": "A_temp_-10",
+      "mean_self_confidence": 0.9426,
+      "self_model_brier": 0.022619,
+      "snapshots": 1193,
+      "success_rate": 1.0
+    },
+    {
+      "condition": "wrong_bound+A_temp",
+      "mean_self_confidence": 0.7483,
+      "self_model_brier": 0.100792,
+      "snapshots": 1378,
+      "success_rate": 1.0
+    },
+    {
+      "condition": "A_dead",
+      "mean_self_confidence": 0.9319,
+      "self_model_brier": 0.015663,
+      "snapshots": 1183,
+      "success_rate": 1.0
+    },
+    {
+      "condition": "A_dead_low",
+      "mean_self_confidence": 0.4183,
+      "self_model_brier": 0.225141,
+      "snapshots": 2744,
+      "success_rate": 0.0962
+    },
+    {
+      "condition": "both_temp_-10",
+      "mean_self_confidence": 0.9057,
+      "self_model_brier": 0.047197,
+      "snapshots": 1151,
+      "success_rate": 0.954
+    }
+  ],
+  "scores": [
+    {
+      "brier": 0.18639,
+      "ece": 0.019335,
+      "n": 10253,
+      "predictor": "base_rate",
+      "separation": 0.0
+    },
+    {
+      "brier": 0.15743,
+      "ece": 0.129635,
+      "n": 10253,
+      "predictor": "heuristic",
+      "separation": 0.272878
+    },
+    {
+      "brier": 0.096157,
+      "ece": 0.019692,
+      "n": 10253,
+      "predictor": "self_model",
+      "separation": 0.495139
+    }
+  ],
+  "self_model_table": [
+    [
+      [
+        "fits",
+        "none",
+        "21-40"
+      ],
+      2585,
+      2892,
+      0.8937
+    ],
+    [
+      [
+        "fits",
+        "widened",
+        ">40"
+      ],
+      1647,
+      2503,
+      0.6581
+    ],
+    [
+      [
+        "fits",
+        "disagree",
+        "21-40"
+      ],
+      796,
+      801,
+      0.9931
+    ],
+    [
+      [
+        "fits",
+        "isolated",
+        "<=20"
+      ],
+      599,
+      599,
+      0.9991
+    ],
+    [
+      [
+        "too_long",
+        "widened",
+        ">40"
+      ],
+      0,
+      599,
+      0.0024
+    ],
+    [
+      [
+        "fits",
+        "disagree",
+        ">40"
+      ],
+      217,
+      536,
+      0.4061
+    ],
+    [
+      [
+        "fits",
+        "widened",
+        "21-40"
+      ],
+      519,
+      519,
+      0.999
+    ],
+    [
+      [
+        "stopping",
+        "none",
+        "21-40"
+      ],
+      383,
+      392,
+      0.9758
+    ],
+    [
+      [
+        "stopping",
+        "widened",
+        ">40"
+      ],
+      351,
+      351,
+      0.9985
+    ],
+    [
+      [
+        "tight",
+        "widened",
+        ">40"
+      ],
+      0,
+      291,
+      0.005
+    ],
+    [
+      [
+        "too_long",
+        "disagree",
+        ">40"
+      ],
+      0,
+      246,
+      0.0059
+    ],
+    [
+      [
+        "stopping",
+        "disagree",
+        "21-40"
+      ],
+      152,
+      152,
+      0.9965
+    ],
+    [
+      [
+        "stopping",
+        "isolated",
+        "<=20"
+      ],
+      151,
+      151,
+      0.9965
+    ],
+    [
+      [
+        "fits",
+        "none",
+        "<=20"
+      ],
+      125,
+      147,
+      0.8488
+    ],
+    [
+      [
+        "tight",
+        "disagree",
+        ">40"
+      ],
+      0,
+      114,
+      0.0126
+    ],
+    [
+      [
+        "stopping",
+        "widened",
+        "21-40"
+      ],
+      52,
+      52,
+      0.9901
+    ],
+    [
+      [
+        "stopping",
+        "disagree",
+        ">40"
+      ],
+      27,
+      27,
+      0.9816
+    ],
+    [
+      [
+        "fits",
+        "disagree",
+        "<=20"
+      ],
+      13,
+      13,
+      0.9645
+    ],
+    [
+      [
+        "fits",
+        "widened",
+        "<=20"
+      ],
+      6,
+      6,
+      0.9334
+    ]
+  ],
+  "test_seeds": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "test_snapshots": 10253,
+  "train_base_rate": 0.733616,
+  "train_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "train_snapshots": 10391
+}

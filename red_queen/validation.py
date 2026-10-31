@@ -2740,6 +2740,105 @@ def check_prereg_m6_present() -> CheckResult:
     return not missing, f"pre-registration file present; required terms missing={missing}"
 
 
+# ----------------------------------------------------------------- M7 checks
+
+M7_FROZEN_SCORES = {  # predictor: (brier, ece, separation) on the test set
+    "base_rate": (0.18639, 0.019335, 0.0), "heuristic": (0.15743, 0.129635, 0.272878),
+    "self_model": (0.096157, 0.019692, 0.495139),
+}
+
+
+def _m7_study():
+    from .self_model_study import run_study
+    if "m7" not in _M5_CACHE:
+        _M5_CACHE["m7"] = run_study()
+    return _M5_CACHE["m7"]
+
+
+def check_observer_does_not_change_behaviour() -> CheckResult:
+    from .safe_agent import SafeAgent
+    from .safety_layer_study import CONDITIONS, sensors_for
+    from .scenarios import ALL_SCENARIOS
+
+    def hostile(snapshot):  # tries to tamper and then crashes
+        snapshot["belief"]["battery"][0] = 100
+        snapshot["trusted"].clear()
+        raise RuntimeError("observer crash")
+
+    runs = diff = errors = 0
+    for cond in CONDITIONS:
+        for sc in ALL_SCENARIOS:
+            a = SafeAgent(RecoveryGoal(), 5).run(sc.make_env(), sensors_for(cond, 1))
+            b = SafeAgent(RecoveryGoal(), 5).run(sc.make_env(), sensors_for(cond, 1), observer=hostile)
+            runs += 1
+            diff += a.actions != b.actions or a.stop_reason != b.stop_reason
+            errors += b.stats["observer_errors"] > 0
+    return diff == 0 and errors > 0, f"{runs} runs with a tampering, crashing observer: behaviour differences={diff}; observer errors caught in {errors} runs"
+
+
+def check_snapshot_is_introspective_only() -> CheckResult:
+    from .safe_agent import SafeAgent
+    from .scenarios import get_scenario
+    from .sensors import NoisySensor
+    snaps = []
+    env = get_scenario("compound_failure").make_env()
+    SafeAgent(RecoveryGoal(), 5).run(env, [NoisySensor(5, 0), NoisySensor(5, 1000)], observer=snaps.append)
+    keys = {k for s in snaps for k in s}
+    allowed = {"step", "belief", "width", "alert_counts", "trusted", "noise_bounds", "plan_len", "steps_left", "stopping"}
+    truth_leak = any("truth" in k or "true" in k or "events" in k or "final" in k for k in keys)
+    ok = keys == allowed and not truth_leak and snaps and snaps[-1]["stopping"]
+    return ok, f"{len(snaps)} snapshots; keys exactly the pre-registered set={keys == allowed}; no true-state fields={not truth_leak}"
+
+
+def check_self_model_unit() -> CheckResult:
+    from .self_model import SelfModel, brier, ece, features, separation
+    snap = {"stopping": False, "plan_len": 3, "steps_left": 4, "alert_counts": {"bound_widened": 1}, "width": 30}
+    key = features(snap)
+    m = SelfModel().fit([(key, True)] * 3 + [(key, False)] + [(("none", "none", ">40"), False)] * 4)
+    p_seen, p_unseen = m.predict(key), m.predict(("fits", "none", "<=20"))
+    refused = 0
+    for make in (lambda: SelfModel().predict(key), lambda: SelfModel().fit([])):
+        try:
+            make()
+        except ValueError:
+            refused += 1
+    metrics_ok = brier([1.0, 0.0], [True, False]) == 0.0 and abs(ece([0.8] * 10, [True] * 8 + [False] * 2)) < 1e-9 \
+        and separation([0.9, 0.1], [True, False]) == 0.8
+    ok = key == ("tight", "widened", "21-40") and abs(p_seen - (3 + 2 * 0.375) / 6) < 1e-9 and p_unseen == m.base_rate and refused == 2 and metrics_ok
+    return ok, f"features={key}; smoothed p={p_seen:.4f} (expected (3 + 2*0.375)/6 = 0.6250); unseen key -> base rate={p_unseen == m.base_rate}; errors refused={refused}/2; metrics exact={metrics_ok}"
+
+
+def check_self_model_study_frozen() -> CheckResult:
+    rep = _m7_study()
+    got = {r["predictor"]: (r["brier"], r["ece"], r["separation"]) for r in rep["scores"]}
+    sizes = (rep["train_snapshots"], rep["test_snapshots"])
+    return got == M7_FROZEN_SCORES and sizes == (10391, 10253), f"scores match frozen={got == M7_FROZEN_SCORES}; snapshots train/test={sizes}"
+
+
+def check_m7_decision_applied() -> CheckResult:
+    from .self_model_study import decide
+    d = _m7_study()["decision"]
+    ok = d == decide(_m7_study()["scores"]) and d["indicator_present_measured_sense"] is True
+    return ok, f"pre-registered rule: S1={d['S1_brier_20pct_below_base_rate']} S2={d['S2_ece_at_most_0.05']} S3={d['S3_not_worse_than_heuristic']} -> indicator present (measured sense)={d['indicator_present_measured_sense']}"
+
+
+def check_blind_spot_reported() -> CheckResult:
+    b = _m7_study()["blind_spot"]
+    ok = b["false_stop_moments"] == 7 and b["mean_self_confidence"] >= 0.8 and set(b["conditions"]) == {"both_temp_-10"}
+    return ok, f"common-mode false stops: {b['false_stop_moments']} moments, mean self-confidence {b['mean_self_confidence']} (pre-registered expectation >= 0.8)"
+
+
+def check_train_test_separation() -> CheckResult:
+    import os
+    from .self_model_study import TEST_SEEDS, TRAIN_SEEDS
+    disjoint = not set(TRAIN_SEEDS) & set(TEST_SEEDS)
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M7.md")
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    missing = [k for k in ("S1", "S2", "S3", "seeds 0–9", "seeds 10–19", "No claim of consciousness") if k not in text]
+    return disjoint and not missing, f"train/test seeds disjoint={disjoint}; pre-registration present, missing terms={missing}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -3002,6 +3101,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("m6_study_totals_frozen", check_m6_study_frozen),
         ("m6_prereg_decision_applied", check_m6_decision_applied),
         ("m6_prereg_file_present", check_prereg_m6_present),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M7 (V177 onward)
+    for name, fn in (
+        ("observer_does_not_change_behaviour", check_observer_does_not_change_behaviour),
+        ("snapshot_is_introspective_only", check_snapshot_is_introspective_only),
+        ("self_model_unit", check_self_model_unit),
+        ("self_model_study_frozen", check_self_model_study_frozen),
+        ("m7_prereg_decision_applied", check_m7_decision_applied),
+        ("self_model_blind_spot_reported", check_blind_spot_reported),
+        ("m7_train_test_separated", check_train_test_separation),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

@@ -1,4 +1,4 @@
-"""RED QUEEN AI - Milestone M6.
+"""RED QUEEN AI - Milestone M7.
 
 Deterministic simulated recovery with explicit action scoring, affect
 experiments (M1-M1.1), persistent and advisory SQLite memory (M2-M2.1),
@@ -11,9 +11,10 @@ and noisy sensors with belief-box agents (M5) that can detect a too-small
 noise bound (M5.1), and redundant-sensor fusion against sensor bias (M5.2),
 consolidated into one SafeEstimator with operator alerts and safe halt (M5.3),
 and a pre-registered, opt-in cross-sensor isolation rule (M5.4), and optional
-untrusted disturbance memory for the sensor-limited agent (M6).
+untrusted disturbance memory for the sensor-limited agent (M6), and a
+measured self-model that predicts its own success (M7).
 Standard library only.
 """
 
-__version__ = "0.19.1"
-MILESTONE = "M6"
+__version__ = "0.20.0"
+MILESTONE = "M7"
