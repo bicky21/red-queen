@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M7
 
-**Version:** 0.20.0 · **Date:** 2026-10-31 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.20.0 · **Date:** 2026-10-31 · **Status:** build-environment passed; **Linux acceptance passed 2026-10-31**
 **Outcome: pre-registered result, positive, with its predicted blind spot.** RED QUEEN now has a measured **self-model**. Using only its own internal state, it predicts whether the current episode will succeed. On 10,253 held-out decision points, its predictions are **calibrated** (ECE 0.020) and **informative**: the Brier score is 48% lower than always guessing the average, and lower than a hand-written rule. All three pre-registered criteria passed. As predicted, it is **blind to what it cannot sense**: at the 7 moments where a shared sensor bias made it stop too early, it was 97.6% confident.
 
 **This is one measured indicator property, not a claim of consciousness.**
@@ -90,15 +90,10 @@ Two of my new checks failed on their first run, both **errors in the checks, not
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
-
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.self_model_study
-```
-
-M7 is accepted when the output shows `Ran 342 tests ... OK` and `183/183 validation checks passed`. The study output should match §6.
+**Passed 2026-10-31.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 342 tests in 258.055s, OK**;
+`python3 -m red_queen.validation` → **183/183 validation checks passed**;
+`python3 -m red_queen.self_model_study`: compared with `diff` against the build environment, it is **identical** (apart from trailing blank lines in the pasted text).
 
 ## 9. Next milestone (candidates)
 

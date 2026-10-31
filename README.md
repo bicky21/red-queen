@@ -272,7 +272,7 @@ docs/ENGINEERING_RECORD_M5_4.md   (accepted on Linux)
 docs/PREREG_M6.md                 (committed before M6 code)
 docs/ENGINEERING_RECORD_M6.md     (accepted on Linux)
 docs/PREREG_M7.md                 (committed before M7 code)
-docs/ENGINEERING_RECORD_M7.md
+docs/ENGINEERING_RECORD_M7.md     (accepted on Linux)
 results/                          build-environment reports
 ```
 
@@ -300,4 +300,4 @@ results/                          build-environment reports
 | M5.4 | 321 tests OK, 169/169 checks | **Accepted** 2026-10-30; study output identical (diff); rule not adopted (pre-registered) |
 | M6 | 329 tests OK, 176/176 checks | **Accepted** 2026-10-31; study output identical (diff); memory not recommended (pre-registered) |
 | 0.19.1 patch | 330 tests OK, 176/176 checks | **Accepted** 2026-10-31; no ResourceWarning on Python 3.14 |
-| M7 | 342 tests OK, 183/183 checks | Pending — run step 2 and step 20 |
+| M7 | 342 tests OK, 183/183 checks | **Accepted** 2026-10-31; study output identical (diff); indicator present in measured sense (pre-registered) |
