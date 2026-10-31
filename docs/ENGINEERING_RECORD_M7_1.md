@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M7.1
 
-**Version:** 0.21.0 · **Date:** 2026-10-31 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.21.0 · **Date:** 2026-10-31 · **Status:** build-environment passed; **Linux acceptance passed 2026-10-31**
 **Outcome: pre-registered result, positive, with two honest qualifications.** RED QUEEN now warns an operator, "I expect to fail", when its self-model's confidence drops below a threshold chosen on training data. On 1,260 held-out episodes the warning was **always right** (precision 1.000, 0 false alarms). It caught **every failure it could perceive** (124/124), with a median of **10 steps** of warning before the end. All four pre-registered criteria passed.
 
 The qualifications:
@@ -83,17 +83,12 @@ There were **0 false alarms** in all 1,129 successful episodes, including the wr
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Passed 2026-10-31.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 352 tests in 277.805s, OK**;
+`python3 -m red_queen.validation` → **190/190 validation checks passed**;
+`python3 -m red_queen.warning_study`: compared with `diff` against the build environment, it is **identical**.
 
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.warning_study
-```
-
-M7.1 is accepted when the output shows `Ran 352 tests ... OK` and `190/190 validation checks passed`. The study output should match §6.
-
-## 9. Next milestone (candidates)
+## 9. Next milestone (candidates) — M7.2 chosen
 
 1. **M7.2: generalisation test (pre-registered).** Run the M7 self-model and the M7.1 warning, unchanged, on the M5.4 fault types they never saw (drift, stuck-mid, B stuck-low, wrong bound + stuck). This checks whether calibration and warning quality survive new situations. It is the honest next question.
 2. **M8: global workspace**, the second indicator.
