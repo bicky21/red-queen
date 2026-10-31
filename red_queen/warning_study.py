@@ -39,6 +39,8 @@ def collect_episodes(seeds: Sequence[int], conditions: Sequence[str] = tuple(CON
                                                                    sc.name, observer=snaps.append)
                 episodes.append({"condition": cond, "scenario": sc.name, "seed": seed,
                                  "keys": [features(s) for s in snaps], "steps": [s["step"] for s in snaps],
+                                 "plan_lens": [s["plan_len"] for s in snaps],
+                                 "stopping": [s["stopping"] for s in snaps],
                                  "actions": len(r.actions), "success": r.success,
                                  "false_stop": r.stop_reason == STOP_GOAL and not r.success})
     return episodes

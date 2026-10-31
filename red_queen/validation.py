@@ -3030,6 +3030,109 @@ def check_prereg_m7_2_present() -> CheckResult:
     return not missing, f"pre-registration file present; required terms missing={missing}"
 
 
+# ---------------------------------------------------------------- M7.3 checks
+
+M73_FROZEN = {  # (data, model) -> (brier, ece, separation); copied from the study output
+    ("new_faults", "v1"): (0.203252, 0.291612, 0.560854), ("new_faults", "v2"): (0.120173, 0.187582, 0.697786),
+    ("familiar", "v1"): (0.096157, 0.019692, 0.495139), ("familiar", "v2"): (0.051986, 0.009479, 0.709003),
+}
+M73_FROZEN_WARNING = (422, 3, 0, 295, 10.0)
+
+
+def _m73_study():
+    from .progress_study import run_study
+    if "m73" not in _M5_CACHE:
+        _M5_CACHE["m73"] = run_study()
+    return _M5_CACHE["m73"]
+
+
+def check_progress_feature_unit() -> CheckResult:
+    from .self_model import features_v2, progress_labels
+    labels = progress_labels([5, 4, 3, 3, 3, None, None, 0], [False] * 7 + [True])
+    expected = ["early", "early", "progressing", "progressing", "stalled", "stalled", "stalled", "progressing"]
+    try:
+        features_v2(("fits", "none", "<=20"), "maybe")
+        refused = False
+    except ValueError:
+        refused = True
+    ok = labels == expected and refused and features_v2(("a", "b", "c"), "stalled") == ("a", "b", "c", "stalled")
+    return ok, f"progress labels={labels}; matches expected={labels == expected}; invalid label refused={refused}"
+
+
+def check_v1_monitor_unchanged() -> CheckResult:
+    rep = _m71_study()
+    m = rep["test_monitor"]
+    got = (m["warned_failures"], m["false_alarms"], m["missed_failures"], m["quiet_successes"], m["median_lead_steps"])
+    return got == (124, 0, 7, 1129, 10.0), f"M7.1 warning results unchanged with the M7.3 code: {got}"
+
+
+def check_live_progress_monitor_matches_offline() -> CheckResult:
+    from .cross_isolation_study import sensors_for as m54
+    from .generalisation_study import NEW_FAULTS
+    from .progress_study import v2_keys
+    from .safe_agent import SafeAgent
+    from .scenarios import ALL_SCENARIOS
+    from .self_model import ConfidenceMonitor, SelfModel
+    from .self_model_study import TRAIN_SEEDS
+    from .warning_study import collect_episodes, first_alert
+    if "m73_v2" not in _M5_CACHE:
+        train = collect_episodes(TRAIN_SEEDS)
+        _M5_CACHE["m73_v2"] = SelfModel().fit((k, e["success"]) for e in train for k in v2_keys(e))
+    v2 = _M5_CACHE["m73_v2"]
+    tau = _m73_study()["v2_threshold_selection"]["chosen"]
+    eps = {(e["condition"], e["scenario"]): e for e in collect_episodes((21,), conditions=NEW_FAULTS, sensors_fn=m54)}
+    mismatch = 0
+    for cond in NEW_FAULTS:
+        for sc in ALL_SCENARIOS:
+            mon = ConfidenceMonitor(v2, tau, use_progress=True)
+            SafeAgent(RecoveryGoal(), 5, max_steps=sc.max_steps).run(sc.make_env(), m54(cond, 21), observer=mon)
+            e = eps[(cond, sc.name)]
+            keys = v2_keys(e)
+            i = first_alert(dict(e, keys=keys), lambda k: v2.predict(k) < tau)
+            offline = None if i is None else e["steps"][i]
+            mismatch += offline != (mon.alerts[0]["step"] if mon.alerts else None)
+    return mismatch == 0, f"{len(eps)} episodes: live progress-aware monitor equals offline computation (mismatches={mismatch})"
+
+
+def check_m73_scores_frozen() -> CheckResult:
+    rep = _m73_study()
+    got = {(b, m): (rep[b][m]["brier"], rep[b][m]["ece"], rep[b][m]["separation"])
+           for b in ("new_faults", "familiar") for m in ("v1", "v2")}
+    w = rep["new_faults"]["v2_warning"]
+    wgot = (w["warned_failures"], w["false_alarms"], w["missed_failures"], w["quiet_successes"], w["median_lead_steps"])
+    ok = got == M73_FROZEN and wgot == M73_FROZEN_WARNING and rep["fresh_seeds"] == list(range(20, 30))
+    return ok, f"scores frozen={got == M73_FROZEN}; v2 warning {wgot} frozen={wgot == M73_FROZEN_WARNING}; fresh seeds 20-29"
+
+
+def check_m73_decision_applied() -> CheckResult:
+    from .progress_study import decide
+    rep = _m73_study()
+    d = rep["decision"]
+    ok = d == decide(rep) and d["adopt_v2"] is False and d["P3_familiar_not_worse"] and d["P4_warning_recall_precision_0.90"]
+    return ok, (f"pre-registered rule: P1={d['P1_new_fault_ece_at_most_0.10']} P2={d['P2_new_fault_ece_halved']} "
+                f"P3={d['P3_familiar_not_worse']} P4={d['P4_warning_recall_precision_0.90']} -> adopt v2={d['adopt_v2']}")
+
+
+def check_m73_improvement_recorded() -> CheckResult:
+    rep = _m73_study()
+    n, f = rep["new_faults"], rep["familiar"]
+    ok = (n["v2"]["ece"] < n["v1"]["ece"] and n["v2"]["brier"] < n["v1"]["brier"]
+          and f["v2"]["ece"] < f["v1"]["ece"] and f["v2"]["brier"] < f["v1"]["brier"])
+    return ok, (f"v2 better than v1 on every measure but below the pre-registered bar: new-fault ECE {n['v1']['ece']} -> {n['v2']['ece']}, "
+                f"familiar Brier {f['v1']['brier']} -> {f['v2']['brier']}")
+
+
+def check_prereg_m7_3_present() -> CheckResult:
+    import os
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M7_3.md")
+    if not os.path.exists(path):
+        return False, "docs/PREREG_M7_3.md missing"
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    missing = [k for k in ("P1", "P2", "P3", "P4", "seeds 20–29", "honest change of plan") if k not in text]
+    return not missing, f"pre-registration file present; required terms missing={missing}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -3328,6 +3431,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("m7_2_ranking_survives_calibration_does_not", check_m72_ranking_survives_calibration_does_not),
         ("m7_2_collect_default_unchanged", check_m72_collect_default_unchanged),
         ("m7_2_prereg_file_present", check_prereg_m7_2_present),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M7.3 (V198 onward)
+    for name, fn in (
+        ("progress_feature_unit", check_progress_feature_unit),
+        ("v1_warning_unchanged", check_v1_monitor_unchanged),
+        ("live_progress_monitor_matches_offline", check_live_progress_monitor_matches_offline),
+        ("m7_3_scores_frozen", check_m73_scores_frozen),
+        ("m7_3_prereg_decision_applied", check_m73_decision_applied),
+        ("m7_3_improvement_recorded", check_m73_improvement_recorded),
+        ("m7_3_prereg_file_present", check_prereg_m7_3_present),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

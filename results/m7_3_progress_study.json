@@ -1,0 +1,198 @@
+{
+  "decision": {
+    "P1_new_fault_ece_at_most_0.10": false,
+    "P2_new_fault_ece_halved": false,
+    "P3_familiar_not_worse": true,
+    "P4_warning_recall_precision_0.90": true,
+    "adopt_v2": false
+  },
+  "familiar": {
+    "v1": {
+      "brier": 0.096157,
+      "ece": 0.019692,
+      "mean_confidence": 0.7447,
+      "n": 10253,
+      "separation": 0.495139
+    },
+    "v2": {
+      "brier": 0.051986,
+      "ece": 0.009479,
+      "mean_confidence": 0.7536,
+      "n": 10253,
+      "separation": 0.709003
+    }
+  },
+  "fresh_seeds": [
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29
+  ],
+  "milestone": "M7.3",
+  "new_faults": {
+    "v1": {
+      "brier": 0.203252,
+      "ece": 0.291612,
+      "mean_confidence": 0.467,
+      "n": 10252,
+      "separation": 0.560854
+    },
+    "v1_warning_0.3": {
+      "episodes": 720,
+      "f1": 1.0,
+      "false_alarm_rate": 0.0,
+      "false_alarms": 0,
+      "false_stop_failures": 0,
+      "median_lead_steps": 8.0,
+      "missed_failures": 0,
+      "other_failures": 422,
+      "precision": 1.0,
+      "quiet_successes": 298,
+      "recall": 1.0,
+      "recall_false_stop_failures": null,
+      "recall_other_failures": 1.0,
+      "warned_failures": 422
+    },
+    "v2": {
+      "brier": 0.120173,
+      "ece": 0.187582,
+      "mean_confidence": 0.3595,
+      "n": 10252,
+      "separation": 0.697786
+    },
+    "v2_warning": {
+      "episodes": 720,
+      "f1": 0.9965,
+      "false_alarm_rate": 0.0101,
+      "false_alarms": 3,
+      "false_stop_failures": 0,
+      "median_lead_steps": 10.0,
+      "missed_failures": 0,
+      "other_failures": 422,
+      "precision": 0.9929,
+      "quiet_successes": 295,
+      "recall": 1.0,
+      "recall_false_stop_failures": null,
+      "recall_other_failures": 1.0,
+      "warned_failures": 422
+    }
+  },
+  "per_condition": {
+    "A_drift": {
+      "success_rate": 1.0,
+      "v1": {
+        "brier": 0.023873,
+        "ece": 0.090631,
+        "mean_confidence": 0.9094,
+        "n": 1187,
+        "separation": 0.0
+      },
+      "v2": {
+        "brier": 0.01128,
+        "ece": 0.063614,
+        "mean_confidence": 0.9364,
+        "n": 1187,
+        "separation": 0.0
+      }
+    },
+    "A_stuck_mid": {
+      "success_rate": 0.3667,
+      "v1": {
+        "brier": 0.23354,
+        "ece": 0.350515,
+        "mean_confidence": 0.5214,
+        "n": 2750,
+        "separation": 0.559221
+      },
+      "v2": {
+        "brier": 0.14614,
+        "ece": 0.228942,
+        "mean_confidence": 0.3899,
+        "n": 2750,
+        "separation": 0.670158
+      }
+    },
+    "B_stuck_low": {
+      "success_rate": 0.1444,
+      "v1": {
+        "brier": 0.215022,
+        "ece": 0.329535,
+        "mean_confidence": 0.353,
+        "n": 3154,
+        "separation": 0.634507
+      },
+      "v2": {
+        "brier": 0.117828,
+        "ece": 0.195961,
+        "mean_confidence": 0.2194,
+        "n": 3154,
+        "separation": 0.700704
+      }
+    },
+    "wrong_bound+B_stuck_low": {
+      "success_rate": 0.1444,
+      "v1": {
+        "brier": 0.232516,
+        "ece": 0.346068,
+        "mean_confidence": 0.3671,
+        "n": 3161,
+        "separation": 0.489752
+      },
+      "v2": {
+        "brier": 0.140813,
+        "ece": 0.236968,
+        "mean_confidence": 0.256,
+        "n": 3161,
+        "separation": 0.617508
+      }
+    }
+  },
+  "progress_split": {
+    "('fits', 'disagree', '>40', 'early')": [
+      157,
+      157,
+      0.9966
+    ],
+    "('fits', 'disagree', '>40', 'progressing')": [
+      51,
+      51,
+      0.9899
+    ],
+    "('fits', 'disagree', '>40', 'stalled')": [
+      9,
+      328,
+      0.0317
+    ],
+    "('fits', 'widened', '>40', 'early')": [
+      164,
+      164,
+      0.9968
+    ],
+    "('fits', 'widened', '>40', 'progressing')": [
+      1072,
+      1072,
+      0.9995
+    ],
+    "('fits', 'widened', '>40', 'stalled')": [
+      411,
+      1267,
+      0.325
+    ]
+  },
+  "v2_threshold_selection": {
+    "chosen": 0.3,
+    "train_f1": {
+      "0.3": 0.9375,
+      "0.4": 0.5233,
+      "0.5": 0.5233,
+      "0.6": 0.5233,
+      "0.7": 0.5233
+    }
+  }
+}

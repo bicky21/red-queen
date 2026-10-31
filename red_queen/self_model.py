@@ -15,7 +15,7 @@ The self-model only predicts. It never changes what the agent does.
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Any, Dict, Iterable, List, Mapping, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 PLAN_STATUSES = ("none", "too_long", "tight", "fits", "stopping")
 ALERT_LEVELS = ("none", "disagree", "widened", "isolated")
@@ -79,6 +79,36 @@ class SelfModel:
         return (s + SMOOTHING * self.base_rate) / (n + SMOOTHING)
 
 
+# M7.3 (pre-registered in docs/PREREG_M7_3.md): "am I making progress?"
+PROGRESS_LABELS = ("early", "progressing", "stalled")
+PROGRESS_LAG = 2
+
+
+def _effective_len(plan_len: Optional[int], stopping: bool) -> float:
+    if stopping:
+        return 0.0
+    return float("inf") if plan_len is None else float(plan_len)
+
+
+def progress_labels(plan_lens: Sequence[Optional[int]], stopping: Sequence[bool]) -> List[str]:
+    """Per decision point: early (first 2), progressing (worst-corner plan shorter
+    than 2 decision points ago), or stalled. Uses only the agent's own history."""
+    eff = [_effective_len(p, s) for p, s in zip(plan_lens, stopping)]
+    out = []
+    for i, e in enumerate(eff):
+        if i < PROGRESS_LAG:
+            out.append("early")
+        else:
+            out.append("progressing" if e < eff[i - PROGRESS_LAG] else "stalled")
+    return out
+
+
+def features_v2(snapshot_key: Key, progress: str) -> Tuple[str, str, str, str]:
+    if progress not in PROGRESS_LABELS:
+        raise ValueError(f"progress must be one of {PROGRESS_LABELS}")
+    return tuple(snapshot_key) + (progress,)
+
+
 def heuristic(key: Key) -> float:
     """Pre-registered baseline: confident iff a fitting plan exists or the agent is stopping."""
     return 0.95 if key[0] in ("tight", "fits", "stopping") else 0.05
@@ -112,18 +142,25 @@ class ConfidenceMonitor:
     confidence drops below `threshold`. Information for a human only: it never
     changes what the agent does. Create a new monitor for each episode."""
 
-    def __init__(self, model: "SelfModel", threshold: float) -> None:
+    def __init__(self, model: "SelfModel", threshold: float, use_progress: bool = False) -> None:
         if not model.fitted:
             raise ValueError("self-model is not fitted")
         if isinstance(threshold, bool) or not isinstance(threshold, (int, float)) or not 0.0 < threshold < 1.0:
             raise ValueError("threshold must be a number in (0, 1)")
         self.model = model
         self.threshold = float(threshold)
+        self.use_progress = bool(use_progress)  # M7.3: model must be fitted on features_v2 keys
+        self._plan_lens: List[Optional[int]] = []
+        self._stopping: List[bool] = []
         self.alerts: List[Dict[str, Any]] = []
         self.confidences: List[float] = []
 
     def __call__(self, snapshot: Mapping[str, Any]) -> None:
         key = features(snapshot)
+        if self.use_progress:
+            self._plan_lens.append(snapshot["plan_len"])
+            self._stopping.append(bool(snapshot["stopping"]))
+            key = features_v2(key, progress_labels(self._plan_lens, self._stopping)[-1])
         p = self.model.predict(key)
         self.confidences.append(p)
         if not self.alerts and p < self.threshold:
