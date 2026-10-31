@@ -286,4 +286,4 @@ results/                          build-environment reports
 | M5.3 | 311 tests OK, 162/162 checks | **Accepted** 2026-10-30; study output identical (diff) |
 | M5.4 | 321 tests OK, 169/169 checks | **Accepted** 2026-10-30; study output identical (diff); rule not adopted (pre-registered) |
 | M6 | 329 tests OK, 176/176 checks | **Accepted** 2026-10-31; study output identical (diff); memory not recommended (pre-registered) |
-| 0.19.1 patch | 330 tests OK, 176/176 checks | Pending — fixes 4 unclosed-file warnings seen on Python 3.14 |
+| 0.19.1 patch | 330 tests OK, 176/176 checks | **Accepted** 2026-10-31; no ResourceWarning on Python 3.14 |

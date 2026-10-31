@@ -95,6 +95,8 @@ The fix:
 - A new test, `tests/test_hygiene.py`, fails if any `open(...).read()` pattern appears in the code again.
 - The full suite was re-run with `python3 -X dev`, which shows every ResourceWarning.
 
+**The patch was accepted on Linux on 2026-10-31:** `Ran 330 tests in 246.172s, OK`, `176/176 validation checks passed`, and no ResourceWarning in the output.
+
 ## 9. Next milestone (candidates)
 
 The project now has a safe, well-tested core: planning, policy, verification, memory, sensor-limited state estimation, and an untrusted language-model interface. Every add-on has been tested against a baseline. Natural next directions:
