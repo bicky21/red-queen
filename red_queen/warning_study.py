@@ -28,13 +28,14 @@ THRESHOLDS = (0.3, 0.4, 0.5, 0.6, 0.7)
 
 
 def collect_episodes(seeds: Sequence[int], conditions: Sequence[str] = tuple(CONDITIONS),
-                     scenarios=ALL_SCENARIOS) -> List[Dict[str, Any]]:
+                     scenarios=ALL_SCENARIOS, sensors_fn: Callable = sensors_for) -> List[Dict[str, Any]]:
+    """`sensors_fn(condition, seed)` builds the sensors (M7.2 passes the M5.4 one)."""
     episodes = []
     for cond in conditions:
         for sc in scenarios:
             for seed in seeds:
                 snaps: List[Dict[str, Any]] = []
-                r = SafeAgent(GOAL, 5, max_steps=sc.max_steps).run(sc.make_env(), sensors_for(cond, seed),
+                r = SafeAgent(GOAL, 5, max_steps=sc.max_steps).run(sc.make_env(), sensors_fn(cond, seed),
                                                                    sc.name, observer=snaps.append)
                 episodes.append({"condition": cond, "scenario": sc.name, "seed": seed,
                                  "keys": [features(s) for s in snaps], "steps": [s["step"] for s in snaps],

@@ -1,0 +1,493 @@
+{
+  "decision": {
+    "G1_ece_at_most_0.10": false,
+    "G2_brier_20pct_below_base_rate": true,
+    "G3_warning_recall_and_precision_at_least_0.70": true,
+    "generalises": false
+  },
+  "milestone": "M7.2",
+  "per_condition": {
+    "A_drift": {
+      "baseline_alert": {
+        "episodes": 180,
+        "f1": 0.0,
+        "false_alarm_rate": 0.0,
+        "false_alarms": 0,
+        "false_stop_failures": 0,
+        "median_lead_steps": null,
+        "missed_failures": 0,
+        "other_failures": 0,
+        "precision": 0.0,
+        "quiet_successes": 180,
+        "recall": 0.0,
+        "recall_false_stop_failures": null,
+        "recall_other_failures": null,
+        "warned_failures": 0
+      },
+      "episodes": 180,
+      "mean_self_confidence": 0.9223,
+      "snapshot_scores": [
+        {
+          "brier": 0.070961,
+          "ece": 0.266384,
+          "n": 1200,
+          "predictor": "base_rate",
+          "separation": 0.0
+        },
+        {
+          "brier": 0.0025,
+          "ece": 0.05,
+          "n": 1200,
+          "predictor": "heuristic",
+          "separation": 0.0
+        },
+        {
+          "brier": 0.019239,
+          "ece": 0.077735,
+          "n": 1200,
+          "predictor": "self_model",
+          "separation": 0.0
+        }
+      ],
+      "success_rate": 1.0,
+      "warning": {
+        "episodes": 180,
+        "f1": 0.0,
+        "false_alarm_rate": 0.0,
+        "false_alarms": 0,
+        "false_stop_failures": 0,
+        "median_lead_steps": null,
+        "missed_failures": 0,
+        "other_failures": 0,
+        "precision": 0.0,
+        "quiet_successes": 180,
+        "recall": 0.0,
+        "recall_false_stop_failures": null,
+        "recall_other_failures": null,
+        "warned_failures": 0
+      }
+    },
+    "A_stuck_mid": {
+      "baseline_alert": {
+        "episodes": 180,
+        "f1": 1.0,
+        "false_alarm_rate": 0.0,
+        "false_alarms": 0,
+        "false_stop_failures": 0,
+        "median_lead_steps": 4.0,
+        "missed_failures": 0,
+        "other_failures": 108,
+        "precision": 1.0,
+        "quiet_successes": 72,
+        "recall": 1.0,
+        "recall_false_stop_failures": null,
+        "recall_other_failures": 1.0,
+        "warned_failures": 108
+      },
+      "episodes": 180,
+      "mean_self_confidence": 0.5375,
+      "snapshot_scores": [
+        {
+          "brier": 0.444193,
+          "ece": 0.532432,
+          "n": 2704,
+          "predictor": "base_rate",
+          "separation": 0.0
+        },
+        {
+          "brier": 0.590296,
+          "ece": 0.617678,
+          "n": 2704,
+          "predictor": "heuristic",
+          "separation": 0.164167
+        },
+        {
+          "brier": 0.223504,
+          "ece": 0.336294,
+          "n": 2704,
+          "predictor": "self_model",
+          "separation": 0.561337
+        }
+      ],
+      "success_rate": 0.4,
+      "warning": {
+        "episodes": 180,
+        "f1": 1.0,
+        "false_alarm_rate": 0.0,
+        "false_alarms": 0,
+        "false_stop_failures": 0,
+        "median_lead_steps": 7.0,
+        "missed_failures": 0,
+        "other_failures": 108,
+        "precision": 1.0,
+        "quiet_successes": 72,
+        "recall": 1.0,
+        "recall_false_stop_failures": null,
+        "recall_other_failures": 1.0,
+        "warned_failures": 108
+      }
+    },
+    "B_stuck_low": {
+      "baseline_alert": {
+        "episodes": 180,
+        "f1": 1.0,
+        "false_alarm_rate": 0.0,
+        "false_alarms": 0,
+        "false_stop_failures": 0,
+        "median_lead_steps": 7.0,
+        "missed_failures": 0,
+        "other_failures": 152,
+        "precision": 1.0,
+        "quiet_successes": 28,
+        "recall": 1.0,
+        "recall_false_stop_failures": null,
+        "recall_other_failures": 1.0,
+        "warned_failures": 152
+      },
+      "episodes": 180,
+      "mean_self_confidence": 0.355,
+      "snapshot_scores": [
+        {
+          "brier": 0.52592,
+          "ece": 0.70735,
+          "n": 3122,
+          "predictor": "base_rate",
+          "separation": 0.0
+        },
+        {
+          "brier": 0.607305,
+          "ece": 0.652178,
+          "n": 3122,
+          "predictor": "heuristic",
+          "separation": 0.278882
+        },
+        {
+          "brier": 0.214612,
+          "ece": 0.328731,
+          "n": 3122,
+          "predictor": "self_model",
+          "separation": 0.634232
+        }
+      ],
+      "success_rate": 0.1556,
+      "warning": {
+        "episodes": 180,
+        "f1": 1.0,
+        "false_alarm_rate": 0.0,
+        "false_alarms": 0,
+        "false_stop_failures": 0,
+        "median_lead_steps": 10.0,
+        "missed_failures": 0,
+        "other_failures": 152,
+        "precision": 1.0,
+        "quiet_successes": 28,
+        "recall": 1.0,
+        "recall_false_stop_failures": null,
+        "recall_other_failures": 1.0,
+        "warned_failures": 152
+      }
+    },
+    "none": {
+      "baseline_alert": {
+        "episodes": 180,
+        "f1": 0.0,
+        "false_alarm_rate": 0.0,
+        "false_alarms": 0,
+        "false_stop_failures": 0,
+        "median_lead_steps": null,
+        "missed_failures": 0,
+        "other_failures": 0,
+        "precision": 0.0,
+        "quiet_successes": 180,
+        "recall": 0.0,
+        "recall_false_stop_failures": null,
+        "recall_other_failures": null,
+        "warned_failures": 0
+      },
+      "episodes": 180,
+      "mean_self_confidence": 0.9025,
+      "snapshot_scores": [
+        {
+          "brier": 0.070961,
+          "ece": 0.266384,
+          "n": 1200,
+          "predictor": "base_rate",
+          "separation": 0.0
+        },
+        {
+          "brier": 0.0025,
+          "ece": 0.05,
+          "n": 1200,
+          "predictor": "heuristic",
+          "separation": 0.0
+        },
+        {
+          "brier": 0.010604,
+          "ece": 0.097468,
+          "n": 1200,
+          "predictor": "self_model",
+          "separation": 0.0
+        }
+      ],
+      "success_rate": 1.0,
+      "warning": {
+        "episodes": 180,
+        "f1": 0.0,
+        "false_alarm_rate": 0.0,
+        "false_alarms": 0,
+        "false_stop_failures": 0,
+        "median_lead_steps": null,
+        "missed_failures": 0,
+        "other_failures": 0,
+        "precision": 0.0,
+        "quiet_successes": 180,
+        "recall": 0.0,
+        "recall_false_stop_failures": null,
+        "recall_other_failures": null,
+        "warned_failures": 0
+      }
+    },
+    "wrong_bound": {
+      "baseline_alert": {
+        "episodes": 180,
+        "f1": 0.0,
+        "false_alarm_rate": 0.0,
+        "false_alarms": 0,
+        "false_stop_failures": 0,
+        "median_lead_steps": null,
+        "missed_failures": 0,
+        "other_failures": 0,
+        "precision": 0.0,
+        "quiet_successes": 180,
+        "recall": 0.0,
+        "recall_false_stop_failures": null,
+        "recall_other_failures": null,
+        "warned_failures": 0
+      },
+      "episodes": 180,
+      "mean_self_confidence": 0.7864,
+      "snapshot_scores": [
+        {
+          "brier": 0.070961,
+          "ece": 0.266384,
+          "n": 1404,
+          "predictor": "base_rate",
+          "separation": 0.0
+        },
+        {
+          "brier": 0.0025,
+          "ece": 0.05,
+          "n": 1404,
+          "predictor": "heuristic",
+          "separation": 0.0
+        },
+        {
+          "brier": 0.083091,
+          "ece": 0.213554,
+          "n": 1404,
+          "predictor": "self_model",
+          "separation": 0.0
+        }
+      ],
+      "success_rate": 1.0,
+      "warning": {
+        "episodes": 180,
+        "f1": 0.0,
+        "false_alarm_rate": 0.0,
+        "false_alarms": 0,
+        "false_stop_failures": 0,
+        "median_lead_steps": null,
+        "missed_failures": 0,
+        "other_failures": 0,
+        "precision": 0.0,
+        "quiet_successes": 180,
+        "recall": 0.0,
+        "recall_false_stop_failures": null,
+        "recall_other_failures": null,
+        "warned_failures": 0
+      }
+    },
+    "wrong_bound+B_stuck_low": {
+      "baseline_alert": {
+        "episodes": 180,
+        "f1": 1.0,
+        "false_alarm_rate": 0.0,
+        "false_alarms": 0,
+        "false_stop_failures": 0,
+        "median_lead_steps": 7.0,
+        "missed_failures": 0,
+        "other_failures": 160,
+        "precision": 1.0,
+        "quiet_successes": 20,
+        "recall": 1.0,
+        "recall_false_stop_failures": null,
+        "recall_other_failures": 1.0,
+        "warned_failures": 160
+      },
+      "episodes": 180,
+      "mean_self_confidence": 0.3589,
+      "snapshot_scores": [
+        {
+          "brier": 0.530297,
+          "ece": 0.716719,
+          "n": 3255,
+          "predictor": "base_rate",
+          "separation": 0.0
+        },
+        {
+          "brier": 0.613283,
+          "ece": 0.659094,
+          "n": 3255,
+          "predictor": "heuristic",
+          "separation": 0.278719
+        },
+        {
+          "brier": 0.231337,
+          "ece": 0.346587,
+          "n": 3255,
+          "predictor": "self_model",
+          "separation": 0.423204
+        }
+      ],
+      "success_rate": 0.1111,
+      "warning": {
+        "episodes": 180,
+        "f1": 1.0,
+        "false_alarm_rate": 0.0,
+        "false_alarms": 0,
+        "false_stop_failures": 0,
+        "median_lead_steps": 10.0,
+        "missed_failures": 0,
+        "other_failures": 160,
+        "precision": 1.0,
+        "quiet_successes": 20,
+        "recall": 1.0,
+        "recall_false_stop_failures": null,
+        "recall_other_failures": 1.0,
+        "warned_failures": 160
+      }
+    }
+  },
+  "primary_new_faults": {
+    "baseline_alert": {
+      "episodes": 720,
+      "f1": 1.0,
+      "false_alarm_rate": 0.0,
+      "false_alarms": 0,
+      "false_stop_failures": 0,
+      "median_lead_steps": 6.0,
+      "missed_failures": 0,
+      "other_failures": 420,
+      "precision": 1.0,
+      "quiet_successes": 300,
+      "recall": 1.0,
+      "recall_false_stop_failures": null,
+      "recall_other_failures": 1.0,
+      "warned_failures": 420
+    },
+    "episodes": 720,
+    "mean_self_confidence": 0.4704,
+    "snapshot_scores": [
+      {
+        "brier": 0.452708,
+        "ece": 0.550657,
+        "n": 10281,
+        "predictor": "base_rate",
+        "separation": 0.0
+      },
+      {
+        "brier": 0.534131,
+        "ece": 0.563335,
+        "n": 10281,
+        "predictor": "heuristic",
+        "separation": 0.249321
+      },
+      {
+        "brier": 0.199442,
+        "ece": 0.28893,
+        "n": 10281,
+        "predictor": "self_model",
+        "separation": 0.572934
+      }
+    ],
+    "success_rate": 0.4167,
+    "warning": {
+      "episodes": 720,
+      "f1": 1.0,
+      "false_alarm_rate": 0.0,
+      "false_alarms": 0,
+      "false_stop_failures": 0,
+      "median_lead_steps": 9.0,
+      "missed_failures": 0,
+      "other_failures": 420,
+      "precision": 1.0,
+      "quiet_successes": 300,
+      "recall": 1.0,
+      "recall_false_stop_failures": null,
+      "recall_other_failures": 1.0,
+      "warned_failures": 420
+    }
+  },
+  "seen_types": {
+    "baseline_alert": {
+      "episodes": 360,
+      "f1": 0.0,
+      "false_alarm_rate": 0.0,
+      "false_alarms": 0,
+      "false_stop_failures": 0,
+      "median_lead_steps": null,
+      "missed_failures": 0,
+      "other_failures": 0,
+      "precision": 0.0,
+      "quiet_successes": 360,
+      "recall": 0.0,
+      "recall_false_stop_failures": null,
+      "recall_other_failures": null,
+      "warned_failures": 0
+    },
+    "episodes": 360,
+    "mean_self_confidence": 0.8399,
+    "snapshot_scores": [
+      {
+        "brier": 0.070961,
+        "ece": 0.266384,
+        "n": 2604,
+        "predictor": "base_rate",
+        "separation": 0.0
+      },
+      {
+        "brier": 0.0025,
+        "ece": 0.05,
+        "n": 2604,
+        "predictor": "heuristic",
+        "separation": 0.0
+      },
+      {
+        "brier": 0.049687,
+        "ece": 0.160059,
+        "n": 2604,
+        "predictor": "self_model",
+        "separation": 0.0
+      }
+    ],
+    "success_rate": 1.0,
+    "warning": {
+      "episodes": 360,
+      "f1": 0.0,
+      "false_alarm_rate": 0.0,
+      "false_alarms": 0,
+      "false_stop_failures": 0,
+      "median_lead_steps": null,
+      "missed_failures": 0,
+      "other_failures": 0,
+      "precision": 0.0,
+      "quiet_successes": 360,
+      "recall": 0.0,
+      "recall_false_stop_failures": null,
+      "recall_other_failures": null,
+      "warned_failures": 0
+    }
+  },
+  "threshold": 0.3,
+  "train_base_rate": 0.733616
+}

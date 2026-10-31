@@ -1,4 +1,4 @@
-# RED QUEEN AI — Milestone M7.1
+# RED QUEEN AI — Milestone M7.2
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
@@ -82,6 +82,10 @@ execution, no real-world actions.
 24. "I expect to fail" warning (M7.1, pre-registered in `docs/PREREG_M7_1.md`):
     when the self-model's confidence drops below a threshold, RED QUEEN warns
     the operator once. It never changes what the agent does.
+25. Generalisation test (M7.2, pre-registered in `docs/PREREG_M7_2.md`): the
+    self-model and warning are run unchanged on fault types they never saw.
+    The warning still works perfectly, but the confidence numbers stop being
+    accurate. RED QUEEN knows *which* situations are bad, but not *how* bad.
 
 Allowed actions (the only ones that can ever run):
 
@@ -113,7 +117,7 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 352 tests ... OK` and `190/190 validation checks passed`
+   Expected: `Ran 359 tests ... OK` and `197/197 validation checks passed`
    (takes about 7-12 minutes; does not need Ollama).
 3. Optional reports:
    ```
@@ -202,6 +206,10 @@ git --version
     ```
     python3 -m red_queen.warning_study --output results/m7_1_warning_study.json
     ```
+22. Generalisation study (M7.2, about 20 seconds):
+    ```
+    python3 -m red_queen.generalisation_study --output results/m7_2_generalisation_study.json
+    ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 
@@ -253,11 +261,12 @@ red_queen/
   self_model.py    self-model: features, fitted confidence, Brier/ECE metrics (M7)
   self_model_study.py pre-registered self-model study, train/test by seed (M7)
   warning_study.py pre-registered expect-failure warning study (M7.1)
-  validation.py    190 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+  generalisation_study.py self-model on unseen fault types (M7.2)
+  validation.py    197 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
                    V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4,
-                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6, V177-V183 M7, V184-V190 M7.1)
-tests/             352 unittest tests
+                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6, V177-V183 M7, V184-V190 M7.1, V191-V197 M7.2)
+tests/             359 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -283,6 +292,8 @@ docs/PREREG_M7.md                 (committed before M7 code)
 docs/ENGINEERING_RECORD_M7.md     (accepted on Linux)
 docs/PREREG_M7_1.md               (committed before M7.1 code)
 docs/ENGINEERING_RECORD_M7_1.md   (accepted on Linux)
+docs/PREREG_M7_2.md               (committed before M7.2 code)
+docs/ENGINEERING_RECORD_M7_2.md
 results/                          build-environment reports
 ```
 
@@ -312,3 +323,4 @@ results/                          build-environment reports
 | 0.19.1 patch | 330 tests OK, 176/176 checks | **Accepted** 2026-10-31; no ResourceWarning on Python 3.14 |
 | M7 | 342 tests OK, 183/183 checks | **Accepted** 2026-10-31; study output identical (diff); indicator present in measured sense (pre-registered) |
 | M7.1 | 352 tests OK, 190/190 checks | **Accepted** 2026-10-31; study output identical (diff); warning useful (pre-registered) |
+| M7.2 | 359 tests OK, 197/197 checks | Pending — run step 2 and step 22 |

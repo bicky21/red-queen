@@ -2954,6 +2954,82 @@ def check_prereg_m7_1_present() -> CheckResult:
     return not missing, f"pre-registration file present; required terms missing={missing}"
 
 
+# ---------------------------------------------------------------- M7.2 checks
+
+M72_FROZEN_SCORES = {  # primary (new-fault) set: predictor -> (brier, ece, separation); copied from the study output
+    "base_rate": (0.452708, 0.550657, 0.0), "heuristic": (0.534131, 0.563335, 0.249321),
+    "self_model": (0.199442, 0.28893, 0.572934),
+}
+M72_FROZEN_WARNING = (420, 0, 0, 300, 9.0)  # warned failures, false alarms, missed, quiet successes, median lead
+
+
+def _m72_study():
+    from .generalisation_study import run_study
+    if "m72" not in _M5_CACHE:
+        _M5_CACHE["m72"] = run_study()
+    return _M5_CACHE["m72"]
+
+
+def check_m72_nothing_refitted() -> CheckResult:
+    rep = _m72_study()
+    m7_base = _m7_study()["train_base_rate"]
+    m71_tau = _m71_study()["threshold"]
+    ok = rep["train_base_rate"] == m7_base and rep["threshold"] == m71_tau == 0.3
+    return ok, f"base rate {rep['train_base_rate']} == M7 {m7_base}; threshold {rep['threshold']} == M7.1 {m71_tau}"
+
+
+def check_m72_faults_unseen_in_training() -> CheckResult:
+    from .generalisation_study import NEW_FAULTS
+    from .safety_layer_study import CONDITIONS as TRAIN_CONDITIONS
+    overlap = set(NEW_FAULTS) & set(TRAIN_CONDITIONS)
+    return not overlap, f"new fault conditions {list(NEW_FAULTS)} overlap with training conditions: {sorted(overlap)}"
+
+
+def check_m72_scores_frozen() -> CheckResult:
+    p = _m72_study()["primary_new_faults"]
+    got = {r["predictor"]: (r["brier"], r["ece"], r["separation"]) for r in p["snapshot_scores"]}
+    w = p["warning"]
+    wgot = (w["warned_failures"], w["false_alarms"], w["missed_failures"], w["quiet_successes"], w["median_lead_steps"])
+    ok = got == M72_FROZEN_SCORES and wgot == M72_FROZEN_WARNING
+    return ok, f"new-fault snapshot scores frozen={got == M72_FROZEN_SCORES}; warning counts {wgot} frozen={wgot == M72_FROZEN_WARNING}"
+
+
+def check_m72_decision_applied() -> CheckResult:
+    from .generalisation_study import decide
+    rep = _m72_study()
+    d = rep["decision"]
+    ok = d == decide(rep["primary_new_faults"]) and d["generalises"] is False and not d["G1_ece_at_most_0.10"] \
+        and d["G2_brier_20pct_below_base_rate"] and d["G3_warning_recall_and_precision_at_least_0.70"]
+    return ok, f"pre-registered rule: G1={d['G1_ece_at_most_0.10']} G2={d['G2_brier_20pct_below_base_rate']} G3={d['G3_warning_recall_and_precision_at_least_0.70']} -> generalises={d['generalises']}"
+
+
+def check_m72_ranking_survives_calibration_does_not() -> CheckResult:
+    p = {r["predictor"]: r for r in _m72_study()["primary_new_faults"]["snapshot_scores"]}
+    sm = p["self_model"]
+    ok = sm["separation"] > 0.5 and sm["ece"] > 0.10 and sm["brier"] < p["base_rate"]["brier"] and sm["brier"] < p["heuristic"]["brier"]
+    return ok, f"self-model on new faults: separation {sm['separation']} (ranking kept), ECE {sm['ece']} (calibration lost), Brier {sm['brier']} vs base {p['base_rate']['brier']}"
+
+
+def check_m72_collect_default_unchanged() -> CheckResult:
+    from .safety_layer_study import sensors_for
+    from .scenarios import ALL_SCENARIOS
+    from .warning_study import collect_episodes
+    a = collect_episodes((3,), conditions=("A_dead_low", "none"), scenarios=ALL_SCENARIOS[:4])
+    b = collect_episodes((3,), conditions=("A_dead_low", "none"), scenarios=ALL_SCENARIOS[:4], sensors_fn=sensors_for)
+    return a == b, f"collect_episodes default sensors identical to explicit M5.3 sensors={a == b} ({len(a)} episodes)"
+
+
+def check_prereg_m7_2_present() -> CheckResult:
+    import os
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M7_2.md")
+    if not os.path.exists(path):
+        return False, "docs/PREREG_M7_2.md missing"
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    missing = [k for k in ("G1", "G2", "G3", "nothing is re-fitted", "0.10", "A_stuck_mid") if k not in text]
+    return not missing, f"pre-registration file present; required terms missing={missing}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -3240,6 +3316,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("warning_study_frozen", check_warning_study_frozen),
         ("m7_1_decision_and_blind_spot", check_m71_decision_and_blind_spot),
         ("m7_1_prereg_file_present", check_prereg_m7_1_present),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M7.2 (V191 onward)
+    for name, fn in (
+        ("m7_2_nothing_refitted", check_m72_nothing_refitted),
+        ("m7_2_faults_unseen_in_training", check_m72_faults_unseen_in_training),
+        ("m7_2_scores_frozen", check_m72_scores_frozen),
+        ("m7_2_prereg_decision_applied", check_m72_decision_applied),
+        ("m7_2_ranking_survives_calibration_does_not", check_m72_ranking_survives_calibration_does_not),
+        ("m7_2_collect_default_unchanged", check_m72_collect_default_unchanged),
+        ("m7_2_prereg_file_present", check_prereg_m7_2_present),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1
