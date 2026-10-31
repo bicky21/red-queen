@@ -69,7 +69,8 @@ class TestStudy(unittest.TestCase):
                                              "wrong_bound+B_stuck_low"})
         self.assertEqual(set(DEVELOPMENT), {"A_dead_low", "A_dead"})
         prereg = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M5_4.md")
-        text = open(prereg, encoding="utf-8").read()
+        with open(prereg, encoding="utf-8") as f:
+            text = f.read()
         for name in list(CONFIRMATION) + list(DEVELOPMENT):
             self.assertIn(f"`{name}`", text)
 

@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M6
 
-**Version:** 0.19.0 · **Date:** 2026-10-30 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.19.0 · **Date:** 2026-10-30 · **Status:** build-environment passed; **Linux acceptance passed 2026-10-31** (patch 0.19.1 fixes a test-hygiene warning)
 **Outcome: pre-registered result, small and mixed.** Untrusted disturbance memory now works with the sensor-limited `SafeAgent`. It is **safe**: 0 false stops in 8,064 runs, because memory cannot reach the estimator or the stopping rule. But it is **barely useful**: exact memory saves 1.5–2.2% of actions, while wrong memory costs up to 2.1%. By the rule committed *before* any code, memory is **not recommended** as default. It stays available as an option.
 
 ## 1. Review of M5.4
@@ -83,15 +83,17 @@ Memory and noisy-sensor state estimation were separate. It was unknown whether d
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Passed 2026-10-31.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 329 tests in 246.413s, OK**;
+`python3 -m red_queen.validation` → **176/176 validation checks passed**;
+`python3 -m red_queen.memory_sensor_study`: the output, including the pre-registered decision, was compared with `diff` against the build environment and is **identical**.
 
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.memory_sensor_study
-```
+**Issue found in the user's output, and fixed in patch 0.19.1.** Four `ResourceWarning: unclosed file` messages appeared, coming from `open(path).read()` in V169, V176 and two M5.4/M6 tests that read the pre-registration files. Results were not affected. My build-environment runs reported no warnings, because I only kept the last lines of the test output and these warnings are printed in the middle. That was a weakness in how I checked.
 
-M6 is accepted when the output shows `Ran 329 tests ... OK` and `176/176 validation checks passed`. The study table and decision should match §6.
+The fix:
+- All four places now close the file (`with open(...)`).
+- A new test, `tests/test_hygiene.py`, fails if any `open(...).read()` pattern appears in the code again.
+- The full suite was re-run with `python3 -X dev`, which shows every ResourceWarning.
 
 ## 9. Next milestone (candidates)
 

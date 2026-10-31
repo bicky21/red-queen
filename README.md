@@ -105,7 +105,7 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 329 tests ... OK` and `176/176 validation checks passed`
+   Expected: `Ran 330 tests ... OK` and `176/176 validation checks passed`
    (takes about 7-12 minutes; does not need Ollama).
 3. Optional reports:
    ```
@@ -238,7 +238,7 @@ red_queen/
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
                    V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4,
                    V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6)
-tests/             329 unittest tests
+tests/             330 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -259,7 +259,7 @@ docs/ENGINEERING_RECORD_M5_3.md   (accepted on Linux)
 docs/PREREG_M5_4.md               (committed before M5.4 code)
 docs/ENGINEERING_RECORD_M5_4.md   (accepted on Linux)
 docs/PREREG_M6.md                 (committed before M6 code)
-docs/ENGINEERING_RECORD_M6.md
+docs/ENGINEERING_RECORD_M6.md     (accepted on Linux)
 results/                          build-environment reports
 ```
 
@@ -285,4 +285,5 @@ results/                          build-environment reports
 | M5.2 | 297 tests OK, 155/155 checks | **Accepted** 2026-10-30; study table identical to build environment |
 | M5.3 | 311 tests OK, 162/162 checks | **Accepted** 2026-10-30; study output identical (diff) |
 | M5.4 | 321 tests OK, 169/169 checks | **Accepted** 2026-10-30; study output identical (diff); rule not adopted (pre-registered) |
-| M6 | 329 tests OK, 176/176 checks | Pending — run step 2 and step 19 |
+| M6 | 329 tests OK, 176/176 checks | **Accepted** 2026-10-31; study output identical (diff); memory not recommended (pre-registered) |
+| 0.19.1 patch | 330 tests OK, 176/176 checks | Pending — fixes 4 unclosed-file warnings seen on Python 3.14 |

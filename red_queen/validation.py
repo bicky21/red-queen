@@ -2638,7 +2638,8 @@ def check_prereg_file_present() -> CheckResult:
     path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M5_4.md")
     if not os.path.exists(path):
         return False, "docs/PREREG_M5_4.md missing"
-    text = open(path, encoding="utf-8").read()
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
     keys = ("C1", "C2", "C3", "A_stuck_mid", "B_stuck_low", "wrong_bound", "18 of 360")
     missing = [k for k in keys if k not in text]
     return not missing, f"pre-registration file present; required terms missing={missing}"
@@ -2733,7 +2734,8 @@ def check_prereg_m6_present() -> CheckResult:
     path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M6.md")
     if not os.path.exists(path):
         return False, "docs/PREREG_M6.md missing"
-    text = open(path, encoding="utf-8").read()
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
     missing = [k for k in ("D1", "D2", "D3", "D4", "on_mismatch", "168 cases", "unrelated") if k not in text]
     return not missing, f"pre-registration file present; required terms missing={missing}"
 

@@ -78,7 +78,8 @@ class TestStudy(unittest.TestCase):
 
     def test_prereg_mentions_agents(self):
         path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M6.md")
-        text = open(path, encoding="utf-8").read()
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
         for a in AGENTS:
             self.assertIn(f"`{a}`", text)
 

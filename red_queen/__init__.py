@@ -15,5 +15,5 @@ untrusted disturbance memory for the sensor-limited agent (M6).
 Standard library only.
 """
 
-__version__ = "0.19.0"
+__version__ = "0.19.1"
 MILESTONE = "M6"
