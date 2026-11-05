@@ -317,7 +317,7 @@ docs/ENGINEERING_RECORD_M7_2.md   (accepted on Linux)
 docs/PREREG_M7_3.md               (committed before M7.3 code)
 docs/ENGINEERING_RECORD_M7_3.md   (accepted on Linux)
 docs/PREREG_M8.md                 (committed before M8 code)
-docs/ENGINEERING_RECORD_M8.md
+docs/ENGINEERING_RECORD_M8.md     (accepted on Linux)
 results/                          build-environment reports
 ```
 
@@ -349,4 +349,4 @@ results/                          build-environment reports
 | M7.1 | 352 tests OK, 190/190 checks | **Accepted** 2026-10-31; study output identical (diff); warning useful (pre-registered) |
 | M7.2 | 359 tests OK, 197/197 checks | **Accepted** 2026-10-31; study output identical (diff); does not fully generalise (pre-registered) |
 | M7.3 | 367 tests OK, 204/204 checks | **Accepted** 2026-11-05; study output identical (diff); v2 optional (pre-registered) |
-| M8 | 378 tests OK, 211/211 checks | Pending — run step 2 and step 24 |
+| M8 | 378 tests OK, 211/211 checks | **Accepted** 2026-11-05; study output identical (diff); architecture indicator present, functional effect null (pre-registered) |

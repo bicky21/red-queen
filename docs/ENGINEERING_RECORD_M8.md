@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M8
 
-**Version:** 0.24.0 · **Date:** 2026-11-05 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.24.0 · **Date:** 2026-11-05 · **Status:** build-environment passed; **Linux acceptance passed 2026-11-05**
 **Outcome: pre-registered result. The architecture indicator is present, and the functional effect is null, as predicted.** RED QUEEN now has a minimal **global workspace**:
 - five modules propose messages in parallel;
 - a limited-capacity workspace selects the most salient one;
@@ -87,17 +87,12 @@ Capacity 1 and full broadcast gave **identical action sequences in 2,016 of 2,01
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Passed 2026-11-05.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 378 tests in 338.945s, OK**;
+`python3 -m red_queen.validation` → **211/211 validation checks passed**;
+`python3 -m red_queen.workspace_study`: compared with `diff` against the build environment, it is **identical**.
 
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.workspace_study
-```
-
-M8 is accepted when the output shows `Ran 378 tests ... OK` and `211/211 validation checks passed`. The study output, which takes about 2 minutes, should match §6.
-
-## 9. Next milestone (candidates)
+## 9. Next milestone (candidates) — M8.1 (housekeeping) done next
 
 1. **M8.1: faster validation (housekeeping).** Validation and tests now take about 12 minutes on the laptop. Split them into a quick suite (every change) and a full suite (acceptance), without changing any check.
 2. **M9: a harder domain.** The planner, memory, language model and workspace have all shown little room to help in this small world. A richer simulation, with more resources, delayed effects, and trade-offs where the shortest plan is not obviously best, would show whether any of them can add real value.
