@@ -52,6 +52,13 @@ goal), steps left, and whether it is stopping. Never the true state. The
 observer's return value is ignored and its exceptions are caught and
 counted, so it cannot change behaviour.
 
+M8 (pre-registered in docs/PREREG_M8.md): `run(..., workspace=None)`. A global
+workspace (workspace.py) runs once per decision point on the same snapshot
+as the observer. Its ONLY possible effect: if it asks for memory to be
+switched off, disturbance prediction stops from the next step. It cannot add
+actions or touch the estimator, the policy or the stopping rule. Workspace
+errors are caught and counted as "no broadcast".
+
 Stated assumptions: at most one sensor is biased; the KINDS of events are
 known (blocked actions, the two level disturbances). Success is decided by
 the independent GoalVerifier on the true state.
@@ -222,7 +229,7 @@ class SafeAgent:
         self.max_policy_denials = max_policy_denials
         self.verifier = GoalVerifier(goal)
 
-    def run(self, env, sensors: Sequence, scenario: str = "", observer=None) -> EpisodeResult:
+    def run(self, env, sensors: Sequence, scenario: str = "", observer=None, workspace=None) -> EpisodeResult:
         sensors = list(sensors)
         if len(sensors) != self.sensors:
             raise ValueError(f"expected {self.sensors} sensor(s)")
@@ -247,19 +254,34 @@ class SafeAgent:
         acted_from: Optional[Box] = None  # belief the last action was planned from
         observer_errors = 0
 
+        workspace_errors = 0
+        workspace_memory_off_at: Optional[int] = None
+
         def introspect(belief: Box, plan_len: Optional[int], stopping: bool) -> None:
-            nonlocal observer_errors
-            if observer is None:
+            nonlocal observer_errors, workspace_errors, workspace_memory_off_at
+            if observer is None and workspace is None:
                 return
             report = estimator.report()
-            snapshot = {"step": len(actions), "belief": belief.to_dict(), "width": belief.width(),
+
+            def make_snapshot() -> Dict[str, Any]:  # a fresh, independent copy for each consumer
+                return {"step": len(actions), "belief": belief.to_dict(), "width": belief.width(),
                         "alert_counts": dict(report["alert_counts"]), "trusted": list(report["trusted"]),
                         "noise_bounds": list(report["noise_bounds"]), "plan_len": plan_len,
                         "steps_left": self.max_steps - len(actions), "stopping": stopping}
-            try:
-                observer(snapshot)
-            except Exception:  # an observer can never affect the agent
-                observer_errors += 1
+
+            if observer is not None:
+                try:
+                    observer(make_snapshot())
+                except Exception:  # an observer can never affect the agent
+                    observer_errors += 1
+            if workspace is not None:
+                try:
+                    workspace.cycle(make_snapshot(), {"next_disturbance": remembered.get(len(actions) + 1)})
+                    if remembered and workspace.wants_memory_off():
+                        remembered.clear()  # the only effect a workspace may have
+                        workspace_memory_off_at = len(actions)
+                except Exception:
+                    workspace_errors += 1
 
         while True:
             readings = [s.observe() for s in sensed]
@@ -335,6 +357,8 @@ class SafeAgent:
                    if self.predict_disturbances else {}),
                 **({"guard_tripped_at": guard_tripped_at} if self.disturbance_guard else {}),
                 **({"observer_errors": observer_errors} if observer is not None else {}),
+                **({"workspace_report": _observer_report(workspace), "workspace_errors": workspace_errors,
+                    "workspace_memory_off_at": workspace_memory_off_at} if workspace is not None else {}),
                 **({"observer_report": _observer_report(observer)}
                    if observer is not None and callable(getattr(observer, "report", None)) else {}),
             },

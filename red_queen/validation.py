@@ -3133,6 +3133,157 @@ def check_prereg_m7_3_present() -> CheckResult:
     return not missing, f"pre-registration file present; required terms missing={missing}"
 
 
+# ----------------------------------------------------------------- M8 checks
+# The full M8 study takes ~100 s; validation runs the same code on a reduced
+# grid (stride 42, seed 0) with frozen totals. The full study is the CLI run.
+
+M8_FROZEN_REDUCED = {('0.0', 'none', 'safe'): (40, 0, 188, 0, 0), ('0.0', 'none', 'safe_mem_guard'): (40, 0, 188, 0, 0), ('0.0', 'none', 'safe_mem_guard_ws'): (40, 0, 188, 0, 228), ('0.0', 'none', 'safe_mem_guard_ws_full'): (40, 0, 188, 0, 228), ('0.0', 'B_stuck_low', 'safe'): (2, 0, 760, 0, 0), ('0.0', 'B_stuck_low', 'safe_mem_guard'): (2, 0, 760, 0, 0), ('0.0', 'B_stuck_low', 'safe_mem_guard_ws'): (2, 0, 760, 0, 762), ('0.0', 'B_stuck_low', 'safe_mem_guard_ws_full'): (2, 0, 760, 0, 1844), ('0.0', 'A_stuck_mid', 'safe'): (16, 0, 547, 0, 0), ('0.0', 'A_stuck_mid', 'safe_mem_guard'): (16, 0, 547, 0, 0), ('0.0', 'A_stuck_mid', 'safe_mem_guard_ws'): (16, 0, 547, 0, 563), ('0.0', 'A_stuck_mid', 'safe_mem_guard_ws_full'): (16, 0, 547, 0, 1227), ('1.0', 'none', 'safe'): (40, 0, 188, 0, 0), ('1.0', 'none', 'safe_mem_guard'): (40, 0, 193, 0, 0), ('1.0', 'none', 'safe_mem_guard_ws'): (40, 0, 193, 0, 233), ('1.0', 'none', 'safe_mem_guard_ws_full'): (40, 0, 193, 0, 244), ('1.0', 'B_stuck_low', 'safe'): (2, 0, 760, 0, 0), ('1.0', 'B_stuck_low', 'safe_mem_guard'): (2, 0, 760, 0, 0), ('1.0', 'B_stuck_low', 'safe_mem_guard_ws'): (2, 0, 760, 10, 762), ('1.0', 'B_stuck_low', 'safe_mem_guard_ws_full'): (2, 0, 760, 10, 1855), ('1.0', 'A_stuck_mid', 'safe'): (16, 0, 547, 0, 0), ('1.0', 'A_stuck_mid', 'safe_mem_guard'): (16, 0, 549, 0, 0), ('1.0', 'A_stuck_mid', 'safe_mem_guard_ws'): (16, 0, 549, 5, 565), ('1.0', 'A_stuck_mid', 'safe_mem_guard_ws_full'): (16, 0, 549, 5, 1239)}  # (level, sensors, agent): (success, false_stops, actions, memory_off, stream)
+
+
+def _m8_self_model():
+    if "m8_model" not in _M5_CACHE:
+        from .workspace_study import fit_self_model
+        _M5_CACHE["m8_model"] = fit_self_model()
+    return _M5_CACHE["m8_model"]
+
+
+def _m8_reduced():
+    if "m8" not in _M5_CACHE:
+        from .workspace_study import run_study
+        _M5_CACHE["m8"] = run_study(stride=42, seeds=(0,), self_model=_m8_self_model())
+    return _M5_CACHE["m8"]
+
+
+def _probe_modules():
+    from .workspace import Message, Module
+
+    class Probe(Module):
+        def __init__(self, name, salience):
+            self.name, self.salience, self.got, self.asked = name, salience, [], 0
+
+        def propose(self, snapshot, context):
+            self.asked += 1
+            return [] if self.salience is None else [Message(self.name, "probe", self.salience)]
+
+        def receive(self, message):
+            self.got.append(message.source)
+
+    return Probe
+
+
+_SNAP = {"step": 0, "stopping": False, "plan_len": 2, "steps_left": 10, "alert_counts": {}, "width": 10,
+         "belief": {}, "trusted": [True, True], "noise_bounds": [5, 5]}
+
+
+def check_gwt_parallel_modules_and_capacity() -> CheckResult:
+    from .workspace import Workspace, standard_workspace
+    Probe = _probe_modules()
+    mods = [Probe(n, s) for n, s in (("a", 0.9), ("b", 0.5), ("c", 0.7), ("d", None))]
+    ws = Workspace(mods, capacity=2)
+    out = ws.cycle(dict(_SNAP), {})
+    a1 = all(m.asked == 1 for m in mods) and len(standard_workspace(_m8_self_model()).modules) >= 4
+    a2 = [m.source for m in out] == ["a", "c"] and len(Workspace(mods, None).cycle(dict(_SNAP), {})) == 3
+    refused = 0
+    for cap in (0, -1, True, 1.5):
+        try:
+            Workspace(mods, cap)
+        except ValueError:
+            refused += 1
+    try:
+        Workspace([Probe("x", 0.1), Probe("x", 0.2)])
+    except ValueError:
+        refused += 1
+    ok = a1 and a2 and refused == 5
+    return ok, f"A1 every module consulted each cycle (>=4 standard modules)={a1}; A2 top-capacity selection={a2}; invalid configs refused={refused}/5"
+
+
+def check_gwt_global_broadcast() -> CheckResult:
+    from .cross_isolation_study import sensors_for as m54
+    from .safe_agent import SafeAgent
+    from .scenarios import get_scenario
+    from .workspace import standard_workspace
+    ws = standard_workspace(_m8_self_model(), 1)
+    SafeAgent(RecoveryGoal(), 5).run(get_scenario("compound_failure").make_env(), m54("B_stuck_low", 0), workspace=ws)
+    total = sum(len(c["broadcast"]) for c in ws.cycles)
+    counts = {m.name: m.received for m in ws.modules}
+    ok = total > 0 and all(v == total for v in counts.values())
+    return ok, f"A3 every module received every broadcast: {total} broadcasts; received per module={counts}"
+
+
+def check_gwt_state_dependent_selection() -> CheckResult:
+    from .workspace import Workspace
+    Probe = _probe_modules()
+    quiet = Workspace([Probe("b", 0.5), Probe("c", None)], 1).cycle(dict(_SNAP), {})
+    busy = Workspace([Probe("b", 0.5), Probe("c", 0.8)], 1).cycle(dict(_SNAP), {})
+    from .workspace import SelfModule
+    sm = SelfModule(_m8_self_model())
+    good = sm.propose({**_SNAP, "plan_len": 1, "steps_left": 15}, {})
+    # ("too_long", "widened", ">40"): seen 599 times in training, confidence ~0.002
+    bad = sm.propose({**_SNAP, "plan_len": 9, "steps_left": 3, "alert_counts": {"bound_widened": 1}, "width": 80}, {})
+    ok = [m.source for m in quiet] == ["b"] and [m.source for m in busy] == ["c"] and not good and bool(bad)
+    return ok, (f"A4 the same message wins alone ({[m.source for m in quiet]}) and loses to a more salient one "
+                f"({[m.source for m in busy]}); self module silent when confident={not good}, speaks when not={bool(bad)}")
+
+
+def check_workspace_can_only_switch_memory_off() -> CheckResult:
+    from .cross_isolation_study import sensors_for as m54
+    from .safe_agent import SafeAgent
+    from .safety_layer_study import CONDITIONS, sensors_for
+    from .scenarios import ALL_SCENARIOS
+    from .workspace import Workspace, standard_workspace
+
+    class Crashing:
+        def cycle(self, snapshot, context):
+            raise RuntimeError("boom")
+
+        def wants_memory_off(self):
+            return True
+
+    runs = diff = errors = 0
+    for cond in CONDITIONS:
+        for sc in ALL_SCENARIOS:
+            a = SafeAgent(RecoveryGoal(), 5).run(sc.make_env(), sensors_for(cond, 4))
+            b = SafeAgent(RecoveryGoal(), 5).run(sc.make_env(), sensors_for(cond, 4),
+                                                 workspace=standard_workspace(_m8_self_model(), 1))
+            c = SafeAgent(RecoveryGoal(), 5).run(sc.make_env(), sensors_for(cond, 4), workspace=Crashing())
+            runs += 1
+            diff += a.actions != b.actions or a.stop_reason != b.stop_reason
+            diff += a.actions != c.actions or a.stop_reason != c.stop_reason
+            errors += c.stats["workspace_errors"] > 0
+    return diff == 0 and errors == runs, (f"{runs} runs without memory: standard and crashing workspaces change nothing "
+                                          f"(differences={diff}); crashing workspace errors caught in {errors}/{runs}")
+
+
+def check_m8_reduced_study_frozen() -> CheckResult:
+    rep = _m8_reduced()
+    got = {(r["level"], r["sensors"], r["agent"]): (r["success"], r["false_stops"], r["actions"],
+                                                    r["memory_off_by_workspace"], r["stream_messages"])
+           for r in rep["summary"]}
+    ok = got == M8_FROZEN_REDUCED and rep["capacity_runs_identical"] == rep["capacity_runs_compared"] == 240
+    return ok, f"reduced study (stride 42, seed 0): totals frozen={got == M8_FROZEN_REDUCED}; capacity-1 vs full identical {rep['capacity_runs_identical']}/{rep['capacity_runs_compared']}"
+
+
+def check_m8_decision_function() -> CheckResult:
+    from .workspace_study import decide
+    rep = _m8_reduced()
+    d = decide(rep)
+    ok = d == rep["decision"] and d["F1_no_extra_false_stops"] and d["F3_capacity_identical_and_stream_halved"] \
+        and not d["F2_coordination_useful"]
+    return ok, (f"reduced study decision: F1={d['F1_no_extra_false_stops']} F2={d['F2_coordination_useful']} "
+                f"F3={d['F3_capacity_identical_and_stream_halved']} (full-study decision is in the M8 record)")
+
+
+def check_prereg_m8_present() -> CheckResult:
+    import os
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M8.md")
+    if not os.path.exists(path):
+        return False, "docs/PREREG_M8.md missing"
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    missing = [k for k in ("GWT-1", "GWT-2", "GWT-3", "GWT-4", "F1", "F2", "F3", "A1", "A4", "null result") if k not in text]
+    return not missing, f"pre-registration file present; required terms missing={missing}"
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -3443,6 +3594,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("m7_3_prereg_decision_applied", check_m73_decision_applied),
         ("m7_3_improvement_recorded", check_m73_improvement_recorded),
         ("m7_3_prereg_file_present", check_prereg_m7_3_present),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M8 (V205 onward)
+    for name, fn in (
+        ("gwt_parallel_modules_and_capacity", check_gwt_parallel_modules_and_capacity),
+        ("gwt_global_broadcast", check_gwt_global_broadcast),
+        ("gwt_state_dependent_selection", check_gwt_state_dependent_selection),
+        ("workspace_can_only_switch_memory_off", check_workspace_can_only_switch_memory_off),
+        ("m8_reduced_study_frozen", check_m8_reduced_study_frozen),
+        ("m8_decision_function", check_m8_decision_function),
+        ("m8_prereg_file_present", check_prereg_m8_present),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

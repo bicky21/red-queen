@@ -1,4 +1,4 @@
-# RED QUEEN AI — Milestone M7.3
+# RED QUEEN AI — Milestone M8
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
@@ -90,6 +90,11 @@ execution, no real-world actions.
     a new self-knowledge feature that makes the self-model much more accurate
     everywhere, but it missed the targets I set in advance, so it is optional
     (`use_progress=True`).
+27. Global workspace (M8, pre-registered in `docs/PREREG_M8.md`): five modules
+    offer messages, the most important one is broadcast to all of them, and
+    the operator gets a short, prioritised stream. The four "global workspace"
+    indicator properties are verified, but in this small world they don't
+    improve performance (a null result, as predicted).
 
 Allowed actions (the only ones that can ever run):
 
@@ -121,8 +126,8 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 367 tests ... OK` and `204/204 validation checks passed`
-   (takes about 7-12 minutes; does not need Ollama).
+   Expected: `Ran 378 tests ... OK` and `211/211 validation checks passed`
+   (takes about 10-15 minutes; does not need Ollama).
 3. Optional reports:
    ```
    python3 -m red_queen.experiments --output results/m1_affect_comparison.json
@@ -218,6 +223,10 @@ git --version
     ```
     python3 -m red_queen.progress_study --output results/m7_3_progress_study.json
     ```
+24. Global workspace study (M8, about 2 minutes):
+    ```
+    python3 -m red_queen.workspace_study --output results/m8_workspace_study.json
+    ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 
@@ -271,11 +280,13 @@ red_queen/
   warning_study.py pre-registered expect-failure warning study (M7.1)
   generalisation_study.py self-model on unseen fault types (M7.2)
   progress_study.py "am I making progress?" self-model v2, fresh seeds (M7.3)
-  validation.py    204 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+  workspace.py     global workspace: modules, salience, capacity, broadcast (M8)
+  workspace_study.py pre-registered workspace functional study (M8)
+  validation.py    211 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
                    V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4,
-                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6, V177-V183 M7, V184-V190 M7.1, V191-V197 M7.2, V198-V204 M7.3)
-tests/             367 unittest tests
+                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6, V177-V183 M7, V184-V190 M7.1, V191-V197 M7.2, V198-V204 M7.3, V205-V211 M8)
+tests/             378 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -305,6 +316,8 @@ docs/PREREG_M7_2.md               (committed before M7.2 code)
 docs/ENGINEERING_RECORD_M7_2.md   (accepted on Linux)
 docs/PREREG_M7_3.md               (committed before M7.3 code)
 docs/ENGINEERING_RECORD_M7_3.md   (accepted on Linux)
+docs/PREREG_M8.md                 (committed before M8 code)
+docs/ENGINEERING_RECORD_M8.md
 results/                          build-environment reports
 ```
 
@@ -336,3 +349,4 @@ results/                          build-environment reports
 | M7.1 | 352 tests OK, 190/190 checks | **Accepted** 2026-10-31; study output identical (diff); warning useful (pre-registered) |
 | M7.2 | 359 tests OK, 197/197 checks | **Accepted** 2026-10-31; study output identical (diff); does not fully generalise (pre-registered) |
 | M7.3 | 367 tests OK, 204/204 checks | **Accepted** 2026-11-05; study output identical (diff); v2 optional (pre-registered) |
+| M8 | 378 tests OK, 211/211 checks | Pending — run step 2 and step 24 |
