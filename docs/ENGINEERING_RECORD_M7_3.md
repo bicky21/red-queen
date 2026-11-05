@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M7.3
 
-**Version:** 0.23.0 · **Date:** 2026-10-31 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.23.0 · **Date:** 2026-10-31 · **Status:** build-environment passed; **Linux acceptance passed 2026-11-05**
 **Outcome: pre-registered result. A large improvement, but below the bar I set in advance.** A new self-knowledge feature, **"am I making progress?"**, makes the self-model much better everywhere:
 - On never-seen faults (fresh seeds): ECE from 0.292 to **0.188**, Brier from 0.203 to **0.120**.
 - On familiar faults: ECE from 0.020 to **0.010**, Brier from 0.096 to **0.052**.
@@ -100,17 +100,12 @@ One new unit test failed on its first run, a **test bug**: it lowercased the fil
 
 ## 8. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
+**Passed 2026-11-05.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 367 tests in 319.206s, OK**;
+`python3 -m red_queen.validation` → **204/204 validation checks passed**;
+`python3 -m red_queen.progress_study`: compared with `diff` against the build environment, it is **identical**.
 
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.progress_study
-```
-
-M7.3 is accepted when the output shows `Ran 367 tests ... OK` and `204/204 validation checks passed`. The study output should match §6.
-
-## 9. Next milestone (candidates)
+## 9. Next milestone (candidates) — M8 chosen
 
 1. **M8: global workspace**, the second indicator family. The self-model work (M7–M7.3) has reached a natural stopping point: it is calibrated in familiar situations, ranks unseen ones correctly, and its remaining errors are understood.
 2. **M7.4:** a pre-registered decision to adopt v2 as the default on the basis of its familiar-fault improvement, with a new and independent fault family to confirm it.
