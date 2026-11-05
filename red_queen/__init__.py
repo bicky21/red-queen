@@ -19,5 +19,5 @@ workspace with limited capacity and global broadcast (M8).
 Standard library only.
 """
 
-__version__ = "0.24.0"
-MILESTONE = "M8"
+__version__ = "0.24.1"
+MILESTONE = "M8.1"

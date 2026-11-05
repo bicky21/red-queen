@@ -1,4 +1,4 @@
-# RED QUEEN AI — Milestone M8
+# RED QUEEN AI — Milestone M8.1
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
@@ -126,8 +126,14 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 378 tests ... OK` and `211/211 validation checks passed`
-   (takes about 10-15 minutes; does not need Ollama).
+   Expected: `Ran 381 tests ... OK` and `211/211 validation checks passed`
+   (the full acceptance run; takes several minutes; does not need Ollama).
+
+   Everyday quick check after any change (under a minute; skips 55 slow checks,
+   so it is **not** an acceptance run):
+   ```
+   python3 -m unittest discover -s tests && python3 -m red_queen.validation --quick
+   ```
 3. Optional reports:
    ```
    python3 -m red_queen.experiments --output results/m1_affect_comparison.json
@@ -282,11 +288,11 @@ red_queen/
   progress_study.py "am I making progress?" self-model v2, fresh seeds (M7.3)
   workspace.py     global workspace: modules, salience, capacity, broadcast (M8)
   workspace_study.py pre-registered workspace functional study (M8)
-  validation.py    211 validation checks (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+  validation.py    211 validation checks (`--quick`: 156 fast ones, M8.1) (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
                    V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4,
                    V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6, V177-V183 M7, V184-V190 M7.1, V191-V197 M7.2, V198-V204 M7.3, V205-V211 M8)
-tests/             378 unittest tests
+tests/             381 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -318,6 +324,7 @@ docs/PREREG_M7_3.md               (committed before M7.3 code)
 docs/ENGINEERING_RECORD_M7_3.md   (accepted on Linux)
 docs/PREREG_M8.md                 (committed before M8 code)
 docs/ENGINEERING_RECORD_M8.md     (accepted on Linux)
+docs/ENGINEERING_RECORD_M8_1.md   (housekeeping: quick validation)
 results/                          build-environment reports
 ```
 
@@ -350,3 +357,4 @@ results/                          build-environment reports
 | M7.2 | 359 tests OK, 197/197 checks | **Accepted** 2026-10-31; study output identical (diff); does not fully generalise (pre-registered) |
 | M7.3 | 367 tests OK, 204/204 checks | **Accepted** 2026-11-05; study output identical (diff); v2 optional (pre-registered) |
 | M8 | 378 tests OK, 211/211 checks | **Accepted** 2026-11-05; study output identical (diff); architecture indicator present, functional effect null (pre-registered) |
+| M8.1 | 381 tests OK, 211/211 checks (quick: 156/156) | Pending — run step 2, then `--quick` |

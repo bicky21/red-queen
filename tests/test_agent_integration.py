@@ -75,7 +75,12 @@ class TestExperimentsAndValidation(unittest.TestCase):
         self.assertIn("compound_failure", format_table(report))
 
     def test_all_validation_checks_pass(self):
-        for label, fn in build_checks():
+        # M8.1: the quick set here; the full set runs in `python3 -m red_queen.validation`
+        # (the acceptance command). Set RED_QUEEN_FULL_VALIDATION=1 to run everything here too.
+        import os
+        from red_queen.validation import select_checks
+        full = os.environ.get("RED_QUEEN_FULL_VALIDATION") == "1"
+        for label, fn in select_checks(quick=not full):
             with self.subTest(check=label):
                 ok, detail = fn()
                 self.assertTrue(ok, detail)

@@ -7,7 +7,7 @@ Exit code 0 only if every check passes.
 from __future__ import annotations
 
 import sys
-from typing import Callable, List, Tuple
+from typing import Callable, List, Optional, Tuple
 
 from .actions import UnknownActionError
 from .affect import AffectConfig
@@ -3284,6 +3284,25 @@ def check_prereg_m8_present() -> CheckResult:
     return not missing, f"pre-registration file present; required terms missing={missing}"
 
 
+# M8.1: checks that are slow, or that reuse a large cached study, run only in
+# the FULL validation (the acceptance run). `--quick` runs the rest. No check
+# was changed; this only selects which ones run.
+FULL_ONLY = frozenset({
+    "V69", "V78", "V86", "V87", "V96", "V106", "V107", "V121", "V129", "V130", "V137", "V138", "V140", "V141",
+    "V144", "V146", "V147", "V148", "V151", "V152", "V153", "V156", "V158", "V159", "V163", "V166", "V167",
+    "V168", "V173", "V174", "V175", "V180", "V181", "V182", "V184", "V185", "V186", "V187", "V188", "V189",
+    "V191", "V193", "V194", "V195", "V199", "V200", "V201", "V202", "V203", "V205", "V206", "V207", "V208",
+    "V209", "V210",
+})
+
+
+def select_checks(quick: bool = False) -> List[Tuple[str, Callable[[], CheckResult]]]:
+    checks = build_checks()
+    if not quick:
+        return checks
+    return [(label, fn) for label, fn in checks if label.split()[0] not in FULL_ONLY]
+
+
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     checks: List[Tuple[str, Callable[[], CheckResult]]] = [("V01 nominal_no_action", check_nominal_no_action)]
     n = 2
@@ -3612,8 +3631,13 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
     return checks
 
 
-def main() -> int:
-    checks = build_checks()
+def main(argv: Optional[List[str]] = None) -> int:
+    import argparse
+    p = argparse.ArgumentParser(description="RED QUEEN validation checks")
+    p.add_argument("--quick", action="store_true",
+                   help="skip the slow, study-heavy checks (everyday use; acceptance uses the full run)")
+    args = p.parse_args(argv)
+    checks = select_checks(quick=args.quick)
     passed = 0
     for label, fn in checks:
         try:
@@ -3622,7 +3646,12 @@ def main() -> int:
             ok, detail = False, f"exception: {exc!r}"
         passed += ok
         print(f"[{'PASS' if ok else 'FAIL'}] {label}: {detail}")
-    print(f"\n{passed}/{len(checks)} validation checks passed")
+    if args.quick:
+        total = len(build_checks())
+        print(f"\nQUICK run: {passed}/{len(checks)} validation checks passed "
+              f"({total - len(checks)} slow checks skipped; run without --quick for acceptance)")
+    else:
+        print(f"\n{passed}/{len(checks)} validation checks passed")
     return 0 if passed == len(checks) else 1
 
 
