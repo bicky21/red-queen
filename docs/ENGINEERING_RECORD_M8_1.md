@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M8.1 (housekeeping)
 
-**Version:** 0.24.1 · **Date:** 2026-11-05 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.24.1 · **Date:** 2026-11-05 · **Status:** build-environment passed; **Linux acceptance passed 2026-11-06**
 **Outcome:** a quick validation mode for everyday use (**156 checks in about 22 s**). The full acceptance run no longer executes the whole validation twice. **No check was changed, added or removed:** there are still 211 checks, and the full run is identical.
 
 ## 1. Review of M8
@@ -51,15 +51,10 @@ So the acceptance command (tests + full validation) drops from about 520 s to **
 
 ## 7. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
-
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.validation --quick
-```
-
-M8.1 is accepted when the output shows `Ran 381 tests ... OK`, `211/211 validation checks passed`, and `QUICK run: 156/156 validation checks passed`.
+**Passed 2026-11-06.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 381 tests in 42.997s, OK**. Under M8 this took 338.9 s, so it is **about 8× faster**.
+`python3 -m red_queen.validation` → **211/211 validation checks passed**.
+`python3 -m red_queen.validation --quick` → **QUICK run: 156/156 validation checks passed** (55 slow checks skipped).
 
 ## 8. Next milestone
 
