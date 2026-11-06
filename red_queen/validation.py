@@ -3293,6 +3293,7 @@ FULL_ONLY = frozenset({
     "V168", "V173", "V174", "V175", "V180", "V181", "V182", "V184", "V185", "V186", "V187", "V188", "V189",
     "V191", "V193", "V194", "V195", "V199", "V200", "V201", "V202", "V203", "V205", "V206", "V207", "V208",
     "V209", "V210",
+    "V216", "V217",  # M9 study (about 50 s)
 })
 
 
@@ -3301,6 +3302,121 @@ def select_checks(quick: bool = False) -> List[Tuple[str, Callable[[], CheckResu
     if not quick:
         return checks
     return [(label, fn) for label, fn in checks if label.split()[0] not in FULL_ONLY]
+
+
+# ----------------------------------------------------------------- M9 checks
+# New, separate domain (datacentre.py). The old domain's checks are untouched.
+
+M9_FROZEN = {  # agent: (success, actions, nodes, stops) on evaluation seeds 0-99; copied from the study output
+    "bfs": (80, 316, 702077, {"goal": 80, "no_plan": 20}),
+    "reference": (100, 483, 7388, {"goal": 100}),
+    "greedy": (95, 570, 0, {"budget": 5, "goal": 95}),
+}
+
+
+def check_dc_state_and_parsing() -> CheckResult:
+    from .datacentre import DCState, parse_action
+    refused = 0
+    for make in (lambda: DCState((50, 50), (0, 0, 0), (True, True, True), 120),
+                 lambda: DCState((50, 50, 101), (0, 0, 0), (True, True, True), 120),
+                 lambda: DCState((50, 50, 50), (0, 30, 0), (True, True, True), 120),
+                 lambda: DCState((50, 50, 50), (0, 20, 0), (True, False, True), 120),
+                 lambda: DCState((50, 50, 50), (0, 0, 0), (True, True, True), -20)):
+        try:
+            make()
+        except ValueError:
+            refused += 1
+    bad_actions = ("cool", "cool:3", "migrate:1:1", "migrate:0", "rm -rf /", "cool:0;wait", "wait:1",
+                   "COOL:0", "cool:-1", "cool:00", "x" * 50, 7)
+    rejected = 0
+    for a in bad_actions:
+        try:
+            parse_action(a, 3)
+        except ValueError:
+            rejected += 1
+    ok_parse = parse_action("migrate:2:0", 3) == ("migrate", (2, 0)) and parse_action("wait", 3) == ("wait", ())
+    ok = refused == 5 and rejected == len(bad_actions) and ok_parse
+    return ok, f"invalid states refused={refused}/5; malformed/hostile actions rejected={rejected}/{len(bad_actions)}; valid parse ok={ok_parse}"
+
+
+def check_dc_physics_exact() -> CheckResult:
+    from .datacentre import DCState, step
+    s = DCState((50, 60, 70), (40, 40, 40), (True, True, True), 120)
+    cooled = step(s, "cool:0")  # 50-15=35, others +5 -> 65, 75; then physics +0 each
+    crash = step(DCState((89, 40, 40), (80, 20, 20), (True, True, True), 120), "wait")  # 89+4-2=91 -> crash
+    down = step(DCState((50, 50, 80), (40, 40, 0), (True, True, False), 120), "wait")  # down cools 80 -> 75
+    restart = step(DCState((50, 50, 60), (40, 40, 0), (True, True, False), 120), "restart:2")  # up, load 0, 60-2=58
+    ok = (cooled.temps == (35, 65, 75) and crash.up == (False, True, True) and crash.loads == (0, 20, 20)
+          and down.temps[2] == 75 and restart.up[2] and restart.temps[2] == 58 and restart.loads[2] == 0)
+    return ok, (f"cool spill {cooled.temps}; crash -> up {crash.up} loads {crash.loads}; down cools to {down.temps[2]}; "
+                f"restart -> temp {restart.temps[2]}")
+
+
+def check_dc_executor_safety() -> CheckResult:
+    from .datacentre import DCEnvironment, DCExecutor, DCState
+    s = DCState((50, 50, 80), (40, 40, 0), (True, True, False), 120)
+    env = DCEnvironment(s)
+    ex = DCExecutor(env, allowed_kinds=("cool", "wait"), max_actions=2)
+    results = [ex.execute(a) for a in ("migrate:0:1", "restart:2", "rm -rf /", "cool:2", "cool:0", "wait", "wait")]
+    refused = 0
+    try:
+        DCExecutor(env, allowed_kinds=("cool", "shell"))
+    except ValueError:
+        refused += 1
+    reasons = [r for _, r in ex.rejections]
+    ok = (results == [False, False, False, False, True, True, False] and len(env.log) == 2
+          and "denied_by_policy" in reasons and "server_down" in reasons and "budget_exhausted" in reasons and refused == 1)
+    return ok, f"executed={results}; env steps={len(env.log)}; rejection reasons={reasons}; unknown kind in allowlist refused={refused == 1}"
+
+
+def check_dc_planners_valid() -> CheckResult:
+    from .datacentre import DCEnvironment, bfs_plan, goal_met, reference_plan, step
+    from .datacentre_study import DEV_SEEDS, make_scenario
+    checked = invalid = 0
+    for seed in DEV_SEEDS[:8]:
+        start = make_scenario(seed)
+        for plan in (bfs_plan(start, max_depth=8, max_nodes=3000), reference_plan(start)):
+            if not plan.found:
+                continue
+            s = start
+            for a in plan.actions:
+                s = step(s, a)
+            invalid += not goal_met(s)
+            checked += 1
+    again = bfs_plan(make_scenario(1001), max_depth=8, max_nodes=3000).actions == bfs_plan(make_scenario(1001), max_depth=8, max_nodes=3000).actions
+    return invalid == 0 and checked > 0 and again, f"{checked} found plans replayed on the model: all reach the goal={invalid == 0}; deterministic={again}"
+
+
+def check_dc_study_frozen() -> CheckResult:
+    from .datacentre_study import run_study
+    rep = run_study()
+    got = {a: (v["success"], v["actions"], v["nodes"], v["stops"]) for a, v in rep["summary"].items()}
+    q = rep["quality_on_common"]
+    ok = got == M9_FROZEN and (q["both_solved"], q["bfs_actions"], q["reference_actions"]) == (80, 316, 318)
+    _M5_CACHE["m9"] = rep
+    return ok, f"evaluation totals frozen={got == M9_FROZEN}; plan quality on common={q}"
+
+
+def check_dc_decision_applied() -> CheckResult:
+    from .datacentre_study import decide, run_study
+    rep = _M5_CACHE.get("m9") or run_study()
+    d = rep["decision"]
+    ok = d == decide(rep) and d["world_has_room"] and d["D1_reference_at_least_90"] and d["D2_bfs_at_least_10_fewer"] \
+        and not d["D3_greedy_at_least_10_fewer"] and d["S_safety"]
+    return ok, f"pre-registered rule: D1={d['D1_reference_at_least_90']} D2={d['D2_bfs_at_least_10_fewer']} D3={d['D3_greedy_at_least_10_fewer']} S={d['S_safety']} -> world has room={d['world_has_room']}"
+
+
+def check_prereg_m9_and_seed_split() -> CheckResult:
+    import os
+    from .datacentre_study import DEV_SEEDS, EVAL_SEEDS
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M9.md")
+    if not os.path.exists(path):
+        return False, "docs/PREREG_M9.md missing"
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    missing = [k for k in ("D1", "D2", "D3", "Seeds 0–99", "1000–1039", "Physics fix") if k not in text]
+    disjoint = not set(DEV_SEEDS) & set(EVAL_SEEDS)
+    return not missing and disjoint, f"pre-registration present, missing terms={missing}; development and evaluation seeds disjoint={disjoint}"
 
 
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
@@ -3625,6 +3741,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("m8_reduced_study_frozen", check_m8_reduced_study_frozen),
         ("m8_decision_function", check_m8_decision_function),
         ("m8_prereg_file_present", check_prereg_m8_present),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M9 (V212 onward): data-centre world
+    for name, fn in (
+        ("dc_state_and_parsing_validated", check_dc_state_and_parsing),
+        ("dc_physics_exact", check_dc_physics_exact),
+        ("dc_executor_blocks_bad_actions", check_dc_executor_safety),
+        ("dc_planner_plans_valid", check_dc_planners_valid),
+        ("dc_study_totals_frozen", check_dc_study_frozen),
+        ("dc_prereg_decision_applied", check_dc_decision_applied),
+        ("dc_prereg_and_seed_split", check_prereg_m9_and_seed_split),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

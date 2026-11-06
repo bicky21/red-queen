@@ -1,0 +1,3061 @@
+{
+  "decision": {
+    "D1_reference_at_least_90": true,
+    "D2_bfs_at_least_10_fewer": true,
+    "D3_greedy_at_least_10_fewer": false,
+    "S_safety": true,
+    "world_has_room": true
+  },
+  "milestone": "M9",
+  "quality_on_common": {
+    "bfs_actions": 316,
+    "both_solved": 80,
+    "reference_actions": 318
+  },
+  "rows": [
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 0,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "reference",
+      "nodes": 36,
+      "rejections": 0,
+      "seed": 0,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 0,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 1,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "reference",
+      "nodes": 119,
+      "rejections": 0,
+      "seed": 1,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 1,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 271,
+      "rejections": 0,
+      "seed": 2,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 34,
+      "rejections": 0,
+      "seed": 2,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 25,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 2,
+      "stop": "budget",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "bfs",
+      "nodes": 40715,
+      "rejections": 0,
+      "seed": 3,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "reference",
+      "nodes": 39,
+      "rejections": 0,
+      "seed": 3,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 3,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 4,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "reference",
+      "nodes": 475,
+      "rejections": 0,
+      "seed": 4,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 4,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 1441,
+      "rejections": 0,
+      "seed": 5,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 15,
+      "rejections": 0,
+      "seed": 5,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 5,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 51,
+      "rejections": 0,
+      "seed": 6,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 6,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 6,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 7,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 7,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 7,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 50,
+      "rejections": 0,
+      "seed": 8,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 8,
+      "rejections": 0,
+      "seed": 8,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 8,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 76,
+      "rejections": 0,
+      "seed": 9,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 9,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 9,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 260,
+      "rejections": 0,
+      "seed": 10,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 10,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 10,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 11,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 11,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 11,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 12,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 12,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 12,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 209,
+      "rejections": 0,
+      "seed": 13,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 13,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 13,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 402,
+      "rejections": 0,
+      "seed": 14,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 14,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 14,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 540,
+      "rejections": 0,
+      "seed": 15,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 15,
+      "rejections": 0,
+      "seed": 15,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 15,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "bfs",
+      "nodes": 5169,
+      "rejections": 0,
+      "seed": 16,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "reference",
+      "nodes": 21,
+      "rejections": 0,
+      "seed": 16,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 16,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 17,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "reference",
+      "nodes": 49,
+      "rejections": 0,
+      "seed": 17,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 17,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 496,
+      "rejections": 0,
+      "seed": 18,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 18,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 18,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 19,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 12,
+      "agent": "reference",
+      "nodes": 236,
+      "rejections": 0,
+      "seed": 19,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 25,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 19,
+      "stop": "budget",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 153,
+      "rejections": 0,
+      "seed": 20,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 20,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 20,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 734,
+      "rejections": 0,
+      "seed": 21,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 21,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 21,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 2519,
+      "rejections": 0,
+      "seed": 22,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 15,
+      "rejections": 0,
+      "seed": 22,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 22,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 23,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 23,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 23,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 101,
+      "rejections": 0,
+      "seed": 24,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 24,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 24,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 557,
+      "rejections": 0,
+      "seed": 25,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 25,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 25,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "bfs",
+      "nodes": 7870,
+      "rejections": 0,
+      "seed": 26,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "reference",
+      "nodes": 21,
+      "rejections": 0,
+      "seed": 26,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 26,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "bfs",
+      "nodes": 11966,
+      "rejections": 0,
+      "seed": 27,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "reference",
+      "nodes": 187,
+      "rejections": 0,
+      "seed": 27,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 27,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 28,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "reference",
+      "nodes": 244,
+      "rejections": 0,
+      "seed": 28,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 28,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "bfs",
+      "nodes": 1,
+      "rejections": 0,
+      "seed": 29,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "reference",
+      "nodes": 1,
+      "rejections": 0,
+      "seed": 29,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 29,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 1961,
+      "rejections": 0,
+      "seed": 30,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 15,
+      "rejections": 0,
+      "seed": 30,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 30,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 149,
+      "rejections": 0,
+      "seed": 31,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 31,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 31,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 288,
+      "rejections": 0,
+      "seed": 32,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 32,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 32,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "bfs",
+      "nodes": 7616,
+      "rejections": 0,
+      "seed": 33,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "reference",
+      "nodes": 21,
+      "rejections": 0,
+      "seed": 33,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 33,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 70,
+      "rejections": 0,
+      "seed": 34,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 34,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 34,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 35,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 9,
+      "agent": "reference",
+      "nodes": 1607,
+      "rejections": 0,
+      "seed": 35,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 9,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 35,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 62,
+      "rejections": 0,
+      "seed": 36,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 36,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 36,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 4,
+      "rejections": 0,
+      "seed": 37,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 37,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 37,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "bfs",
+      "nodes": 1,
+      "rejections": 0,
+      "seed": 38,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "reference",
+      "nodes": 1,
+      "rejections": 0,
+      "seed": 38,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 38,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "bfs",
+      "nodes": 23137,
+      "rejections": 0,
+      "seed": 39,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "reference",
+      "nodes": 48,
+      "rejections": 0,
+      "seed": 39,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 39,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 40,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 9,
+      "agent": "reference",
+      "nodes": 174,
+      "rejections": 0,
+      "seed": 40,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 40,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 4,
+      "rejections": 0,
+      "seed": 41,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 41,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 41,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 716,
+      "rejections": 0,
+      "seed": 42,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 42,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 42,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 43,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "reference",
+      "nodes": 36,
+      "rejections": 0,
+      "seed": 43,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 43,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "bfs",
+      "nodes": 1,
+      "rejections": 0,
+      "seed": 44,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "reference",
+      "nodes": 1,
+      "rejections": 0,
+      "seed": 44,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 44,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "bfs",
+      "nodes": 21195,
+      "rejections": 0,
+      "seed": 45,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "reference",
+      "nodes": 28,
+      "rejections": 0,
+      "seed": 45,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 45,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 13,
+      "rejections": 0,
+      "seed": 46,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 46,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 46,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 47,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 10,
+      "agent": "reference",
+      "nodes": 70,
+      "rejections": 0,
+      "seed": 47,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 10,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 47,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 48,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "reference",
+      "nodes": 85,
+      "rejections": 0,
+      "seed": 48,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 48,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "bfs",
+      "nodes": 1,
+      "rejections": 0,
+      "seed": 49,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "reference",
+      "nodes": 1,
+      "rejections": 0,
+      "seed": 49,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 49,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "bfs",
+      "nodes": 24258,
+      "rejections": 0,
+      "seed": 50,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "reference",
+      "nodes": 107,
+      "rejections": 0,
+      "seed": 50,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 50,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 13,
+      "rejections": 0,
+      "seed": 51,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 51,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 51,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 52,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "reference",
+      "nodes": 36,
+      "rejections": 0,
+      "seed": 52,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 52,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "bfs",
+      "nodes": 1,
+      "rejections": 0,
+      "seed": 53,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "reference",
+      "nodes": 1,
+      "rejections": 0,
+      "seed": 53,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 53,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 164,
+      "rejections": 0,
+      "seed": 54,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 54,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 54,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 304,
+      "rejections": 0,
+      "seed": 55,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 55,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 55,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 56,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "reference",
+      "nodes": 36,
+      "rejections": 0,
+      "seed": 56,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 56,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 2668,
+      "rejections": 0,
+      "seed": 57,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 15,
+      "rejections": 0,
+      "seed": 57,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 57,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 58,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "reference",
+      "nodes": 152,
+      "rejections": 0,
+      "seed": 58,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 25,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 58,
+      "stop": "budget",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 298,
+      "rejections": 0,
+      "seed": 59,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 59,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 59,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 307,
+      "rejections": 0,
+      "seed": 60,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 60,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 60,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 783,
+      "rejections": 0,
+      "seed": 61,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 61,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 61,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 62,
+      "rejections": 0,
+      "seed": 62,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 62,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 62,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 407,
+      "rejections": 0,
+      "seed": 63,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 63,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 63,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 64,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 11,
+      "agent": "reference",
+      "nodes": 85,
+      "rejections": 0,
+      "seed": 64,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 11,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 64,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 196,
+      "rejections": 0,
+      "seed": 65,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 65,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 65,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "bfs",
+      "nodes": 5679,
+      "rejections": 0,
+      "seed": 66,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "reference",
+      "nodes": 64,
+      "rejections": 0,
+      "seed": 66,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 66,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 594,
+      "rejections": 0,
+      "seed": 67,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 67,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 67,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 484,
+      "rejections": 0,
+      "seed": 68,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 68,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 68,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 69,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 69,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 69,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 1600,
+      "rejections": 0,
+      "seed": 70,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 15,
+      "rejections": 0,
+      "seed": 70,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 70,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "bfs",
+      "nodes": 22956,
+      "rejections": 0,
+      "seed": 71,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "reference",
+      "nodes": 110,
+      "rejections": 0,
+      "seed": 71,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 71,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 1716,
+      "rejections": 0,
+      "seed": 72,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 15,
+      "rejections": 0,
+      "seed": 72,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 72,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 2310,
+      "rejections": 0,
+      "seed": 73,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 15,
+      "rejections": 0,
+      "seed": 73,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 73,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 789,
+      "rejections": 0,
+      "seed": 74,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 15,
+      "rejections": 0,
+      "seed": 74,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 74,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "bfs",
+      "nodes": 1,
+      "rejections": 0,
+      "seed": 75,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "reference",
+      "nodes": 1,
+      "rejections": 0,
+      "seed": 75,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 1,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 75,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 76,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 9,
+      "agent": "reference",
+      "nodes": 1824,
+      "rejections": 0,
+      "seed": 76,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 9,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 76,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "bfs",
+      "nodes": 24089,
+      "rejections": 0,
+      "seed": 77,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "reference",
+      "nodes": 222,
+      "rejections": 0,
+      "seed": 77,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 25,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 77,
+      "stop": "budget",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 677,
+      "rejections": 0,
+      "seed": 78,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 15,
+      "rejections": 0,
+      "seed": 78,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 78,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 1523,
+      "rejections": 0,
+      "seed": 79,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 33,
+      "rejections": 0,
+      "seed": 79,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 79,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 80,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 80,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 80,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 4772,
+      "rejections": 0,
+      "seed": 81,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 21,
+      "rejections": 0,
+      "seed": 81,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 81,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 82,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "reference",
+      "nodes": 90,
+      "rejections": 0,
+      "seed": 82,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 25,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 82,
+      "stop": "budget",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 15,
+      "rejections": 0,
+      "seed": 83,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 83,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 83,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 8,
+      "rejections": 0,
+      "seed": 84,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 84,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 84,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "bfs",
+      "nodes": 17798,
+      "rejections": 0,
+      "seed": 85,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "reference",
+      "nodes": 62,
+      "rejections": 0,
+      "seed": 85,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 85,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 487,
+      "rejections": 0,
+      "seed": 86,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 86,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 86,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 454,
+      "rejections": 0,
+      "seed": 87,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 14,
+      "rejections": 0,
+      "seed": 87,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 87,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "bfs",
+      "nodes": 2122,
+      "rejections": 0,
+      "seed": 88,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "reference",
+      "nodes": 15,
+      "rejections": 0,
+      "seed": 88,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 5,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 88,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 866,
+      "rejections": 0,
+      "seed": 89,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 89,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 89,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 90,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "reference",
+      "nodes": 269,
+      "rejections": 0,
+      "seed": 90,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 8,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 90,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 45,
+      "rejections": 0,
+      "seed": 91,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 91,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 91,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "bfs",
+      "nodes": 10862,
+      "rejections": 0,
+      "seed": 92,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "reference",
+      "nodes": 21,
+      "rejections": 0,
+      "seed": 92,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 6,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 92,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "bfs",
+      "nodes": 780,
+      "rejections": 0,
+      "seed": 93,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "reference",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 93,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 4,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 93,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "bfs",
+      "nodes": 23250,
+      "rejections": 0,
+      "seed": 94,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "reference",
+      "nodes": 141,
+      "rejections": 0,
+      "seed": 94,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 94,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "bfs",
+      "nodes": 19872,
+      "rejections": 0,
+      "seed": 95,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "reference",
+      "nodes": 28,
+      "rejections": 0,
+      "seed": 95,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 95,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 96,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 9,
+      "agent": "reference",
+      "nodes": 45,
+      "rejections": 0,
+      "seed": 96,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 9,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 96,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 0,
+      "agent": "bfs",
+      "nodes": 20000,
+      "rejections": 0,
+      "seed": 97,
+      "stop": "no_plan",
+      "success": false,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "reference",
+      "nodes": 28,
+      "rejections": 0,
+      "seed": 97,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 7,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 97,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "bfs",
+      "nodes": 10,
+      "rejections": 0,
+      "seed": 98,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "reference",
+      "nodes": 3,
+      "rejections": 0,
+      "seed": 98,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 2,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 98,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "bfs",
+      "nodes": 27,
+      "rejections": 0,
+      "seed": 99,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "reference",
+      "nodes": 6,
+      "rejections": 0,
+      "seed": 99,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    },
+    {
+      "actions": 3,
+      "agent": "greedy",
+      "nodes": 0,
+      "rejections": 0,
+      "seed": 99,
+      "stop": "goal",
+      "success": true,
+      "unchecked_actions": 0
+    }
+  ],
+  "seeds": [
+    0,
+    99
+  ],
+  "summary": {
+    "bfs": {
+      "actions": 316,
+      "max_actions": 8,
+      "nodes": 702077,
+      "rejections": 0,
+      "scenarios": 100,
+      "stops": {
+        "goal": 80,
+        "no_plan": 20
+      },
+      "success": 80,
+      "unchecked_actions": 0
+    },
+    "greedy": {
+      "actions": 570,
+      "max_actions": 25,
+      "nodes": 0,
+      "rejections": 0,
+      "scenarios": 100,
+      "stops": {
+        "budget": 5,
+        "goal": 95
+      },
+      "success": 95,
+      "unchecked_actions": 0
+    },
+    "reference": {
+      "actions": 483,
+      "max_actions": 12,
+      "nodes": 7388,
+      "rejections": 0,
+      "scenarios": 100,
+      "stops": {
+        "goal": 100
+      },
+      "success": 100,
+      "unchecked_actions": 0
+    }
+  }
+}

@@ -1,4 +1,4 @@
-# RED QUEEN AI — Milestone M8.1
+# RED QUEEN AI — Milestone M9
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
@@ -95,6 +95,11 @@ execution, no real-world actions.
     the operator gets a short, prioritised stream. The four "global workspace"
     indicator properties are verified, but in this small world they don't
     improve performance (a null result, as predicted).
+28. Data-centre world (M9, pre-registered in `docs/PREREG_M9.md`): a new,
+    harder world with 3 servers that share cooling, where fixing one server
+    can hurt another. The old simple planner solves only 80 of 100 scenarios,
+    while a smarter search solves all 100, so there is finally room for
+    smarter decisions.
 
 Allowed actions (the only ones that can ever run):
 
@@ -126,7 +131,7 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 381 tests ... OK` and `211/211 validation checks passed`
+   Expected: `Ran 395 tests ... OK` and `218/218 validation checks passed`
    (the full acceptance run; takes several minutes; does not need Ollama).
 
    Everyday quick check after any change (under a minute; skips 55 slow checks,
@@ -233,6 +238,10 @@ git --version
     ```
     python3 -m red_queen.workspace_study --output results/m8_workspace_study.json
     ```
+25. Data-centre study (M9, about 1 minute):
+    ```
+    python3 -m red_queen.datacentre_study --output results/m9_datacentre_study.json
+    ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 
@@ -288,11 +297,13 @@ red_queen/
   progress_study.py "am I making progress?" self-model v2, fresh seeds (M7.3)
   workspace.py     global workspace: modules, salience, capacity, broadcast (M8)
   workspace_study.py pre-registered workspace functional study (M8)
-  validation.py    211 validation checks (`--quick`: 156 fast ones, M8.1) (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+  datacentre.py    data-centre world: state, actions, physics, executor, planners (M9)
+  datacentre_study.py pre-registered difficulty study, seeds 0-99 (M9)
+  validation.py    218 validation checks (`--quick`: 161 fast ones, M8.1) (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
                    V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4,
-                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6, V177-V183 M7, V184-V190 M7.1, V191-V197 M7.2, V198-V204 M7.3, V205-V211 M8)
-tests/             381 unittest tests
+                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6, V177-V183 M7, V184-V190 M7.1, V191-V197 M7.2, V198-V204 M7.3, V205-V211 M8, V212-V218 M9)
+tests/             395 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -325,6 +336,8 @@ docs/ENGINEERING_RECORD_M7_3.md   (accepted on Linux)
 docs/PREREG_M8.md                 (committed before M8 code)
 docs/ENGINEERING_RECORD_M8.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M8_1.md   (accepted on Linux; quick validation)
+docs/PREREG_M9.md                 (committed before the M9 evaluation run)
+docs/ENGINEERING_RECORD_M9.md
 results/                          build-environment reports
 ```
 
@@ -358,3 +371,4 @@ results/                          build-environment reports
 | M7.3 | 367 tests OK, 204/204 checks | **Accepted** 2026-11-05; study output identical (diff); v2 optional (pre-registered) |
 | M8 | 378 tests OK, 211/211 checks | **Accepted** 2026-11-05; study output identical (diff); architecture indicator present, functional effect null (pre-registered) |
 | M8.1 | 381 tests OK, 211/211 checks (quick: 156/156) | **Accepted** 2026-11-06; tests 339 s -> 43 s on the laptop |
+| M9 | 395 tests OK, 218/218 checks (quick: 161/161) | Pending — run step 2 and step 25 |
