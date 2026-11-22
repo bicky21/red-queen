@@ -337,7 +337,7 @@ docs/PREREG_M8.md                 (committed before M8 code)
 docs/ENGINEERING_RECORD_M8.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M8_1.md   (accepted on Linux; quick validation)
 docs/PREREG_M9.md                 (committed before the M9 evaluation run)
-docs/ENGINEERING_RECORD_M9.md
+docs/ENGINEERING_RECORD_M9.md     (accepted on Linux)
 results/                          build-environment reports
 ```
 
@@ -371,4 +371,4 @@ results/                          build-environment reports
 | M7.3 | 367 tests OK, 204/204 checks | **Accepted** 2026-11-05; study output identical (diff); v2 optional (pre-registered) |
 | M8 | 378 tests OK, 211/211 checks | **Accepted** 2026-11-05; study output identical (diff); architecture indicator present, functional effect null (pre-registered) |
 | M8.1 | 381 tests OK, 211/211 checks (quick: 156/156) | **Accepted** 2026-11-06; tests 339 s -> 43 s on the laptop |
-| M9 | 395 tests OK, 218/218 checks (quick: 161/161) | Pending — run step 2 and step 25 |
+| M9 | 395 tests OK, 218/218 checks (quick: 161/161) | **Accepted** 2026-11-22; study output identical (diff); world has room (pre-registered) |

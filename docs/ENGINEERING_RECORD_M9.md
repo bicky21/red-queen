@@ -1,6 +1,6 @@
 # RED QUEEN AI — Engineering Record, Milestone M9
 
-**Version:** 0.25.0 · **Date:** 2026-11-06 · **Status:** build-environment passed; Linux acceptance pending
+**Version:** 0.25.0 · **Date:** 2026-11-06 · **Status:** build-environment passed; **Linux acceptance passed 2026-11-22**
 **Outcome: pre-registered result. The new data-centre world does leave room for better decision-making.**
 
 On 100 never-before-run scenarios:
@@ -105,15 +105,10 @@ Nothing was changed after the evaluation run.
 
 ## 9. Linux acceptance (user's laptop)
 
-**Pending.** Run in the repository folder:
-
-```
-git pull
-python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
-python3 -m red_queen.datacentre_study
-```
-
-M9 is accepted when the output shows `Ran 395 tests ... OK` and `218/218 validation checks passed`. The study output, which takes about 1 minute, should match §7.
+**Passed 2026-11-22.** On the user's Ubuntu laptop (Python 3.14):
+`python3 -m unittest discover -s tests -v` → **Ran 395 tests in 47.409s, OK**;
+`python3 -m red_queen.validation` → **218/218 validation checks passed**;
+`python3 -m red_queen.datacentre_study`: compared with `diff` against the build environment, it is **identical**, including the pre-registered decision.
 
 ## 10. Next milestone (candidates)
 
