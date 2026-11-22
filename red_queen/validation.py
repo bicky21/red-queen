@@ -3294,6 +3294,7 @@ FULL_ONLY = frozenset({
     "V191", "V193", "V194", "V195", "V199", "V200", "V201", "V202", "V203", "V205", "V206", "V207", "V208",
     "V209", "V210",
     "V216", "V217",  # M9 study (about 50 s)
+    "V222", "V223", "V224",  # M9.2 study (about 15 s)
 })
 
 
@@ -3417,6 +3418,125 @@ def check_prereg_m9_and_seed_split() -> CheckResult:
     missing = [k for k in ("D1", "D2", "D3", "Seeds 0–99", "1000–1039", "Physics fix") if k not in text]
     disjoint = not set(DEV_SEEDS) & set(EVAL_SEEDS)
     return not missing and disjoint, f"pre-registration present, missing terms={missing}; development and evaluation seeds disjoint={disjoint}"
+
+
+# ---------------------------------------------------------------- M9.2 checks
+
+M92_FROZEN = {  # copied from results/m9_2_heuristic_study.json
+    "summary": {"astar_hand": (100, 500, 15110), "astar_learned": (100, 491, 2164),
+                "greedy_hand": (95, 595, 0), "greedy_learned": (94, 605, 0)},
+    "accuracy": {"hand_pearson": 0.911, "held_out_states": 600, "learned_mae": 0.6298, "learned_pearson": 0.9297},
+    "training_states": 1200,
+    "weights": {"bias": 0.609841, "down_heat_over_60": 0.563751, "down_servers": 0.590691,
+                "heating_servers": 0.027911, "load_over_40": 0.906017, "max_up_temp": 0.029839,
+                "unserved": 0.746834, "up_heat_over_70": 0.65995},
+}
+
+
+def _m92_study():
+    if "m92" not in _M5_CACHE:
+        from .heuristic_study import run_study
+        _M5_CACHE["m92"] = run_study()
+    return _M5_CACHE["m92"]
+
+
+def check_dc_defaults_unchanged_by_plugin() -> CheckResult:
+    from .datacentre import goal_distance, reference_plan
+    from .datacentre_study import DEV_SEEDS, greedy_action, make_scenario
+    same = 0
+    for seed in DEV_SEEDS[:10]:
+        s = make_scenario(seed)
+        a, b = reference_plan(s), reference_plan(s, heuristic=goal_distance)
+        same += (a.actions, a.nodes) == (b.actions, b.nodes) and greedy_action(s) == greedy_action(s, heuristic=goal_distance)
+    return same == 10, f"default heuristic identical to explicit hand heuristic (plans, nodes, greedy choice) on {same}/10 scenarios"
+
+
+def check_ridge_solver_exact() -> CheckResult:
+    from .learned_heuristic import fit_ridge
+    true_w = [1.5, -2.0, 0.5]
+    xs = [[1.0, float(i), float((i * 7) % 5)] for i in range(30)]
+    ys = [sum(w * x for w, x in zip(true_w, row)) for row in xs]
+    got = fit_ridge(xs, ys, ridge=0.0)
+    exact = all(abs(g - t) < 1e-9 for g, t in zip(got, true_w))
+    refused = 0
+    for make in (lambda: fit_ridge([], []), lambda: fit_ridge([[1.0, 2.0]], [1.0, 2.0]),
+                 lambda: fit_ridge([[1.0, 1.0], [1.0, 1.0]], [1.0, 1.0], ridge=0.0)):
+        try:
+            make()
+        except ValueError:
+            refused += 1
+    return exact and refused == 3, f"recovers exact weights {[round(g, 6) for g in got]}={exact}; bad inputs refused={refused}/3"
+
+
+def check_learned_heuristic_cannot_break_safety() -> CheckResult:
+    from .datacentre import DCEnvironment, DCExecutor, goal_distance, goal_met, reference_plan, step
+    from .datacentre_study import DEV_SEEDS, make_scenario
+    from .learned_heuristic import LearnedHeuristic
+    s = make_scenario(DEV_SEEDS[0])
+    nan_h = LearnedHeuristic([float("nan")] * 8)
+    neg_h = LearnedHeuristic([-1e6] * 8)
+    big_h = LearnedHeuristic([1e300] * 8)
+    vals = (nan_h(s), neg_h(s), big_h(s))
+    fell_back = vals[0] == goal_distance(s) and nan_h.fallbacks == 1
+    clipped = vals[1] == 0.0
+    refused = False
+    try:
+        LearnedHeuristic([1.0] * 3)
+    except ValueError:
+        refused = True
+    invalid = found = 0
+    for h in (nan_h, neg_h, big_h):
+        for seed in DEV_SEEDS[:5]:
+            start = make_scenario(seed)
+            plan = reference_plan(start, max_nodes=5000, heuristic=h)
+            if plan.found:
+                found += 1
+                env = DCEnvironment(start)
+                ex = DCExecutor(env)
+                ok = all(ex.execute(a) for a in plan.actions)
+                invalid += not (ok and goal_met(env.state))
+    ok = fell_back and clipped and refused and invalid == 0 and found > 0
+    return ok, (f"NaN weights fall back to the hand heuristic={fell_back}; negative clipped to 0={clipped}; "
+                f"wrong length refused={refused}; {found} plans from garbage heuristics all pass the executor and reach the goal={invalid == 0}")
+
+
+def check_m9_2_study_frozen() -> CheckResult:
+    rep = _m92_study()
+    got = {"summary": {a: (v["success"], v["actions"], v["nodes"]) for a, v in rep["summary"].items()},
+           "accuracy": rep["accuracy"], "training_states": rep["training_states"], "weights": rep["weights"]}
+    unchecked = sum(v["unchecked_actions"] for v in rep["summary"].values())
+    return got == M92_FROZEN and unchecked == 0, f"study frozen={got == M92_FROZEN}; actions bypassing the executor={unchecked}"
+
+
+def check_m9_2_decision_applied() -> CheckResult:
+    from .heuristic_study import decide
+    rep = _m92_study()
+    d = rep["decision"]
+    ok = d == decide(rep["summary"]) and d["learned_heuristic_useful"] is True
+    return ok, f"pre-registered rule: L1={d['L1_success_not_lower']} L2={d['L2_nodes_at_most_80pct']} L3={d['L3_actions_at_most_105pct']} (node ratio {d['node_ratio']}) -> useful={d['learned_heuristic_useful']}"
+
+
+def check_m9_2_exploratory_control_labelled() -> CheckResult:
+    rep = _m92_study()
+    e = rep["exploratory_scaled_hand"]
+    ok = ("not part of the decision" in e["note"] and "exploratory" not in str(rep["decision"]).lower()
+          and e["nodes"] > rep["summary"]["astar_learned"]["nodes"] and e["success"] == 100)
+    return ok, f"exploratory scaled-hand control labelled and outside the decision; nodes {e['nodes']} vs learned {rep['summary']['astar_learned']['nodes']} (gain is not just scale)"
+
+
+def check_m9_2_seed_split_and_prereg() -> CheckResult:
+    import os
+    from .datacentre_study import DEV_SEEDS, EVAL_SEEDS as M9_EVAL
+    from .heuristic_study import EVAL_SEEDS, TRAIN_SEEDS
+    sets = [set(DEV_SEEDS), set(M9_EVAL), set(TRAIN_SEEDS), set(EVAL_SEEDS)]
+    disjoint = all(not (a & b) for i, a in enumerate(sets) for b in sets[i + 1:])
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "PREREG_M9_2.md")
+    if not os.path.exists(path):
+        return False, "docs/PREREG_M9_2.md missing"
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    missing = [k for k in ("L1", "L2", "L3", "2000–2199", "3000–3099", "λ = 0.01") if k not in text]
+    return disjoint and not missing, f"M9 dev/eval and M9.2 train/eval seeds pairwise disjoint={disjoint}; pre-registration missing terms={missing}"
 
 
 def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
@@ -3753,6 +3873,18 @@ def build_checks() -> List[Tuple[str, Callable[[], CheckResult]]]:
         ("dc_study_totals_frozen", check_dc_study_frozen),
         ("dc_prereg_decision_applied", check_dc_decision_applied),
         ("dc_prereg_and_seed_split", check_prereg_m9_and_seed_split),
+    ):
+        checks.append((f"V{n:02d} {name}", fn))
+        n += 1
+    # M9.2 (V219 onward): learned heuristic
+    for name, fn in (
+        ("dc_defaults_unchanged_by_heuristic_plugin", check_dc_defaults_unchanged_by_plugin),
+        ("ridge_solver_exact", check_ridge_solver_exact),
+        ("learned_heuristic_cannot_break_safety", check_learned_heuristic_cannot_break_safety),
+        ("m9_2_study_frozen", check_m9_2_study_frozen),
+        ("m9_2_prereg_decision_applied", check_m9_2_decision_applied),
+        ("m9_2_exploratory_control_labelled", check_m9_2_exploratory_control_labelled),
+        ("m9_2_seed_split_and_prereg", check_m9_2_seed_split_and_prereg),
     ):
         checks.append((f"V{n:02d} {name}", fn))
         n += 1

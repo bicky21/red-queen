@@ -45,12 +45,13 @@ def make_scenario(seed: int) -> DCState:
             return s
 
 
-def greedy_action(state: DCState) -> Optional[str]:
+def greedy_action(state: DCState, heuristic=None) -> Optional[str]:
+    h = goal_distance if heuristic is None else heuristic  # M9.2: pluggable; default unchanged
     best = None
     for a in all_actions(len(state.temps)):
         if precondition(state, a) is not None:
             continue
-        d = goal_distance(step(state, a))
+        d = h(step(state, a))
         if best is None or d < best[0]:
             best = (d, a)
     return None if best is None else best[1]

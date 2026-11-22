@@ -1,4 +1,4 @@
-"""RED QUEEN AI - Milestone M9.
+"""RED QUEEN AI - Milestone M9.2.
 
 Deterministic simulated recovery with explicit action scoring, affect
 experiments (M1-M1.1), persistent and advisory SQLite memory (M2-M2.1),
@@ -16,9 +16,10 @@ measured self-model that predicts its own success (M7) and warns an operator
 when it expects to fail (M7.1), tested on unseen fault types (M7.2), with an
 optional "am I making progress?" feature (M7.3), and a minimal global
 workspace with limited capacity and global broadcast (M8), and a harder,
-coupled data-centre world with a pre-registered difficulty study (M9).
+coupled data-centre world with a pre-registered difficulty study (M9), and a
+"distance to goal" heuristic learned from experience (M9.2).
 Standard library only.
 """
 
-__version__ = "0.25.0"
-MILESTONE = "M9"
+__version__ = "0.26.0"
+MILESTONE = "M9.2"

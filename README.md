@@ -1,4 +1,4 @@
-# RED QUEEN AI — Milestone M9
+# RED QUEEN AI — Milestone M9.2
 
 Deterministic simulated recovery, explicit action scoring, an
 affect-enabled vs affect-disabled comparison, scheduled action faults,
@@ -100,6 +100,10 @@ execution, no real-world actions.
     can hurt another. The old simple planner solves only 80 of 100 scenarios,
     while a smarter search solves all 100, so there is finally room for
     smarter decisions.
+29. Learned "distance to goal" (M9.2, pre-registered in `docs/PREREG_M9_2.md`):
+    RED QUEEN learns its own estimate of how far it is from the goal, from past
+    runs. On new scenarios, planning with it needs 86% less search, with the
+    same success and slightly fewer actions.
 
 Allowed actions (the only ones that can ever run):
 
@@ -131,7 +135,7 @@ git --version
    git pull
    python3 -m unittest discover -s tests -v && python3 -m red_queen.validation
    ```
-   Expected: `Ran 395 tests ... OK` and `218/218 validation checks passed`
+   Expected: `Ran 409 tests ... OK` and `225/225 validation checks passed`
    (the full acceptance run; takes several minutes; does not need Ollama).
 
    Everyday quick check after any change (under a minute; skips 55 slow checks,
@@ -242,6 +246,10 @@ git --version
     ```
     python3 -m red_queen.datacentre_study --output results/m9_datacentre_study.json
     ```
+26. Learned heuristic study (M9.2, about 15 seconds):
+    ```
+    python3 -m red_queen.heuristic_study --output results/m9_2_heuristic_study.json
+    ```
 
 Note: on Linux use `python3`, not `py` (`py` on Linux is an unrelated tool).
 
@@ -299,11 +307,13 @@ red_queen/
   workspace_study.py pre-registered workspace functional study (M8)
   datacentre.py    data-centre world: state, actions, physics, executor, planners (M9)
   datacentre_study.py pre-registered difficulty study, seeds 0-99 (M9)
-  validation.py    218 validation checks (`--quick`: 161 fast ones, M8.1) (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
+  learned_heuristic.py features + ridge regression "distance to goal" (M9.2)
+  heuristic_study.py pre-registered learned-heuristic study (M9.2)
+  validation.py    225 validation checks (`--quick`: 165 fast ones, M8.1) (V01-V20 M1, V21-V31 M1.1, V32-V42 M2,
                    V43-V50 M2.1, V51-V63 M3, V64-V73 M3.2, V74-V82 M3.3,
                    V83-V90 M3.4, V91-V100 M3.5, V101-V108 M3.6, V109-V117 M4,
-                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6, V177-V183 M7, V184-V190 M7.1, V191-V197 M7.2, V198-V204 M7.3, V205-V211 M8, V212-V218 M9)
-tests/             395 unittest tests
+                   V118-V124 M4.1, V125-V131 M4.2, V132-V141 M5, V142-V148 M5.1, V149-V155 M5.2, V156-V162 M5.3, V163-V169 M5.4, V170-V176 M6, V177-V183 M7, V184-V190 M7.1, V191-V197 M7.2, V198-V204 M7.3, V205-V211 M8, V212-V218 M9, V219-V225 M9.2)
+tests/             409 unittest tests
 docs/ENGINEERING_RECORD_M1.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M1_1.md   (accepted on Linux)
 docs/ENGINEERING_RECORD_M2.md     (accepted on Linux)
@@ -338,6 +348,8 @@ docs/ENGINEERING_RECORD_M8.md     (accepted on Linux)
 docs/ENGINEERING_RECORD_M8_1.md   (accepted on Linux; quick validation)
 docs/PREREG_M9.md                 (committed before the M9 evaluation run)
 docs/ENGINEERING_RECORD_M9.md     (accepted on Linux)
+docs/PREREG_M9_2.md               (committed before M9.2 code)
+docs/ENGINEERING_RECORD_M9_2.md
 results/                          build-environment reports
 ```
 
@@ -372,3 +384,4 @@ results/                          build-environment reports
 | M8 | 378 tests OK, 211/211 checks | **Accepted** 2026-11-05; study output identical (diff); architecture indicator present, functional effect null (pre-registered) |
 | M8.1 | 381 tests OK, 211/211 checks (quick: 156/156) | **Accepted** 2026-11-06; tests 339 s -> 43 s on the laptop |
 | M9 | 395 tests OK, 218/218 checks (quick: 161/161) | **Accepted** 2026-11-22; study output identical (diff); world has room (pre-registered) |
+| M9.2 | 409 tests OK, 225/225 checks (quick: 165/165) | Pending — run step 2 and step 26 |

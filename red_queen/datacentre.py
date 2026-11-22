@@ -280,16 +280,17 @@ def bfs_plan(start: DCState, allowed_kinds: Sequence[str] = ACTION_KINDS, max_de
 
 
 def reference_plan(start: DCState, allowed_kinds: Sequence[str] = ACTION_KINDS, max_depth: int = 25,
-                   max_nodes: int = 100000, weight: int = 2) -> DCPlan:
+                   max_nodes: int = 100000, weight: int = 2, heuristic=None) -> DCPlan:
     """Weighted A* (f = g + weight*h) with the goal_distance heuristic. Not
     guaranteed shortest; used as a stronger REFERENCE solver to tell
     'unsolvable' apart from 'too hard for bounded BFS'."""
     import heapq
+    h = goal_distance if heuristic is None else heuristic  # M9.2: pluggable; default unchanged
     if goal_met(start):
         return DCPlan((), True, 0, False)
     acts = [a for a in all_actions(len(start.temps)) if a.split(":")[0] in set(allowed_kinds)]
     counter = 0
-    heap = [(weight * goal_distance(start), 0, counter, start, ())]
+    heap = [(weight * h(start), 0, counter, start, ())]
     best_g = {start: 0}
     nodes = 0
     while heap:
@@ -311,5 +312,5 @@ def reference_plan(start: DCState, allowed_kinds: Sequence[str] = ACTION_KINDS, 
             if ng < best_g.get(nxt, 1 << 30):
                 best_g[nxt] = ng
                 counter += 1
-                heapq.heappush(heap, (ng + weight * goal_distance(nxt), ng, counter, nxt, path + (a,)))
+                heapq.heappush(heap, (ng + weight * h(nxt), ng, counter, nxt, path + (a,)))
     return DCPlan((), False, nodes, False)
